@@ -22,11 +22,11 @@
    Applied when <html> has class="dark"
    ============================================= */
 :root.dark {
-  --color-primary:   #4e9195;   /* slightly brighter teal for dark bg readability  */
-  --color-secondary: #3a6b8a;   /* brighter blue                                   */
-  --color-dark:      #e8e8e8;   /* used for body text → becomes near-white         */
-  --color-neutral:   #6b6b6b;   /* muted mid-grey for secondary text / icons       */
-  --color-white:     #1c1c1c;   /* "white" surfaces → dark background              */
+  --color-primary:   #4e9195;
+  --color-secondary: #3a6b8a;
+  --color-dark:      #e8e8e8;
+  --color-neutral:   #6b6b6b;
+  --color-white:     #1c1c1c;
 }
 
 /* =============================================
@@ -37,10 +37,9 @@ body {
   transition: background-color 0.5s ease, color 0.5s ease;
 }
 
-/* Dark body background driven by CSS variable override */
 :root.dark body {
-  background-color: var(--color-white);   /* resolves to #1c1c1c in dark mode */
-  color:            var(--color-dark);    /* resolves to #e8e8e8 in dark mode  */
+  background-color: var(--color-white);
+  color:            var(--color-dark);
 }
 
 /* =============================================
@@ -61,13 +60,52 @@ input:focus, select:focus, button:focus {
 }
 
 /* =============================================
-   SOCIAL ICONS
+   DARK MODE — white surface overrides
+   Any element using bg-white needs to pick up
+   the dark surface color automatically.
    ============================================= */
-.social-container .social-icon {
-  @apply grayscale-0 ;
+:root.dark .bg-white {
+  background-color: var(--color-white) !important; /* resolves to #1c1c1c */
 }
 
-.social-container .social-text {
+/* Slightly lighter surface for cards vs page bg */
+:root.dark .border-neutral\/10,
+:root.dark .border-neutral\/15,
+:root.dark .border-neutral\/20 {
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Dropdown panels in dark mode */
+:root.dark .shadow-xl {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* Filters bar background in dark */
+:root.dark .bg-neutral\/5 {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* Neutral text in dark */
+:root.dark .text-dark {
+  color: var(--color-dark);
+}
+
+/* =============================================
+   STICKY SEARCH — glass backdrop in dark mode
+   ============================================= */
+.sticky-search-wrap {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* =============================================
+   SOCIAL ICONS
+   ============================================= */
+.social-container:hover .social-icon {
+  @apply grayscale-0 scale-110;
+}
+
+.social-container:hover .social-text {
   @apply text-primary;
 }
 
@@ -75,10 +113,16 @@ input:focus, select:focus, button:focus {
   @apply grayscale transition-all duration-300;
 }
 
+:root.dark .social-icon {
+  filter: grayscale(1) brightness(1.8);
+}
 
+:root.dark .social-container:hover .social-icon {
+  filter: grayscale(0) brightness(1) scale(1.1);
+}
 
 /* =============================================
-   CUSTOM TOGGLE SWITCH  (legacy .switch class)
+   CUSTOM TOGGLE SWITCH
    ============================================= */
 .switch {
   position: relative;
@@ -157,7 +201,6 @@ input:checked + .slider:before {
   bottom: 130%;
 }
 
-/* In dark mode tooltip: dark bg with light text */
 :root.dark [data-tooltip]:before {
   background: #e8e8e8;
   color: #1c1c1c;

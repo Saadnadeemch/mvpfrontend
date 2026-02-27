@@ -29,6 +29,6 @@ router = inject(Router)
     setTimeout(() => {
       this.isLoading = false;
        this.router.navigate(['/dashboard']);
-    }, 3000);
+    }, 1000);
   }
 }
