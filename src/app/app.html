@@ -1,4 +1,5 @@
-<div class="min-h-screen flex flex-col bg-white">
+<div class="min-h-screen flex flex-col transition-colors duration-500"
+     [ngClass]="isDark ? 'bg-[#1c1c1c] text-[#f0f0f0]' : 'bg-white text-dark'">
 
   <!-- Navbar -->
   <nav class="flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-12 py-4">
@@ -15,35 +16,39 @@
     <!-- Right Side -->
     <div class="flex items-center gap-4">
 
-<button
-  (click)="isDark = !isDark"
-  [attr.title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'"
-  class="relative w-14 h-7 rounded-full transition-all duration-500 ease-in-out border-2 focus:outline-none flex items-center px-1"
-  [ngClass]="isDark ? 'bg-primary border-primary' : 'bg-transparent border-primary'"
->
-  <span
-    class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ease-in-out shadow-sm"
-    [ngClass]="isDark ? 'translate-x-6 bg-white' : 'translate-x-0 bg-primary'"
-  >
-    
-    <svg *ngIf="!isDark"
-         xmlns="http://www.w3.org/2000/svg"
-         class="w-3.5 h-3.5 text-white" 
-         fill="currentColor"
-         viewBox="0 0 20 20">
-      <path d="M17.293 13.293A8 8 0 016.707 2.707 8.001 8.001 0 1017.293 13.293z"/>
-    </svg>
+      <!-- Dark / Light Toggle Button -->
+      <button
+        (click)="toggleTheme()"
+        [attr.title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'"
+        class="relative w-14 h-7 rounded-full transition-all duration-500 ease-in-out border-2 focus:outline-none flex items-center px-1"
+        [ngClass]="isDark ? 'bg-primary border-primary' : 'bg-transparent border-primary'"
+      >
+        <span
+          class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ease-in-out shadow-sm"
+          [ngClass]="isDark ? 'translate-x-6 bg-white' : 'translate-x-0 bg-primary'"
+        >
 
-    <svg *ngIf="isDark"
-         xmlns="http://www.w3.org/2000/svg"
-         class="w-3.5 h-3.5 text-primary"
-         fill="currentColor"
-         viewBox="0 0 20 20">
-      <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
-    </svg>
+          <!-- Moon icon — shown in Light mode -->
+          <svg *ngIf="!isDark"
+               xmlns="http://www.w3.org/2000/svg"
+               class="w-3.5 h-3.5 text-white"
+               fill="currentColor"
+               viewBox="0 0 20 20">
+            <path d="M17.293 13.293A8 8 0 016.707 2.707 8.001 8.001 0 1017.293 13.293z"/>
+          </svg>
 
-  </span>
-</button>
+          <!-- Sun icon — shown in Dark mode -->
+          <svg *ngIf="isDark"
+               xmlns="http://www.w3.org/2000/svg"
+               class="w-3.5 h-3.5 text-primary"
+               fill="currentColor"
+               viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
+          </svg>
+
+        </span>
+      </button>
+
       <!-- Login Button -->
       <button 
         routerLink="/login"
@@ -61,15 +66,16 @@
   </main>
 
   <!-- Footer -->
- <footer class="py-12 flex flex-col items-center gap-6">
+  <footer class="py-12 flex flex-col items-center gap-6">
     <div class="social-container flex flex-col items-center gap-3 cursor-default">
       <div class="flex items-center justify-center gap-5">
-        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube" class="social-icon h-5 w-5" />
+        <img src="https://cdn-icons-png.flaticon.com/512/1384/1384060.png" alt="YouTube"   class="social-icon h-5 w-5" />
         <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" class="social-icon h-5 w-5" />
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" class="social-icon h-5 w-5" />
-        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="social-icon h-5 w-5" />
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png"   alt="Twitter"   class="social-icon h-5 w-5" />
+        <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok"    class="social-icon h-5 w-5" />
         <span class="social-text text-neutral text-sm font-bold transition-colors">+ 1800 more</span>
       </div>
     </div>
   </footer>
+
 </div>

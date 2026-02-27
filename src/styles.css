@@ -3,23 +3,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;600;700&display=swap');
 @import "tailwindcss";
 
+/* =============================================
+   LIGHT THEME (default) — Tailwind theme tokens
+   ============================================= */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Outfit", ui-sans-serif, system-ui, sans-serif;
 
-  --color-primary: #3c6e71;
+  --color-primary:   #3c6e71;
   --color-secondary: #284b63;
-  --color-dark: #353535;
-  --color-neutral: #d9d9d9;
-  --color-white: #ffffff;
+  --color-dark:      #353535;
+  --color-neutral:   #d9d9d9;
+  --color-white:     #ffffff;
 }
 
+/* =============================================
+   DARK THEME — same variable names, new values
+   Applied when <html> has class="dark"
+   ============================================= */
+:root.dark {
+  --color-primary:   #4e9195;   /* slightly brighter teal for dark bg readability  */
+  --color-secondary: #3a6b8a;   /* brighter blue                                   */
+  --color-dark:      #e8e8e8;   /* used for body text → becomes near-white         */
+  --color-neutral:   #6b6b6b;   /* muted mid-grey for secondary text / icons       */
+  --color-white:     #1c1c1c;   /* "white" surfaces → dark background              */
+}
+
+/* =============================================
+   BASE BODY
+   ============================================= */
 body {
   @apply bg-white text-dark font-sans antialiased;
+  transition: background-color 0.5s ease, color 0.5s ease;
 }
 
+/* Dark body background driven by CSS variable override */
+:root.dark body {
+  background-color: var(--color-white);   /* resolves to #1c1c1c in dark mode */
+  color:            var(--color-dark);    /* resolves to #e8e8e8 in dark mode  */
+}
+
+/* =============================================
+   UTILITIES
+   ============================================= */
 .chat-box-shadow {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+:root.dark .chat-box-shadow {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Remove focus outline */
@@ -28,7 +60,9 @@ input:focus, select:focus, button:focus {
   box-shadow: none !important;
 }
 
-/* Social Icon Hover Effects - All icons light up when container is hovered */
+/* =============================================
+   SOCIAL ICONS
+   ============================================= */
 .social-container:hover .social-icon {
   @apply grayscale-0 scale-110;
 }
@@ -41,7 +75,18 @@ input:focus, select:focus, button:focus {
   @apply grayscale transition-all duration-300;
 }
 
-/* Custom Toggle Switch */
+/* In dark mode keep icons visible even without hover */
+:root.dark .social-icon {
+  filter: grayscale(1) brightness(1.8);
+}
+
+:root.dark .social-container:hover .social-icon {
+  filter: grayscale(0) brightness(1) scale(1.1);
+}
+
+/* =============================================
+   CUSTOM TOGGLE SWITCH  (legacy .switch class)
+   ============================================= */
 .switch {
   position: relative;
   display: inline-block;
@@ -58,13 +103,14 @@ input:focus, select:focus, button:focus {
 .slider {
   position: absolute;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background-color: #e0e0e0;
   transition: .4s;
   border-radius: 34px;
+}
+
+:root.dark .slider {
+  background-color: #3a3a3a;
 }
 
 .slider:before {
@@ -87,7 +133,9 @@ input:checked + .slider:before {
   transform: translateX(14px);
 }
 
-/* Tooltip */
+/* =============================================
+   TOOLTIP
+   ============================================= */
 [data-tooltip] {
   position: relative;
 }
@@ -100,7 +148,7 @@ input:checked + .slider:before {
   transform: translateX(-50%);
   padding: 4px 8px;
   background: var(--color-dark);
-  color: white;
+  color: var(--color-white);
   font-size: 10px;
   border-radius: 4px;
   white-space: nowrap;
@@ -116,13 +164,23 @@ input:checked + .slider:before {
   bottom: 130%;
 }
 
-/* Custom Scrollbar for dropdown */
+/* In dark mode tooltip: dark bg with light text */
+:root.dark [data-tooltip]:before {
+  background: #e8e8e8;
+  color: #1c1c1c;
+}
+
+/* =============================================
+   CUSTOM SCROLLBAR
+   ============================================= */
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }
+
 .custom-scrollbar::-webkit-scrollbar-track {
   @apply bg-transparent;
 }
+
 .custom-scrollbar::-webkit-scrollbar-thumb {
   @apply bg-neutral rounded-full;
 }
