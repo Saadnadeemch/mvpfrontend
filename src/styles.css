@@ -101,24 +101,15 @@ input:focus, select:focus, button:focus {
 /* =============================================
    SOCIAL ICONS
    ============================================= */
-.social-container:hover .social-icon {
-  @apply grayscale-0 scale-110;
-}
 
-.social-container:hover .social-text {
+.social-container .social-text {
   @apply text-primary;
 }
 
-.social-icon {
-  @apply grayscale transition-all duration-300;
-}
 
-:root.dark .social-icon {
-  filter: grayscale(1) brightness(1.8);
-}
 
-:root.dark .social-container:hover .social-icon {
-  filter: grayscale(0) brightness(1) scale(1.1);
+:root.dark .social-container .social-icon {
+  filter: grayscale(0) brightness(1) ;
 }
 
 /* =============================================

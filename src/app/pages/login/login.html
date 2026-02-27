@@ -13,7 +13,7 @@
     <button
       (click)="loginWithGoogle()"
       [disabled]="isLoading"
-      class="w-full border border-neutral/30 bg-white hover:bg-neutral/10 text-dark font-semibold text-sm py-3.5 px-5 rounded-2xl flex items-center justify-between gap-3 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
+      class="w-full border border-neutral/30 bg-white hover:bg-neutral/10 text-dark font-semibold text-sm py-3.5 px-2 sm:px-5 rounded-2xl flex items-center justify-between gap-3 transition-colors duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
     >
       <!-- Left: Google icon -->
       <img
@@ -23,7 +23,7 @@
       />
 
       <!-- Centre: label -->
-      <span class="flex-1 text-center">Continue with Google</span>
+      <span class="flex-1 sm:text-sm text-xs text-center">Continue with Google</span>
 
       <!-- Right: spinner or arrow -->
       <span class="w-5 h-5 flex items-center justify-center shrink-0">
