@@ -1,0 +1,78 @@
+<div class="flex flex-col items-center justify-center w-full">
+  <div class="relative w-full max-w-sm">
+    <!-- Border Loading SVG -->
+    <svg class="svg-border-container" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <rect 
+        x="2" y="2" width="96" height="96" 
+        rx="8" ry="8"
+        pathLength="1"
+        class="svg-border-rect"
+        [style.strokeDashoffset]="1 - (progress() / 100)"
+      ></rect>
+    </svg>
+
+    <!-- Main Box -->
+    <div class="bg-white rounded-2xl overflow-hidden chat-box-shadow border border-neutral/20 relative z-0">
+      <!-- Thumbnail with Padding -->
+      <div class="p-3">
+        <div class="aspect-video w-full bg-neutral/10 relative overflow-hidden rounded-xl">
+          <img [src]="videoData.thumbnail" alt="Thumbnail" class="w-full h-full object-cover" />
+          <div class="absolute inset-0 bg-black/5"></div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="px-6 pb-6 pt-2 space-y-4">
+        <div class="space-y-1">
+          <h2 class="text-lg font-bold text-dark line-clamp-2 leading-tight">
+            {{ videoData.title }}
+          </h2>
+          <p class="text-[10px] text-neutral font-medium truncate opacity-60">
+            {{ videoData.requestedUrl }}
+          </p>
+        </div>
+
+        <p class="text-xs text-dark/70 line-clamp-2 leading-relaxed">
+          {{ videoData.description }}
+        </p>
+
+        <!-- Stats -->
+        <div class="flex items-center justify-between pt-4 border-t border-neutral/10">
+          <div class="flex items-center gap-3">
+            <div class="flex items-center gap-1 text-neutral">
+              <mat-icon class="text-xs h-3 w-3">visibility</mat-icon>
+              <span class="text-[9px] font-bold">{{ videoData.views }}</span>
+            </div>
+            <div class="flex items-center gap-1 text-neutral">
+              <mat-icon class="text-xs h-3 w-3">thumb_up</mat-icon>
+              <span class="text-[9px] font-bold">{{ videoData.likes }}</span>
+            </div>
+            <div class="flex items-center gap-1 text-neutral">
+              <mat-icon class="text-xs h-3 w-3">chat_bubble</mat-icon>
+              <span class="text-[9px] font-bold">{{ videoData.comments }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress / Action Section -->
+  <div class="mt-8 text-center space-y-4">
+    @if (!isCompleted()) {
+      <div class="space-y-1">
+        <span class="text-4xl font-display font-bold text-primary tabular-nums">
+          {{ progress() }}%
+        </span>
+        <p class="text-[10px] uppercase tracking-widest font-bold text-neutral/60">Video Downloading...</p>
+      </div>
+    } @else {
+      <button 
+        (click)="saveVideo()"
+        class="px-12 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-all active:scale-95"
+      >
+        Save Video to Device
+      </button>
+    }
+  </div>
+</div>
