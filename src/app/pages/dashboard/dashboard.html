@@ -1,0 +1,198 @@
+<div class="w-full max-w-350 mx-auto px-4 py-6 md:py-8 space-y-6 md:space-y-8">
+  <!-- Search Bar Section -->
+  <div class="flex justify-center">
+    <div class="w-full max-w-xl bg-white rounded-2xl p-1 shadow-md border border-neutral/20 flex items-center gap-2 transition-all duration-300 focus-within:ring-1 focus-within:ring-primary/40 focus-within:border-primary/40">
+      <div class="flex-1 flex items-center px-3 md:px-4">
+        <input 
+          type="text" 
+          [(ngModel)]="searchQuery"
+          placeholder="Search your videos..."
+          class="w-full py-1.5 md:py-2 bg-transparent border-none focus:ring-0 text-sm md:text-base text-dark placeholder:text-neutral/40 transition-all duration-300"
+        />
+      </div>
+      <button class="bg-primary text-white w-9 h-9 md:w-10 md:h-10 rounded-xl font-bold hover:bg-primary/90 transition-all active:scale-95 flex items-center justify-center">
+        <mat-icon class="text-lg md:text-xl">search</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Filters Section -->
+  <div class="bg-neutral/5 p-3 md:p-4 rounded-2xl border border-neutral/10">
+    <div class="grid grid-cols-2 md:flex md:flex-wrap items-center justify-between gap-2 md:gap-4">
+      <!-- Platform Filter -->
+      <div class="relative w-full md:w-auto">
+        <button 
+          (click)="isPlatformDropdownOpen.set(!isPlatformDropdownOpen()); isSortDropdownOpen.set(false); isTypeDropdownOpen.set(false)"
+          class="w-full flex items-center justify-between md:justify-start gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-white border border-neutral/20 rounded-xl text-[10px] md:text-sm font-medium text-dark hover:border-primary transition-all"
+        >
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="text-primary text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">apps</mat-icon>
+            <span>{{ selectedPlatform() }}</span>
+          </div>
+          <mat-icon class="text-neutral text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">expand_more</mat-icon>
+        </button>
+        @if (isPlatformDropdownOpen()) {
+          <div class="absolute top-full left-0 mt-2 w-full md:w-48 bg-white border border-neutral/20 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            @for (p of platforms; track p) {
+              <button 
+                (click)="selectPlatform(p)"
+                class="w-full text-left px-4 py-2 text-xs md:text-sm hover:bg-neutral/5 transition-colors"
+                [class.text-primary]="selectedPlatform() === p"
+                [class.font-bold]="selectedPlatform() === p"
+              >
+                {{ p }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Type Filter -->
+      <div class="relative w-full md:w-auto">
+        <button 
+          (click)="isTypeDropdownOpen.set(!isTypeDropdownOpen()); isPlatformDropdownOpen.set(false); isSortDropdownOpen.set(false)"
+          class="w-full flex items-center justify-between md:justify-start gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-white border border-neutral/20 rounded-xl text-[10px] md:text-sm font-medium text-dark hover:border-primary transition-all"
+        >
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="text-primary text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">movie</mat-icon>
+            <span>{{ selectedType() }}</span>
+          </div>
+          <mat-icon class="text-neutral text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">expand_more</mat-icon>
+        </button>
+        @if (isTypeDropdownOpen()) {
+          <div class="absolute top-full left-0 mt-2 w-full md:w-40 bg-white border border-neutral/20 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            @for (t of typeOptions; track t) {
+              <button 
+                (click)="selectType(t)"
+                class="w-full text-left px-4 py-2 text-xs md:text-sm hover:bg-neutral/5 transition-colors"
+                [class.text-primary]="selectedType() === t"
+                [class.font-bold]="selectedType() === t"
+              >
+                {{ t }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Favorites Toggle -->
+      <button 
+        (click)="showFavoritesOnly.set(!showFavoritesOnly())"
+        class="w-full md:w-auto flex items-center justify-center md:justify-start gap-1.5 px-3 py-2 md:px-4 md:py-2 rounded-xl text-[10px] md:text-sm font-medium transition-all border"
+        [class.bg-primary]="showFavoritesOnly()"
+        [class.text-white]="showFavoritesOnly()"
+        [class.border-primary]="showFavoritesOnly()"
+        [class.bg-white]="!showFavoritesOnly()"
+        [class.text-dark]="!showFavoritesOnly()"
+        [class.border-neutral/20]="!showFavoritesOnly()"
+      >
+        <mat-icon class="text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4" [class.text-white]="showFavoritesOnly()" [class.text-primary]="!showFavoritesOnly()">
+          {{ showFavoritesOnly() ? 'favorite' : 'favorite_border' }}
+        </mat-icon>
+        <span>Favorites</span>
+      </button>
+
+      <!-- Sort Filter -->
+      <div class="relative w-full md:w-auto">
+        <button 
+          (click)="isSortDropdownOpen.set(!isSortDropdownOpen()); isPlatformDropdownOpen.set(false); isTypeDropdownOpen.set(false)"
+          class="w-full flex items-center justify-between md:justify-start gap-1.5 px-3 py-2 md:px-4 md:py-2 bg-white border border-neutral/20 rounded-xl text-[10px] md:text-sm font-medium text-dark hover:border-primary transition-all"
+        >
+          <div class="flex items-center gap-1.5">
+            <mat-icon class="text-primary text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">sort</mat-icon>
+            <span>{{ selectedSort() }}</span>
+          </div>
+          <mat-icon class="text-neutral text-sm md:text-base h-3.5 w-3.5 md:h-4 md:w-4">expand_more</mat-icon>
+        </button>
+        @if (isSortDropdownOpen()) {
+          <div class="absolute top-full right-0 mt-2 w-full md:w-40 bg-white border border-neutral/20 rounded-xl shadow-xl z-50 py-1 overflow-hidden">
+            @for (s of sortOptions; track s) {
+              <button 
+                (click)="selectSort(s)"
+                class="w-full text-left px-4 py-2 text-xs md:text-sm hover:bg-neutral/5 transition-colors"
+                [class.text-primary]="selectedSort() === s"
+                [class.font-bold]="selectedSort() === s"
+              >
+                {{ s }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Video Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+    @for (video of filteredVideos(); track video.id) {
+      <div class="bg-white rounded-2xl overflow-hidden border border-neutral/10 shadow-sm transition-all">
+        <!-- Thumbnail -->
+        <div class="aspect-video relative overflow-hidden">
+          <img [src]="video.thumbnail" [alt]="video.title" class="w-full h-full object-cover" />
+          <div class="absolute top-2 left-2 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded-lg flex items-center gap-1">
+            <mat-icon class="text-white text-[8px] h-2.5 w-2.5">
+              {{ video.type === 'Video' ? 'play_circle' : 'headset' }}
+            </mat-icon>
+            <span class="text-[8px] text-white font-bold uppercase tracking-wider">{{ video.type }}</span>
+          </div>
+          <button 
+            (click)="toggleFavorite(video.id)"
+            class="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all active:scale-90"
+          >
+            <mat-icon class="text-sm h-3.5 w-3.5" [class.text-red-500]="video.isFavorite" [class.text-neutral]="!video.isFavorite">
+              {{ video.isFavorite ? 'favorite' : 'favorite_border' }}
+            </mat-icon>
+          </button>
+        </div>
+
+        <!-- Content -->
+        <div class="p-3 md:p-4 space-y-2 md:space-y-3">
+          <div class="space-y-1 text-center">
+            <h3 class="text-xs md:text-sm font-bold text-dark line-clamp-2 leading-tight min-h-10">
+              {{ video.title }}
+            </h3>
+            <span class="inline-block text-[9px] md:text-[10px] px-2 py-0.5 bg-primary/10 text-primary rounded-full font-bold uppercase tracking-wider">
+              {{ video.platform }}
+            </span>
+          </div>
+          
+          <div class="flex items-center justify-between text-[9px] md:text-[10px] text-neutral font-medium">
+            <div class="flex items-center gap-2 md:gap-3">
+              <div class="flex items-center gap-0.5">
+                <mat-icon class="text-[10px] h-2.5 w-2.5">visibility</mat-icon>
+                <span>{{ video.views }}</span>
+              </div>
+              <div class="flex items-center gap-0.5">
+                <mat-icon class="text-[10px] h-2.5 w-2.5">thumb_up</mat-icon>
+                <span>{{ video.likes }}</span>
+              </div>
+            </div>
+            <span>{{ video.downloadDate | date:'MMM d, y' }}</span>
+          </div>
+
+          <div class="pt-2 md:pt-3 border-t border-neutral/5 flex gap-2">
+            <button class="flex-1 py-1.5 md:py-2 bg-neutral/5 hover:bg-neutral/10 rounded-xl text-[9px] md:text-[10px] font-bold text-dark transition-colors">
+              Open Video
+            </button>
+            <button class="flex-1 py-1.5 md:py-2 bg-primary/10 hover:bg-primary/20 rounded-xl text-[9px] md:text-[10px] font-bold text-primary transition-colors">
+              Download
+            </button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-span-full py-16 md:py-20 flex flex-col items-center justify-center text-center space-y-4">
+        <div class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-neutral/5 flex items-center justify-center">
+          <mat-icon class="text-neutral text-3xl md:text-4xl h-8 w-8 md:h-10 md:w-10">search_off</mat-icon>
+        </div>
+        <div class="space-y-1">
+          <h3 class="text-base md:text-lg font-bold text-dark">No videos found</h3>
+          <p class="text-xs md:text-sm text-neutral">Try adjusting your search or filters</p>
+        </div>
+        <button (click)="searchQuery.set(''); selectedPlatform.set('All Platforms'); selectedType.set('All Types'); showFavoritesOnly.set(false)" class="text-primary font-bold text-xs md:text-sm hover:underline">
+          Clear all filters
+        </button>
+      </div>
+    }
+  </div>
+</div>

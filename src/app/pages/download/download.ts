@@ -1,7 +1,10 @@
-import {ChangeDetectionStrategy, Component, signal, OnInit, OnDestroy, inject} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {MatIconModule} from '@angular/material/icon';
-import {ActivatedRoute} from '@angular/router';
+import {
+  ChangeDetectionStrategy, Component, signal,
+  OnInit, OnDestroy, inject
+} from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -10,80 +13,78 @@ import {ActivatedRoute} from '@angular/router';
   imports: [CommonModule, MatIconModule],
   templateUrl: './download.html',
   styles: [`
-    .border-loader {
-      position: absolute;
-      inset: -2px;
-      border: 4px solid transparent;
-      border-radius: 1rem;
-      pointer-events: none;
-      z-index: 10;
-    }
-    
-    .loader-path {
-      position: absolute;
-      inset: -4px;
-      border: 4px solid var(--color-primary);
-      border-radius: 1.25rem;
-      clip-path: inset(0 0 100% 0);
-      transition: clip-path 0.3s ease-out;
-    }
-    
-    /* SVG Border Animation */
+
     .svg-border-container {
       position: absolute;
-      inset: -2px;
-      width: calc(100% + 4px);
-      height: calc(100% + 4px);
+      inset: -5px;
+      width: calc(100% + 10px);
+      height: calc(100% + 10px);
       pointer-events: none;
+      z-index: 10;
+      overflow: visible;
     }
-    
-    .svg-border-rect {
+
+    /* Faint track outline — always visible */
+    .svg-track-rect {
       fill: none;
-      stroke: #3c6e71;
-      stroke-width: 4;
-      stroke-dasharray: 1;
-      stroke-dashoffset: 1;
-      transition: stroke-dashoffset 0.1s linear;
+      stroke: var(--color-primary);
+      stroke-width: 3;
+      opacity: 0.15;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
+
+    /* Progress stroke — ease-in-out so every tick glides smoothly */
+    .svg-border-rect {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 3;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 0.6s ease-in-out;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
   `]
 })
 export class Download implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
-  progress = signal(0);
+
+  progress    = signal(0);
   isCompleted = signal(false);
-  
+
   videoData = {
-    thumbnail: 'https://picsum.photos/seed/video/800/450',
-    title: 'How to Edit Like a Pro: Cinematic Masterclass 2024',
-    description: 'Learn the secrets of professional video editing in this comprehensive guide. We cover everything from color grading to sound design...',
-    likes: '12.4K',
-    comments: '842',
-    views: '1.2M',
+    thumbnail:    'https://picsum.photos/seed/video/800/450',
+    title:        'How to Edit Like a Pro: Cinematic Masterclass 2024',
+    description:  'Learn the secrets of professional video editing in this comprehensive guide. We cover everything from color grading to sound design...',
+    likes:        '12.4K',
+    comments:     '842',
+    views:        '1.2M',
     requestedUrl: ''
   };
 
-  private progressInterval: ReturnType<typeof setInterval> | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit() {
-    this.videoData.requestedUrl = this.route.snapshot.queryParams['url'] || 'https://youtube.com/watch?v=example';
+    this.videoData.requestedUrl =
+      this.route.snapshot.queryParams['url'] || 'https://youtube.com/watch?v=example';
     this.startSimulation();
   }
 
   private startSimulation() {
     let current = 0;
-    this.progressInterval = setInterval(() => {
-      // Smaller increments for smoother feel
-      const increment = Math.random() * 2 + 0.5;
-      current = Math.min(100, current + increment);
-      this.progress.set(Math.floor(current));
-      
-      if (current >= 100 && this.progressInterval) {
-        clearInterval(this.progressInterval);
+    // Tick every 600ms — the CSS transition handles all the visual smoothing
+    this.timer = setInterval(() => {
+      current = Math.min(100, current + Math.random() * 4 + 1);
+      this.progress.set(Math.round(current));
+
+      if (current >= 100) {
+        clearInterval(this.timer!);
+        this.timer = null;
         this.isCompleted.set(true);
       }
-    }, 100);
+    }, 600);
   }
 
   saveVideo() {
@@ -91,8 +92,6 @@ export class Download implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.progressInterval) {
-      clearInterval(this.progressInterval);
-    }
+    if (this.timer) clearInterval(this.timer);
   }
 }
