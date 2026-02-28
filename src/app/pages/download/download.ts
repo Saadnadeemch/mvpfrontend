@@ -75,7 +75,7 @@ export class Download implements OnInit, OnDestroy {
   videoData = signal<VideoData | null>(null);
   finalDownloadUrl = signal<string | null>(null);
 
-  private readonly API_BASE = 'http://localhost:8000';
+  private readonly API_BASE = 'http://localhost:8080';
   private eventSource: EventSource | null = null;
 
   ngOnInit() {
@@ -93,11 +93,10 @@ export class Download implements OnInit, OnDestroy {
     // Read videoInfo from shared service (set by Home before navigating)
     const info = this.navState.getVideoInfo();
     console.log('[Download] videoInfo from NavigationStateService:', info);
-    this.navState.clear(); // consume it so it doesn't linger
+    this.navState.clear();
 
     this.videoData.set(this.buildVideoData(info, params));
 
-    // EventSource only works in the browser — skip on SSR server render
     if (isPlatformBrowser(this.platformId)) {
       this.listenToStream(requestId);
     }
@@ -116,22 +115,21 @@ export class Download implements OnInit, OnDestroy {
     };
   }
 
-private resolveUrl(rawUrl: string): string {
-  if (!rawUrl) return '';
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+  // ✅ FIXED — NO ENCODING HERE
+  private resolveUrl(rawUrl: string): string {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
 
-  // Ensure path starts with slash
-  const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+    const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
 
-  // Encode URI to handle spaces, Arabic letters, emojis, etc.
-  return `${this.API_BASE}${encodeURI(path)}`;
-}
+    // Just join base + path (backend already encoded if needed)
+    return `${this.API_BASE}${path}`;
+  }
 
   private listenToStream(requestId: string) {
     console.log('[Download] Connecting to SSE stream for requestId:', requestId);
     this.eventSource = this.downloadService.connectToStream(requestId);
 
-    // Use only onmessage to prevent duplicate handler firing
     this.eventSource.onmessage = (event: MessageEvent) => {
       console.log('[Download] Raw SSE data:', event.data);
 
@@ -145,21 +143,20 @@ private resolveUrl(rawUrl: string): string {
 
       console.log('[Download] Parsed SSE payload:', data);
 
-      // SSE video_info update (some backends send this mid-stream)
       if (data.video_info) {
         console.log('[Download] SSE video_info update:', data.video_info);
-        this.videoData.update(prev => this.buildVideoData(data.video_info, { url: prev?.requestedUrl }));
+        this.videoData.update(prev =>
+          this.buildVideoData(data.video_info, { url: prev?.requestedUrl })
+        );
         return;
       }
 
-      // Progress update
       if (typeof data.percent === 'number') {
         this.progress.set(data.percent);
         this.statusMessage.set(data.message ?? '');
         console.log(`[Download] Progress: ${data.percent}% | status: ${data.status}`);
       }
 
-      // Completion — final message carries result.download_url
       if (data.status === 'completed') {
         console.log('[Download] Status completed. Full SSE payload:', data);
 
@@ -170,8 +167,7 @@ private resolveUrl(rawUrl: string): string {
         console.log('[Download] download_url:', rawUrl);
 
         if (!rawUrl) {
-          // Not the final message yet (intermediate "completed" without result) — keep waiting
-          console.warn('[Download] No download_url yet, waiting for final message...');
+          console.warn('[Download] No download_url yet, waiting...');
           return;
         }
 
@@ -185,7 +181,6 @@ private resolveUrl(rawUrl: string): string {
     };
 
     this.eventSource.onerror = () => {
-      // Only treat as error if download hasn't completed
       if (!this.isCompleted()) {
         console.error('[Download] SSE connection error');
         this.hasError.set(true);
@@ -196,23 +191,22 @@ private resolveUrl(rawUrl: string): string {
   }
 
   saveVideo() {
-  const url = this.finalDownloadUrl();
-  if (!url) {
-    this.hasError.set(true);
-    this.errorMessage.set('Download URL not available.');
-    return;
+    const url = this.finalDownloadUrl();
+    if (!url) {
+      this.hasError.set(true);
+      this.errorMessage.set('Download URL not available.');
+      return;
+    }
+
+    const fileName = this.videoData()?.title || 'video.mp4';
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
-
-  // Use the original file name from videoData if available
-  const fileName = this.videoData()?.title || 'video.mp4';
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
   goHome() {
     this.router.navigate(['/']);
