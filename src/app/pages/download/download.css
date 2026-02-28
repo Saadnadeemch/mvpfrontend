@@ -1,0 +1,31 @@
+   .svg-border-container {
+      position: absolute;
+      inset: -5px;
+      width: calc(100% + 10px);
+      height: calc(100% + 10px);
+      pointer-events: none;
+      z-index: 10;
+      overflow: visible;
+    }
+
+    /* Faint track outline — always visible */
+    .svg-track-rect {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 3;
+      opacity: 0.15;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Progress stroke — ease-in-out so every tick glides smoothly */
+    .svg-border-rect {
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 3;
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      transition: stroke-dashoffset 0.6s ease-in-out;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
