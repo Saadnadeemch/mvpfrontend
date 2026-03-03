@@ -75,8 +75,8 @@ export class Download implements OnInit, OnDestroy {
   videoData = signal<VideoData | null>(null);
   finalDownloadUrl = signal<string | null>(null);
 
-  // private readonly API_BASE = 'http://localhost:8080'; // fallback if environment variable is missing
-  private readonly API_BASE = 'https://videosaver.online'; 
+  private readonly API_BASE = 'http://localhost:8080'; // fallback if environment variable is missing
+  // private readonly API_BASE = 'https://videosaver.online'; 
 
   private eventSource: EventSource | null = null;
 
