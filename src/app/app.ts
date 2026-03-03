@@ -1,5 +1,14 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  inject,
+  OnInit,
+  PLATFORM_ID,
+  signal,
+} from '@angular/core';
 import { RouterModule, RouterOutlet, Router } from '@angular/router';
 import { AuthService } from './services/auth';
 
@@ -7,34 +16,55 @@ import { AuthService } from './services/auth';
   selector: 'app-root',
   imports: [RouterOutlet, CommonModule, RouterModule],
   templateUrl: './app.html',
-  styleUrl: './app.css'
+  styleUrl: './app.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class App implements OnInit {
   protected readonly title = signal('Buckty');
+
   isDark = true;
   isProfileOpen = false;
   isCancelModalOpen = false;
   isCancelling = false;
 
+  isLoggedIn = false;
+  currentUser: {
+    name: string;
+    firstName: string;
+    email: string;
+    avatar: string;
+    plan: 'Free' | 'Basic' | 'Pro';
+  } | null = null;
+
   private platformId = inject(PLATFORM_ID);
-  private auth = inject(AuthService);
-  private router = inject(Router);
+  private router     = inject(Router);
+  cdr        = inject(ChangeDetectorRef);
+  auth       = inject(AuthService);
 
-  // ── Computed from auth service ──
-  get isLoggedIn(): boolean {
-    return this.auth.isLoggedIn();
-  }
+  constructor() {
+    effect(() => {
+      const u = this.auth.currentUser();
 
-  get currentUser() {
-    const user = this.auth.currentUser();
-    return {
-      name: user?.user_metadata?.['full_name'] ?? 'User',
-      firstName: (user?.user_metadata?.['full_name'] as string)?.split(' ')[0] ?? 'User',
-      email: user?.email ?? '',
-      avatar: user?.user_metadata?.['avatar_url'] ?? `https://api.dicebear.com/9.x/notionists/svg?seed=${user?.email}`,
-      // Read plan from JWT custom claim — set via Supabase hook
-      plan: this.auth.isPaid() ? 'Pro' : 'Basic' as 'Free' | 'Basic' | 'Pro',
-    };
+      this.isLoggedIn = !!u;
+
+      if (u) {
+        const fullName = (u.user_metadata?.['full_name'] as string) ?? 'User';
+
+        this.currentUser = {
+          name: fullName,
+          firstName: fullName.split(' ')[0],
+          email: u.email ?? '',
+          avatar:
+            (u.user_metadata?.['avatar_url'] as string) ??
+            `https://api.dicebear.com/9.x/notionists/svg?seed=${u.email}`,
+          plan: this.auth.isPaid() ? 'Pro' : 'Basic',
+        };
+      } else {
+        this.currentUser = null;
+      }
+
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnInit(): void {
@@ -48,29 +78,32 @@ export class App implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       document.documentElement.classList.toggle('dark', this.isDark);
     }
+    this.cdr.markForCheck();
   }
 
   toggleProfile(): void {
     this.isProfileOpen = !this.isProfileOpen;
+    this.cdr.markForCheck();
   }
 
   openCancelModal(): void {
     this.isCancelModalOpen = true;
+    this.isProfileOpen     = false;
+    this.cdr.markForCheck();
   }
 
   closeCancelModal(): void {
     if (this.isCancelling) return;
     this.isCancelModalOpen = false;
+    this.cdr.markForCheck();
   }
 
   confirmCancel(): void {
     this.isCancelling = true;
-
-    // Hook to your Stripe cancellation endpoint here
-    // this.subscriptionService.cancel().subscribe(() => { ... })
+    this.cdr.markForCheck();
 
     setTimeout(() => {
-      this.isCancelling = false;
+      this.isCancelling      = false;
       this.isCancelModalOpen = false;
       this.logout();
     }, 1500);

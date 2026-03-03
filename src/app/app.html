@@ -1,30 +1,26 @@
 <div class="min-h-screen flex flex-col transition-colors duration-500"
-     [ngClass]="isDark ? 'bg-[#1c1c1c] text-[#f0f0f0]' : 'bg-white text-dark'">
+  [ngClass]="isDark ? 'bg-[#1c1c1c] text-[#e8e8e8]' : 'bg-white text-dark'">
 
   <!-- Navbar -->
   <nav class="flex items-center justify-between px-4 sm:px-6 md:px-10 lg:px-12 py-4">
 
     <!-- Logo -->
     <div class="flex items-center gap-2 cursor-pointer" routerLink="/">
-      <img
-        src="https://i.ibb.co/XkGHSPKG/Untitled-design.png"
-        alt="Logo"
-        class="h-9 w-auto object-contain rounded-xl"
-      />
+      <img src="buckty.png" alt="Logo" class="h-9 w-auto object-contain rounded-xl" />
     </div>
 
-    <!-- Right Side -->
-    <div class="flex items-center gap-4">
+    <!-- Right side -->
+    <div class="flex items-center gap-3">
 
-      <!-- Dark / Light Toggle -->
+      <!-- Theme toggle -->
       <button
         (click)="toggleTheme()"
         [attr.title]="isDark ? 'Switch to Light mode' : 'Switch to Dark mode'"
-        class="relative w-14 h-7 rounded-full transition-all duration-500 ease-in-out border-2 focus:outline-none flex items-center px-1"
+        class="relative w-14 h-7 rounded-full transition-all duration-500 border-2 focus:outline-none flex items-center px-1 flex-shrink-0"
         [ngClass]="isDark ? 'bg-primary border-primary' : 'bg-transparent border-primary'"
       >
         <span
-          class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 ease-in-out shadow-sm"
+          class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm"
           [ngClass]="isDark ? 'translate-x-6 bg-white' : 'translate-x-0 bg-primary'"
         >
           <svg *ngIf="!isDark" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -36,35 +32,40 @@
         </span>
       </button>
 
-      <!-- NOT logged in: Upgrade button -->
+      <!-- NOT logged in - Upgrade button -->
       <button
         *ngIf="!isLoggedIn"
         routerLink="/pricing"
-        class="px-6 md:px-8 py-2.5 rounded-2xl border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-300 ease-in-out text-sm"
+        class="px-5 md:px-8 py-2.5 rounded-2xl border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-300 text-sm"
       >
         Upgrade
       </button>
 
-      <!-- Logged in: Avatar pill with dropdown -->
-      <div class="relative" *ngIf="isLoggedIn">
+      <!-- Logged in - Avatar pill + dropdown -->
+      <div class="relative" *ngIf="isLoggedIn && currentUser">
+
         <button
           (click)="toggleProfile()"
-          class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full border transition-all cursor-pointer"
-          [ngClass]="isDark ? 'border-white/20 bg-white/5 hover:border-primary/50' : 'border-neutral/60 bg-white hover:border-primary/40'"
+          class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border transition-all cursor-pointer"
+          [ngClass]="isDark ? ' bg-white/5 border-primary/50' : ' bg-white border-primary/40'"
         >
-          <img [src]="currentUser.avatar" [alt]="currentUser.name" class="w-7 h-7 rounded-full object-cover" />
-          <span class="text-sm font-semibold hidden sm:block"
-            [ngClass]="isDark ? 'text-white/80' : 'text-dark'">
+          <img [src]="currentUser.avatar" [alt]="currentUser.name" class="w-7 h-7 rounded-full object-cover flex-shrink-0" />
+          <span
+            class="text-sm font-semibold hidden sm:block truncate max-w-24"
+            [ngClass]="isDark ? 'text-[#e8e8e8]' : 'text-dark'"
+          >
             {{ currentUser.firstName }}
           </span>
-          <span class="material-icons text-base transition-transform"
-            [ngClass]="isDark ? 'text-white/30' : 'text-dark/30'"
-            [style.transform]="isProfileOpen ? 'rotate(180deg)' : 'rotate(0)'">
+          <span
+            class="material-icons text-base transition-transform duration-200 flex-shrink-0"
+            [ngClass]="isDark ? 'text-[#e8e8e8]/40' : 'text-dark/30'"
+            [style.transform]="isProfileOpen ? 'rotate(180deg)' : 'rotate(0)'"
+          >
             expand_more
           </span>
         </button>
 
-        <!-- Profile Dropdown -->
+        <!-- Dropdown -->
         <div
           class="absolute top-full right-0 mt-2 w-60 border rounded-2xl shadow-xl overflow-hidden transition-all duration-200 origin-top-right z-50"
           [ngClass]="isDark ? 'bg-[#242424] border-white/10' : 'bg-white border-neutral/50'"
@@ -74,56 +75,75 @@
           [class.opacity-100]="isProfileOpen"
           [class.scale-100]="isProfileOpen"
         >
+
           <!-- User info -->
           <div class="px-4 py-4" [ngClass]="isDark ? 'border-b border-white/10' : 'border-b border-neutral/30'">
             <div class="flex items-center gap-3">
-              <img [src]="currentUser.avatar" class="w-10 h-10 rounded-full object-cover border-2"
-                [ngClass]="isDark ? 'border-white/20' : 'border-neutral/40'" />
+              <img
+                [src]="currentUser.avatar"
+                class="w-10 h-10 rounded-full object-cover border-2 flex-shrink-0"
+                [ngClass]="isDark ? 'border-white/20' : 'border-neutral/40'"
+              />
               <div class="min-w-0">
-                <p class="text-sm font-bold truncate" [ngClass]="isDark ? 'text-white/90' : 'text-dark'">{{ currentUser.name }}</p>
-                <p class="text-xs truncate" [ngClass]="isDark ? 'text-white/40' : 'text-dark/40'">{{ currentUser.email }}</p>
+                <p class="text-sm font-bold truncate" [ngClass]="isDark ? 'text-[#e8e8e8]' : 'text-dark'">
+                  {{ currentUser.name }}
+                </p>
+                <p class="text-xs truncate" [ngClass]="isDark ? 'text-[#e8e8e8]/55' : 'text-dark/40'">
+                  {{ currentUser.email }}
+                </p>
               </div>
             </div>
           </div>
 
           <!-- Plan -->
-          <div class="px-4 py-3 flex items-center justify-between"
-            [ngClass]="isDark ? 'border-b border-white/10' : 'border-b border-neutral/30'">
+          <div
+            class="px-4 py-3 flex items-center justify-between"
+            [ngClass]="isDark ? 'border-b border-white/10' : 'border-b border-neutral/30'"
+          >
             <div class="flex items-center gap-2">
               <span class="material-icons text-base text-primary">workspace_premium</span>
               <div>
-                <p class="text-xs font-medium" [ngClass]="isDark ? 'text-white/40' : 'text-dark/40'">Current plan</p>
-                <p class="text-sm font-bold"
+                <p class="text-xs font-medium" [ngClass]="isDark ? 'text-[#e8e8e8]/55' : 'text-dark/40'">Current plan</p>
+                <p
+                  class="text-sm font-bold"
                   [class.text-primary]="currentUser.plan === 'Pro'"
-                  [ngClass]="currentUser.plan !== 'Pro' ? (isDark ? 'text-white/80' : 'text-dark') : ''">
+                  [ngClass]="currentUser.plan !== 'Pro' ? (isDark ? 'text-[#e8e8e8]' : 'text-dark') : ''"
+                >
                   {{ currentUser.plan }}
                 </p>
               </div>
             </div>
-            <a *ngIf="currentUser.plan !== 'Pro'" routerLink="/pricing"
+            <a
+              *ngIf="currentUser.plan !== 'Pro'"
+              routerLink="/pricing"
               (click)="isProfileOpen = false"
-              class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors">
+              class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full hover:bg-primary/20 transition-colors"
+            >
               Upgrade
             </a>
           </div>
 
           <!-- Actions -->
           <div class="py-1.5">
-            <button *ngIf="currentUser.plan === 'Pro'"
-              (click)="openCancelModal(); isProfileOpen = false"
-              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 transition-colors cursor-pointer"
-              [ngClass]="isDark ? 'hover:bg-red-500/10' : 'hover:bg-red-50'">
+            <button
+              *ngIf="currentUser.plan === 'Pro'"
+              (click)="openCancelModal()"
+              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 transition-colors cursor-pointer border-none bg-transparent text-left"
+              [ngClass]="isDark ? 'hover:bg-red-500/10' : 'hover:bg-red-50'"
+            >
               <span class="material-icons text-base">cancel</span>
               Cancel Pro
             </button>
             <button
               (click)="logout()"
-              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer"
-              [ngClass]="isDark ? 'text-white/50 hover:bg-white/5' : 'text-dark/60 hover:bg-neutral/20'">
-              <span class="material-icons text-base">logout</span>
+              class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer border-none bg-transparent text-left"
+              [ngClass]="isDark ? 'text-[#e8e8e8]/65 hover:bg-white/5' : 'text-dark/60 hover:bg-neutral/20'"
+            >
+              <span class="material-icons text-base" [ngClass]="isDark ? 'text-[#e8e8e8]/65' : 'text-dark/60'">logout</span>
               Log out
             </button>
           </div>
+
         </div>
       </div>
 
@@ -143,33 +163,41 @@
         <img src="https://cdn-icons-png.flaticon.com/512/2111/2111463.png" alt="Instagram" class="social-icon h-5 w-5" />
         <img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Twitter" class="social-icon h-5 w-5" />
         <img src="https://cdn-icons-png.flaticon.com/512/3046/3046121.png" alt="TikTok" class="social-icon h-5 w-5" />
-        <span class="social-text text-neutral text-sm font-bold transition-colors">+ 1800 more</span>
+        <span class="social-text text-neutral text-sm font-bold">+ 1800 more</span>
       </div>
     </div>
   </footer>
 
 </div>
 
-<!-- Click outside to close dropdown -->
-<div *ngIf="isProfileOpen" class="fixed inset-0 z-40" (click)="isProfileOpen = false"></div>
+<!-- Click outside closes dropdown -->
+<div *ngIf="isProfileOpen" class="fixed inset-0 z-40" (click)="isProfileOpen = false; cdr.markForCheck()"></div>
 
-<!-- ── Cancel Modal ── -->
-<div *ngIf="isCancelModalOpen"
+<!-- Cancel Modal -->
+<div
+  *ngIf="isCancelModalOpen"
   class="fixed inset-0 z-50 flex items-center justify-center px-4"
-  (click)="closeCancelModal()">
-  <div class="absolute inset-0 backdrop-blur-sm"
-    [ngClass]="isDark ? 'bg-black/50' : 'bg-dark/20'"></div>
-  <div class="relative rounded-2xl shadow-2xl w-full max-w-sm p-7 flex flex-col gap-5"
+  (click)="closeCancelModal()"
+>
+  <div
+    class="absolute inset-0"
+    style="backdrop-filter: blur(4px)"
+    [ngClass]="isDark ? 'bg-black/60' : 'bg-black/25'"
+  ></div>
+
+  <div
+    class="relative rounded-2xl shadow-2xl w-full max-w-sm p-7 flex flex-col gap-5"
     [ngClass]="isDark ? 'bg-[#242424]' : 'bg-white'"
-    (click)="$event.stopPropagation()">
+    (click)="$event.stopPropagation()"
+  >
     <div class="w-12 h-12 rounded-2xl bg-red-50 flex items-center justify-center mx-auto">
       <span class="material-icons text-red-400 text-2xl">cancel</span>
     </div>
     <div class="text-center">
-      <h3 class="font-display font-bold text-xl tracking-tight mb-2"
-        [ngClass]="isDark ? 'text-white/90' : 'text-dark'">Cancel your Pro plan?</h3>
-      <p class="text-sm leading-relaxed"
-        [ngClass]="isDark ? 'text-white/45' : 'text-dark/50'">
+      <h3 class="font-display font-bold text-xl tracking-tight mb-2" [ngClass]="isDark ? 'text-[#e8e8e8]' : 'text-dark'">
+        Cancel your Pro plan?
+      </h3>
+      <p class="text-sm leading-relaxed" [ngClass]="isDark ? 'text-[#e8e8e8]/55' : 'text-dark/50'">
         You will lose access to 4K downloads, personal cloud storage, and priority speed at the end of your billing period. This cannot be undone.
       </p>
     </div>
@@ -177,18 +205,22 @@
       <button
         (click)="confirmCancel()"
         [disabled]="isCancelling"
-        class="w-full py-3 rounded-xl text-sm font-bold bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-60">
+        class="w-full py-3 rounded-xl text-sm font-bold bg-red-500 text-white hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-60"
+      >
         <span *ngIf="!isCancelling">Yes, cancel my plan</span>
         <span *ngIf="isCancelling" class="flex items-center justify-center gap-2">
           <span class="material-icons text-base animate-spin">sync</span>
-          Cancelling…
+          Cancelling...
         </span>
       </button>
       <button
         (click)="closeCancelModal()"
         [disabled]="isCancelling"
         class="w-full py-3 rounded-xl text-sm font-bold border transition-colors cursor-pointer disabled:opacity-60"
-        [ngClass]="isDark ? 'border-white/15 text-white/50 hover:border-white/30 hover:text-white/80' : 'border-neutral text-dark/60 hover:border-primary/40 hover:text-dark'">
+        [ngClass]="isDark
+          ? 'border-white/15 text-[#e8e8e8]/60 hover:border-white/30 hover:text-[#e8e8e8]'
+          : 'border-neutral text-dark/60 hover:border-primary/40 hover:text-dark'"
+      >
         Keep my Pro plan
       </button>
     </div>

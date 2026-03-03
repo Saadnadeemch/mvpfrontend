@@ -1,10 +1,17 @@
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  effect,
+  inject,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
 interface Alert {
-  type: 'info' | 'warn' | 'danger';
+  type: 'warn' | 'danger';
   icon: string;
   message: string;
   action?: string;
@@ -25,23 +32,30 @@ interface DownloadItem {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './basic-dashboard.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BasicDashboard implements OnInit {
-  private auth = inject(AuthService);
+  private auth   = inject(AuthService);
   private router = inject(Router);
+  private cdr    = inject(ChangeDetectorRef);
 
-  // ── User — pulled from Supabase auth ──
-  get user() {
-    const u = this.auth.currentUser();
-    return {
-      name: u?.user_metadata?.['full_name'] ?? 'User',
-      firstName: (u?.user_metadata?.['full_name'] as string)?.split(' ')[0] ?? 'User',
-      email: u?.email ?? '',
-      avatar: u?.user_metadata?.['avatar_url'] ?? `https://api.dicebear.com/9.x/notionists/svg?seed=${u?.email}`,
-      plan: this.auth.isPaid() ? 'Pro' : 'Basic' as 'Free' | 'Basic' | 'Pro',
-    };
+  // Plain properties — updated by effect() so OnPush re-renders
+  userFirstName = 'there';
+  userPlan: 'Free' | 'Basic' | 'Pro' = 'Basic';
+
+  constructor() {
+    effect(() => {
+      const u = this.auth.currentUser();
+      this.userFirstName = u
+        ? ((u.user_metadata?.['full_name'] as string) ?? 'User').split(' ')[0]
+        : 'there';
+      this.userPlan = this.auth.isPaid() ? 'Pro' : 'Basic';
+      this.buildAlerts();
+      this.cdr.markForCheck();
+    });
   }
 
+  // ── Stats (replace with real API data) ──
   stats = {
     totalDownloads: 142,
     thisMonth: 23,
@@ -61,29 +75,32 @@ export class BasicDashboard implements OnInit {
 
   alerts: Alert[] = [];
 
-  // ── History modal state ──
+  // ── History modal ──
   isHistoryOpen = false;
-  private historyPageSize = 10;
   private historyPage = 1;
+  private readonly pageSize = 10;
 
   get visibleHistory(): DownloadItem[] {
-    return this.recentDownloads.slice(0, this.historyPageSize * this.historyPage);
+    return this.recentDownloads.slice(0, this.pageSize * this.historyPage);
   }
 
   openHistoryModal(): void {
     this.historyPage = 1;
     this.isHistoryOpen = true;
+    this.cdr.markForCheck();
   }
 
   closeHistoryModal(): void {
     this.isHistoryOpen = false;
+    this.cdr.markForCheck();
   }
 
   loadMore(): void {
     this.historyPage++;
+    this.cdr.markForCheck();
   }
 
-  // ── Replace with real data from your API ──
+  // ── Replace with real API data ──
   recentDownloads: DownloadItem[] = [
     { title: 'How to Build a SaaS in 30 Days', thumbnail: 'https://picsum.photos/seed/vid1/80/48', platform: 'YouTube', quality: '1080p', date: 'Today', savedTo: 'drive' },
     { title: 'Lo-fi Hip Hop Mix 2 Hours', thumbnail: 'https://picsum.photos/seed/vid2/80/48', platform: 'YouTube', quality: '720p', date: 'Yesterday', savedTo: 'cloud' },
@@ -106,6 +123,7 @@ export class BasicDashboard implements OnInit {
   private buildAlerts(): void {
     this.alerts = [];
 
+    // Drive warnings only — no upsell boxes
     if (this.storagePercent >= 95) {
       this.alerts.push({
         type: 'danger',
@@ -124,30 +142,20 @@ export class BasicDashboard implements OnInit {
       });
     }
 
-    if (this.user.plan === 'Pro') {
+    if (this.userPlan === 'Pro') {
       if (this.cloudPercent >= 95) {
         this.alerts.push({
           type: 'danger',
           icon: 'storage',
-          message: 'Your personal cloud storage is almost full. New video uploads will be blocked.',
+          message: 'Your personal cloud storage is almost full. New uploads will be blocked.',
         });
       } else if (this.cloudPercent >= 80) {
         this.alerts.push({
           type: 'warn',
           icon: 'storage',
-          message: `Your personal storage is ${this.cloudPercent}% full. Consider clearing some old downloads.`,
+          message: `Your personal storage is ${this.cloudPercent}% full. Consider clearing old downloads.`,
         });
       }
-    }
-
-    if (this.user.plan === 'Basic') {
-      this.alerts.push({
-        type: 'info',
-        icon: 'workspace_premium',
-        message: 'Upgrade to Pro to unlock 4K downloads and 50 GB of personal cloud storage.',
-        action: 'Upgrade to Pro',
-        onAction: () => this.router.navigate(['/pricing']),
-      });
     }
   }
 }

@@ -14,7 +14,6 @@ export const routes: Routes = [
   { path: 'download', component: Download },
   { path: 'login', component: Login },
   { path: 'auth/callback', component: AuthCallback },
-  { path: 'dashboard' , component:Dashboard},
   { path: 'pricing' , component:Pricing },
   { path: 'bdashboard' , component:BasicDashboard},
   { path: 'privacy-and-policy' , component:Privacy},
