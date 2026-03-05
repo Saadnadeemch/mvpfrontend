@@ -1,214 +1,232 @@
 <div class="min-h-screen rounded-2xl" style="background: color-mix(in srgb, var(--color-primary) 3%, var(--color-white))">
   <main class="w-full max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex flex-col gap-6 sm:gap-8">
 
-    <!-- Greeting -->
-    <div>
-      <h1 class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark mb-1">
-        Hey, {{ userFirstName }} 👋
-      </h1>
-      <p class="text-sm text-dark/45">Here is what is happening with your account today.</p>
+    <!-- Loading skeleton -->
+    <div *ngIf="isLoading()" class="flex flex-col gap-6">
+      <div class="h-8 w-48 bg-neutral/30 rounded-xl animate-pulse"></div>
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        <div class="h-28 bg-neutral/20 rounded-2xl animate-pulse"></div>
+        <div class="h-28 bg-neutral/20 rounded-2xl animate-pulse"></div>
+        <div class="col-span-2 h-24 bg-neutral/20 rounded-2xl animate-pulse"></div>
+      </div>
     </div>
 
-    <!-- Alerts — drive/storage warnings only -->
-    <div class="flex flex-col gap-2" *ngIf="alerts.length">
-      <div
-        *ngFor="let alert of alerts"
-        class="flex items-start sm:items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border"
-        [class.bg-amber-50]="alert.type === 'warn'"
-        [class.border-amber-200]="alert.type === 'warn'"
-        [class.text-amber-800]="alert.type === 'warn'"
-        [class.bg-red-50]="alert.type === 'danger'"
-        [class.border-red-200]="alert.type === 'danger'"
-        [class.text-red-800]="alert.type === 'danger'"
-      >
-        <span class="material-icons text-base flex-shrink-0 mt-0.5 sm:mt-0">{{ alert.icon }}</span>
-        <p class="flex-1 leading-relaxed">{{ alert.message }}</p>
-        <button
-          *ngIf="alert.action"
-          (click)="alert.onAction && alert.onAction()"
-          class="text-xs font-bold underline underline-offset-2 opacity-80 hover:opacity-100 cursor-pointer bg-transparent border-none flex-shrink-0 whitespace-nowrap"
+    <ng-container *ngIf="!isLoading()">
+
+      <!-- Greeting -->
+      <div>
+        <h1 class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark mb-1">
+          Hey, {{ userFirstName() }} 👋
+        </h1>
+        <p class="text-sm text-dark/45">
+          Here is what is happening with your account today.
+          <span *ngIf="isTrial()" class="ml-1.5 inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span class="material-icons text-xs">schedule</span>
+            Trial · {{ trialDaysLeft() }}d left
+          </span>
+        </p>
+      </div>
+
+      <!-- Alerts -->
+      <div class="flex flex-col gap-2" *ngIf="alerts().length">
+        <div
+          *ngFor="let alert of alerts()"
+          class="flex items-start sm:items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border"
+          [class.bg-amber-50]="alert.type === 'warn'"
+          [class.border-amber-200]="alert.type === 'warn'"
+          [class.text-amber-800]="alert.type === 'warn'"
+          [class.bg-red-50]="alert.type === 'danger'"
+          [class.border-red-200]="alert.type === 'danger'"
+          [class.text-red-800]="alert.type === 'danger'"
         >
-          {{ alert.action }}
-        </button>
-      </div>
-    </div>
-
-    <!-- Stats grid -->
-    <div class="grid grid-cols-2 gap-3 sm:gap-4">
-
-      <!-- Total Downloads -->
-      <div class="bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow">
-        <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
-          <span class="material-icons text-base text-primary">download</span>
-        </div>
-        <div>
-          <p class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark leading-none mb-1">
-            {{ stats.totalDownloads }}
-          </p>
-          <p class="text-xs text-dark/45 font-medium">Total downloads</p>
+          <span class="material-icons text-base shrink-0 mt-0.5 sm:mt-0">{{ alert.icon }}</span>
+          <p class="flex-1 leading-relaxed">{{ alert.message }}</p>
+          <button
+            *ngIf="alert.action"
+            (click)="alert.onAction && alert.onAction()"
+            class="text-xs font-bold underline underline-offset-2 opacity-80 hover:opacity-100 cursor-pointer bg-transparent border-none shrink-0 whitespace-nowrap"
+          >
+            {{ alert.action }}
+          </button>
         </div>
       </div>
 
-      <!-- This Month -->
-      <div class="bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow">
-        <div class="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center">
-          <span class="material-icons text-base text-secondary">calendar_month</span>
-        </div>
-        <div>
-          <p class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark leading-none mb-1">
-            {{ stats.thisMonth }}
-          </p>
-          <p class="text-xs text-dark/45 font-medium">This month</p>
-        </div>
-      </div>
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 gap-3 sm:gap-4">
 
-      <!-- Drive Storage — full width on mobile, half on md+ -->
-      <div
-        class="col-span-2 md:col-span-2 bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow"
-        [class.border-amber-300]="storagePercent >= 80 && storagePercent < 95"
-        [class.border-red-300]="storagePercent >= 95"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              [class.bg-blue-50]="storagePercent < 80"
-              [class.bg-amber-50]="storagePercent >= 80 && storagePercent < 95"
-              [class.bg-red-50]="storagePercent >= 95">
-              <span class="material-icons text-base"
-                [class.text-blue-500]="storagePercent < 80"
-                [class.text-amber-500]="storagePercent >= 80 && storagePercent < 95"
-                [class.text-red-500]="storagePercent >= 95">add_to_drive</span>
+        <!-- Total Downloads -->
+        <div class="bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow">
+          <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center">
+            <span class="material-icons text-base text-primary">download</span>
+          </div>
+          <div>
+            <p class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark leading-none mb-1">
+              {{ stats().totalDownloads }}
+            </p>
+            <p class="text-xs text-dark/45 font-medium">Total downloads</p>
+          </div>
+        </div>
+
+        <!-- Total Uploads to Drive -->
+        <div class="bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow">
+          <div class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center">
+            <span class="material-icons text-base text-blue-500">add_to_drive</span>
+          </div>
+          <div>
+            <p class="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-dark leading-none mb-1">
+              {{ stats().totalDriveUploads }}
+            </p>
+            <p class="text-xs text-dark/45 font-medium">Uploaded to Drive</p>
+          </div>
+        </div>
+
+        <!-- Google Drive Storage -->
+        <div
+          class="col-span-2 bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow"
+          [class.border-amber-300]="storagePercent() >= 80 && storagePercent() < 95"
+          [class.border-red-300]="storagePercent() >= 95"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                [class.bg-blue-50]="storagePercent() < 80"
+                [class.bg-amber-50]="storagePercent() >= 80 && storagePercent() < 95"
+                [class.bg-red-50]="storagePercent() >= 95">
+                <span class="material-icons text-base"
+                  [class.text-blue-500]="storagePercent() < 80"
+                  [class.text-amber-500]="storagePercent() >= 80 && storagePercent() < 95"
+                  [class.text-red-500]="storagePercent() >= 95">add_to_drive</span>
+              </div>
+              <p class="text-xs text-dark/45 font-medium truncate">Google Drive</p>
             </div>
-            <p class="text-xs text-dark/45 font-medium truncate">Google Drive</p>
+            <p class="text-xs font-bold text-dark/50 shrink-0">
+              {{ stats().driveUsed }} / {{ stats().driveTotal }} GB
+            </p>
           </div>
-          <p class="text-xs font-bold text-dark/50 flex-shrink-0">{{ stats.driveUsed }} / {{ stats.driveTotal }} GB</p>
-        </div>
-        <div class="w-full h-1.5 bg-neutral/40 rounded-full overflow-hidden">
-          <div class="h-full rounded-full transition-all duration-500"
-            [class.bg-blue-400]="storagePercent < 80"
-            [class.bg-amber-400]="storagePercent >= 80 && storagePercent < 95"
-            [class.bg-red-400]="storagePercent >= 95"
-            [style.width.%]="storagePercent">
-          </div>
-        </div>
-        <p class="text-xs text-dark/40">{{ storagePercent }}% used</p>
-      </div>
-
-      <!-- Personal Cloud — Pro only, full width -->
-      <div
-        *ngIf="userPlan === 'Pro'"
-        class="col-span-2 bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow"
-        [class.border-amber-300]="cloudPercent >= 80 && cloudPercent < 95"
-        [class.border-red-300]="cloudPercent >= 95"
-      >
-        <div class="flex items-center justify-between gap-2">
-          <div class="flex items-center gap-2 min-w-0">
-            <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
-              [class.bg-violet-50]="cloudPercent < 80"
-              [class.bg-amber-50]="cloudPercent >= 80 && cloudPercent < 95"
-              [class.bg-red-50]="cloudPercent >= 95">
-              <span class="material-icons text-base"
-                [class.text-violet-500]="cloudPercent < 80"
-                [class.text-amber-500]="cloudPercent >= 80 && cloudPercent < 95"
-                [class.text-red-500]="cloudPercent >= 95">cloud</span>
+          <div class="w-full h-1.5 bg-neutral/40 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500"
+              [class.bg-blue-400]="storagePercent() < 80"
+              [class.bg-amber-400]="storagePercent() >= 80 && storagePercent() < 95"
+              [class.bg-red-400]="storagePercent() >= 95"
+              [style.width.%]="storagePercent()">
             </div>
-            <p class="text-xs text-dark/45 font-medium truncate">Personal Storage (Pro)</p>
           </div>
-          <p class="text-xs font-bold text-dark/50 flex-shrink-0">{{ stats.cloudUsed }} / {{ stats.cloudTotal }} GB</p>
+          <p class="text-xs text-dark/40">{{ storagePercent() }}% used</p>
         </div>
-        <div class="w-full h-1.5 bg-neutral/40 rounded-full overflow-hidden">
-          <div class="h-full rounded-full transition-all duration-500"
-            [class.bg-violet-400]="cloudPercent < 80"
-            [class.bg-amber-400]="cloudPercent >= 80 && cloudPercent < 95"
-            [class.bg-red-400]="cloudPercent >= 95"
-            [style.width.%]="cloudPercent">
+
+        <!-- Personal Cloud — Pro only -->
+        <div
+          *ngIf="userPlan() === 'Pro'"
+          class="col-span-2 bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow"
+          [class.border-amber-300]="cloudPercent() >= 80 && cloudPercent() < 95"
+          [class.border-red-300]="cloudPercent() >= 95"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                [class.bg-violet-50]="cloudPercent() < 80"
+                [class.bg-amber-50]="cloudPercent() >= 80 && cloudPercent() < 95"
+                [class.bg-red-50]="cloudPercent() >= 95">
+                <span class="material-icons text-base"
+                  [class.text-violet-500]="cloudPercent() < 80"
+                  [class.text-amber-500]="cloudPercent() >= 80 && cloudPercent() < 95"
+                  [class.text-red-500]="cloudPercent() >= 95">cloud</span>
+              </div>
+              <p class="text-xs text-dark/45 font-medium truncate">Personal Storage (Pro)</p>
+            </div>
+            <p class="text-xs font-bold text-dark/50 shrink-0">
+              {{ stats().cloudUsed }} / {{ stats().cloudTotal }} GB
+            </p>
           </div>
+          <div class="w-full h-1.5 bg-neutral/40 rounded-full overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-500"
+              [class.bg-violet-400]="cloudPercent() < 80"
+              [class.bg-amber-400]="cloudPercent() >= 80 && cloudPercent() < 95"
+              [class.bg-red-400]="cloudPercent() >= 95"
+              [style.width.%]="cloudPercent()">
+            </div>
+          </div>
+          <p class="text-xs text-dark/40">{{ cloudPercent() }}% used</p>
         </div>
-        <p class="text-xs text-dark/40">{{ cloudPercent }}% used</p>
+
       </div>
 
-    </div>
-
-    <!-- Recent Downloads — shows last 5 -->
-    <div class="bg-white border border-neutral/50 rounded-2xl overflow-hidden">
-      <div class="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-neutral/30">
-        <h2 class="font-display font-bold text-base text-dark tracking-tight">Recent Downloads</h2>
-        <button
-          (click)="openHistoryModal()"
-          class="text-xs font-bold text-primary hover:opacity-70 transition-opacity cursor-pointer bg-transparent border-none"
-        >
-          View all →
-        </button>
-      </div>
-
-      <div
-        *ngFor="let item of recentDownloads.slice(0, 5); let last = last"
-        class="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-primary/[0.02] transition-colors"
-        [class.border-b]="!last"
-        [class.border-neutral/20]="!last"
-      >
-        <!-- Thumbnail — hidden on very small screens -->
-        <img
-          [src]="item.thumbnail"
-          class="hidden xs:block w-14 sm:w-16 h-9 sm:h-10 rounded-lg object-cover bg-neutral/20 flex-shrink-0"
-        />
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-dark truncate">{{ item.title }}</p>
-          <p class="text-xs text-dark/40 mt-0.5 truncate">
-            {{ item.platform }} · {{ item.quality }} · {{ item.date }}
-          </p>
+      <!-- Recent Downloads -->
+      <div class="bg-white border border-neutral/50 rounded-2xl overflow-hidden">
+        <div class="flex items-center justify-between px-4 sm:px-5 py-4 border-b border-neutral/30">
+          <h2 class="font-display font-bold text-base text-dark tracking-tight">Recent Downloads</h2>
+          <button
+            (click)="openHistoryModal()"
+            class="text-xs font-bold text-primary hover:opacity-70 transition-opacity cursor-pointer bg-transparent border-none"
+          >
+            View all →
+          </button>
         </div>
-        <span
-          class="flex items-center gap-1 text-xs font-bold px-2 sm:px-2.5 py-1 rounded-full flex-shrink-0"
-          [class.bg-blue-50]="item.savedTo === 'drive'"
-          [class.text-blue-600]="item.savedTo === 'drive'"
-          [class.bg-primary/10]="item.savedTo === 'cloud'"
-          [class.text-primary]="item.savedTo === 'cloud'"
+
+        <div
+          *ngFor="let item of recentDownloads().slice(0, 5); let last = last"
+          class="flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-3.5 hover:bg-primary/5 transition-colors"
+          [class.border-b]="!last"
+          [class.border-neutral/20]="!last"
         >
-          <span class="material-icons text-xs">{{ item.savedTo === 'drive' ? 'add_to_drive' : 'cloud' }}</span>
-          <span class="hidden sm:inline">{{ item.savedTo === 'drive' ? 'Drive' : 'Cloud' }}</span>
-        </span>
+          <!-- Thumbnail -->
+          <img
+            [src]="item.thumbnail"
+            class="w-14 sm:w-16 h-9 sm:h-10 rounded-lg object-cover bg-neutral/20 shrink-0"
+          />
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-dark truncate">{{ item.title }}</p>
+            <p class="text-xs text-dark/40 mt-0.5 truncate">
+              {{ item.platform }} · {{ item.quality }} · {{ item.date }}
+            </p>
+          </div>
+          <!-- Open video button -->
+          <button
+            (click)="openVideo(item.videoUrl)"
+            class="flex items-center gap-1 text-xs font-bold px-2 sm:px-2.5 py-1.5 rounded-full shrink-0 border border-primary/20 text-primary bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all cursor-pointer"
+          >
+            <span class="material-icons text-xs">open_in_new</span>
+            <span class="hidden sm:inline">Open</span>
+          </button>
+        </div>
+
+        <div *ngIf="!recentDownloads().length" class="flex flex-col items-center gap-2 py-12 text-dark/30">
+          <span class="material-icons text-4xl">download_for_offline</span>
+          <p class="text-sm">No downloads yet. Go grab a video!</p>
+        </div>
       </div>
 
-      <div *ngIf="!recentDownloads.length" class="flex flex-col items-center gap-2 py-12 text-dark/30">
-        <span class="material-icons text-4xl">download_for_offline</span>
-        <p class="text-sm">No downloads yet. Go grab a video!</p>
-      </div>
-    </div>
-
+    </ng-container>
   </main>
 </div>
 
-<!-- ── History Modal ── -->
+<!-- History Modal -->
 <div
-  *ngIf="isHistoryOpen"
+  *ngIf="isHistoryOpen()"
   class="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
   (click)="closeHistoryModal()"
 >
-  <!-- Reduced blur — safe on dark backgrounds -->
   <div class="absolute inset-0 bg-black/30" style="backdrop-filter: blur(3px)"></div>
 
-  <!-- Sheet on mobile (slides from bottom), centered modal on sm+ -->
   <div
-    class="relative bg-white w-full sm:max-w-2xl sm:mx-4 flex flex-col overflow-hidden
-           rounded-t-2xl sm:rounded-2xl shadow-2xl"
+    class="relative bg-white w-full sm:max-w-2xl sm:mx-4 flex flex-col overflow-hidden rounded-t-2xl sm:rounded-2xl shadow-2xl"
     style="max-height: 85vh"
     (click)="$event.stopPropagation()"
   >
-    <!-- Drag handle on mobile -->
+    <!-- Drag handle (mobile) -->
     <div class="flex justify-center pt-3 pb-1 sm:hidden">
       <div class="w-10 h-1 rounded-full bg-neutral/40"></div>
     </div>
 
     <!-- Header -->
-    <div class="flex items-center justify-between px-5 sm:px-6 py-3 sm:py-4 border-b border-neutral/30 flex-shrink-0">
+    <div class="flex items-center justify-between px-5 sm:px-6 py-3 sm:py-4 border-b border-neutral/30 shrink-0">
       <div>
         <h3 class="font-display font-bold text-base sm:text-lg text-dark tracking-tight">Download History</h3>
-        <p class="text-xs text-dark/40 mt-0.5">{{ recentDownloads.length }} total downloads</p>
+        <p class="text-xs text-dark/40 mt-0.5">{{ recentDownloads().length }} total downloads</p>
       </div>
       <button
         (click)="closeHistoryModal()"
-        class="w-8 h-8 rounded-full flex items-center justify-center border border-neutral/40 text-dark/40 hover:border-primary/40 hover:text-dark transition-all cursor-pointer flex-shrink-0"
+        class="w-8 h-8 rounded-full flex items-center justify-center border border-neutral/40 text-dark/40 hover:border-primary/40 hover:text-dark transition-all cursor-pointer shrink-0"
       >
         <span class="material-icons text-base">close</span>
       </button>
@@ -217,14 +235,14 @@
     <!-- Scrollable list -->
     <div class="overflow-y-auto flex-1 overscroll-contain">
       <div
-        *ngFor="let item of visibleHistory; let last = last"
-        class="flex items-center gap-3 px-5 sm:px-6 py-3 sm:py-3.5 hover:bg-primary/[0.02] transition-colors"
+        *ngFor="let item of visibleHistory(); let last = last"
+        class="flex items-center gap-3 px-5 sm:px-6 py-3 sm:py-3.5 hover:bg-primary/5 transition-colors"
         [class.border-b]="!last"
         [class.border-neutral/15]="!last"
       >
         <img
           [src]="item.thumbnail"
-          class="w-14 sm:w-16 h-9 sm:h-10 rounded-lg object-cover bg-neutral/20 flex-shrink-0"
+          class="w-14 sm:w-16 h-9 sm:h-10 rounded-lg object-cover bg-neutral/20 shrink-0"
         />
         <div class="flex-1 min-w-0">
           <p class="text-sm font-semibold text-dark truncate">{{ item.title }}</p>
@@ -232,20 +250,17 @@
             {{ item.platform }} · {{ item.quality }} · {{ item.date }}
           </p>
         </div>
-        <span
-          class="flex items-center gap-1 text-xs font-bold px-2 sm:px-2.5 py-1 rounded-full flex-shrink-0"
-          [class.bg-blue-50]="item.savedTo === 'drive'"
-          [class.text-blue-600]="item.savedTo === 'drive'"
-          [class.bg-primary/10]="item.savedTo === 'cloud'"
-          [class.text-primary]="item.savedTo === 'cloud'"
+        <button
+          (click)="openVideo(item.videoUrl)"
+          class="flex items-center gap-1 text-xs font-bold px-2 sm:px-2.5 py-1.5 rounded-full shrink-0 border border-primary/20 text-primary bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all cursor-pointer"
         >
-          <span class="material-icons text-xs">{{ item.savedTo === 'drive' ? 'add_to_drive' : 'cloud' }}</span>
-          <span class="hidden sm:inline">{{ item.savedTo === 'drive' ? 'Drive' : 'Cloud' }}</span>
-        </span>
+          <span class="material-icons text-xs">open_in_new</span>
+          <span class="hidden sm:inline">Open</span>
+        </button>
       </div>
 
       <!-- Load more -->
-      <div *ngIf="visibleHistory.length < recentDownloads.length" class="px-5 sm:px-6 py-4 border-t border-neutral/20">
+      <div *ngIf="visibleHistory().length < recentDownloads().length" class="px-5 sm:px-6 py-4 border-t border-neutral/20">
         <button
           (click)="loadMore()"
           class="w-full py-2.5 rounded-xl text-sm font-bold border border-neutral/40 text-dark/50 hover:border-primary/40 hover:text-primary transition-all cursor-pointer"
@@ -254,11 +269,10 @@
         </button>
       </div>
 
-      <div *ngIf="!recentDownloads.length" class="flex flex-col items-center gap-2 py-16 text-dark/30">
+      <div *ngIf="!recentDownloads().length" class="flex flex-col items-center gap-2 py-16 text-dark/30">
         <span class="material-icons text-4xl">download_for_offline</span>
         <p class="text-sm">No downloads yet.</p>
       </div>
     </div>
-
   </div>
 </div>

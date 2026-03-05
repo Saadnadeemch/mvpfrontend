@@ -7,13 +7,12 @@
       <span class="text-primary">Upgrade when you want more.</span>
     </h1>
     <p class="text-base text-dark/55 max-w-lg mx-auto leading-relaxed mb-8">
-      No credit card needed. Automatic sync to Google Drive 
+      No credit card needed. Automatic sync to Google Drive
     </p>
 
     <!-- Billing Toggle -->
     <div class="inline-flex items-center gap-3 bg-neutral/20 px-5 py-2.5 rounded-full">
-      <span
-        class="text-sm font-semibold transition-colors"
+      <span class="text-sm font-semibold transition-colors"
         [class.text-dark]="!isAnnual"
         [class.text-dark/40]="isAnnual">
         Monthly
@@ -22,8 +21,7 @@
         <input type="checkbox" [checked]="isAnnual" (change)="isAnnual = !isAnnual" />
         <span class="slider"></span>
       </label>
-      <span
-        class="text-sm font-semibold flex items-center gap-2 transition-colors"
+      <span class="text-sm font-semibold flex items-center gap-2 transition-colors"
         [class.text-dark]="isAnnual"
         [class.text-dark/40]="!isAnnual">
         Annual
@@ -53,13 +51,11 @@
         </p>
       </div>
 
-      <!-- Trial badge -->
       <div class="flex items-center gap-2 text-sm font-semibold text-dark/50 bg-neutral/20 px-4 py-3 rounded-xl">
         <span class="material-icons text-base text-dark/30">star_border</span>
         First month is completely free, no card needed
       </div>
 
-      <!-- Features -->
       <ul class="flex flex-col gap-3.5 flex-1">
         <li *ngFor="let f of basicFeatures" class="flex items-start gap-3 text-sm text-dark leading-snug">
           <span class="material-icons text-base text-primary mt-0.5 shrink-0">check_circle</span>
@@ -69,15 +65,19 @@
 
       <button
         (click)="selectPlan('basic')"
-        class="w-full py-3.5 rounded-xl text-sm font-bold border border-primary text-primary bg-transparent transition-all hover:bg-primary/5 cursor-pointer mt-2">
-        Start Free Trial
+        [disabled]="savingPlan !== null"
+        class="w-full py-3.5 rounded-xl text-sm font-bold border border-primary text-primary bg-transparent
+               transition-all hover:bg-primary/5 cursor-pointer mt-2
+               disabled:opacity-60 disabled:cursor-not-allowed
+               flex items-center justify-center gap-2">
+        <span *ngIf="savingPlan === 'basic'" class="material-icons text-base animate-spin">sync</span>
+        <span>{{ savingPlan === 'basic' ? 'Saving…' : 'Start Free Trial' }}</span>
       </button>
     </div>
 
     <!-- Pro -->
     <div class="relative flex flex-col gap-6 bg-white rounded-2xl border-2 border-primary p-8 overflow-hidden transition-shadow hover:shadow-xl">
 
-      <!-- Ambient glow -->
       <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-primary/10 blur-2xl pointer-events-none"></div>
 
       <div class="flex flex-col gap-2">
@@ -100,13 +100,11 @@
         </p>
       </div>
 
-      <!-- Trial badge -->
       <div class="flex items-center gap-2 text-sm font-semibold text-primary bg-primary/10 px-4 py-3 rounded-xl">
         <span class="material-icons text-base">star</span>
         First month is completely free, no card needed
       </div>
 
-      <!-- Features -->
       <ul class="flex flex-col gap-3.5 flex-1">
         <li *ngFor="let f of proFeatures" class="flex items-start gap-3 text-sm text-dark leading-snug">
           <span class="material-icons text-base text-primary mt-0.5 shrink-0">check_circle</span>
@@ -116,11 +114,24 @@
 
       <button
         (click)="selectPlan('pro')"
-        class="w-full py-3.5 rounded-xl text-sm font-bold bg-primary text-white transition-all hover:opacity-90 hover:-translate-y-px shadow-md cursor-pointer mt-2">
-        Start Free Trial
+        [disabled]="savingPlan !== null"
+        class="w-full py-3.5 rounded-xl text-sm font-bold bg-primary text-white
+               transition-all hover:opacity-90 hover:-translate-y-px shadow-md cursor-pointer mt-2
+               disabled:opacity-60 disabled:cursor-not-allowed
+               flex items-center justify-center gap-2">
+        <span *ngIf="savingPlan === 'pro'" class="material-icons text-base animate-spin">sync</span>
+        <span>{{ savingPlan === 'pro' ? 'Saving…' : 'Start Free Trial' }}</span>
       </button>
     </div>
 
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="saveError" class="max-w-3xl mx-auto mb-6">
+    <div class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
+      <span class="material-icons text-base">error_outline</span>
+      {{ saveError }}
+    </div>
   </div>
 
   <!-- Compare note -->

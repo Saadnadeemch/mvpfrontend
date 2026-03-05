@@ -1,17 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router, RouterLink, RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-pricing',
+  standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './pricing.html',
   styleUrl: './pricing.css',
 })
 export class Pricing {
 
-  
-  isAnnual = false;
+  isAnnual   = false;
+  // null = idle, 'basic' | 'pro' = that specific button is saving
+  savingPlan: 'basic' | 'pro' | null = null;
+  saveError: string | null = null;
 
   basicFeatures = [
     'Download from 144p up to 1440p quality',
@@ -61,11 +65,31 @@ export class Pricing {
     },
   ];
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {}
 
-  selectPlan(plan: 'basic' | 'pro'): void {
-    
-    this.router.navigate(['/login'], {
+  async selectPlan(plan: 'basic' | 'pro'): Promise<void> {
+    if (this.savingPlan !== null) return; // block if already mid-save
+
+    this.savingPlan = plan;
+    this.saveError  = null;
+
+    const { error } = await this.auth.savePlanSelection({
+      plan,
+      isAnnual: this.isAnnual,
+    });
+
+    this.savingPlan = null;
+
+    if (error) {
+      this.saveError = 'Something went wrong saving your plan. Please try again.';
+      console.error('Plan save error:', error);
+      return;
+    }
+
+    this.router.navigate(['/bdashboard'], {
       queryParams: { plan, annual: this.isAnnual },
     });
   }
