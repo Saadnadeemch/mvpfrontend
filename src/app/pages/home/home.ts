@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { DownloadService } from '../../services/download';
 import { finalize } from 'rxjs';
 import { NavigationStateService } from '../../services/navigationsate';
+import { Footer } from "../../components/footer/footer";
 
 interface QualityOption {
   label: string;

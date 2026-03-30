@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, computed, effect, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, effect, inject, OnInit, ElementRef, HostListener } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ThemeService } from '../../services/themeService';
@@ -14,21 +14,20 @@ import { ThemeService } from '../../services/themeService';
 export class NavbarComponent implements OnInit {
 
   // ── UI state signals ─────────────────────────────────────────
-  isProfileOpen     = signal(false);
-  isCancelModalOpen = signal(false);
-  isCancelling      = signal(false);
+  isProfileOpen = signal(false);
 
   // ── User / plan state signals ─────────────────────────────────
   private _planLabel = signal<string>('Free');
   private _isTrial   = signal<boolean>(false);
 
   // ── Injected services ─────────────────────────────────────────
-  private theme  = inject(ThemeService);
-  private router = inject(Router);
-  auth           = inject(AuthService);
+  private theme   = inject(ThemeService);
+  private router  = inject(Router);
+  private elRef   = inject(ElementRef);
+  auth            = inject(AuthService);
 
   // ── Computed values used directly in template ─────────────────
-  isDark    = computed(() => this.theme.isDark());
+  isDark     = computed(() => this.theme.isDark());
   isLoggedIn = computed(() => !!this.auth.currentUser());
 
   currentUser = computed(() => {
@@ -67,6 +66,16 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {}
 
+  // ── Close dropdown on outside click ──────────────────────────
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.isProfileOpen()) return;
+    const clickedInside = this.elRef.nativeElement.contains(event.target as Node);
+    if (!clickedInside) {
+      this.isProfileOpen.set(false);
+    }
+  }
+
   // ── Load real plan from DB ────────────────────────────────────
   private async loadPlanFromProfile(): Promise<void> {
     const profile = await this.auth.getProfile();
@@ -98,29 +107,8 @@ export class NavbarComponent implements OnInit {
     this.router.navigate(['/bdashboard']);
   }
 
-  openCancelModal(): void {
-    this.isCancelModalOpen.set(true);
-    this.isProfileOpen.set(false);
-  }
-
-  closeCancelModal(): void {
-    if (this.isCancelling()) return;
-    this.isCancelModalOpen.set(false);
-  }
-
-  confirmCancel(): void {
-    this.isCancelling.set(true);
-    setTimeout(() => {
-      this.isCancelling.set(false);
-      this.isCancelModalOpen.set(false);
-      this.logout();
-    }, 1500);
-  }
-
   logout(): void {
     this.isProfileOpen.set(false);
-    // auth.logout() triggers SIGNED_OUT → onAuthStateChange → router.navigate(['/login'])
-    // which is handled inside AuthService already
     this.auth.logout();
   }
 }
