@@ -33,14 +33,15 @@ export interface DownloadResponse {
 })
 export class DownloadService {
   private http = inject(HttpClient);
-  private baseUrl = environment.apiBaseUrl;
+  private baseUrl = environment.apiUrl;
+  private engine = environment.EngineUrl;
 
   createDownload(payload: DownloadRequest): Observable<DownloadResponse> {
-    return this.http.post<DownloadResponse>(`${this.baseUrl}/video`, payload);
+    return this.http.post<DownloadResponse>(`${this.baseUrl}/api/video`, payload);
   }
 
   // NOTE: EventSource is browser-only. Always guard with isPlatformBrowser before calling.
   connectToStream(requestId: string): EventSource {
-    return new EventSource(`${this.baseUrl}/stream/${requestId}`);
+    return new EventSource(`${this.engine}/stream/${requestId}`);
   }
 }

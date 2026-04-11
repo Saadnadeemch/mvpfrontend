@@ -1,5 +1,18 @@
-import { CommonModule } from '@angular/common';
-import { Component, signal, computed, effect, inject, OnInit, ElementRef, HostListener } from '@angular/core';
+import {
+  CommonModule,
+} from '@angular/common';
+
+import {
+  Component,
+  signal,
+  computed,
+  effect,
+  inject,
+  OnInit,
+  ElementRef,
+  HostListener
+} from '@angular/core';
+
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../services/auth';
 import { ThemeService } from '../../services/themeService';
@@ -9,55 +22,56 @@ import { ThemeService } from '../../services/themeService';
   standalone: true,
   imports: [CommonModule, RouterModule],
   templateUrl: './navbar.html',
-  // NO OnPush — default CD works correctly with signals
 })
 export class NavbarComponent implements OnInit {
 
-  // ── UI state signals ─────────────────────────────────────────
+  // ── UI STATE ───────────────────────────────────────────────
   isProfileOpen = signal(false);
 
-  // ── User / plan state signals ─────────────────────────────────
+  // ── USER STATE ──────────────────────────────────────────────
   private _planLabel = signal<string>('Free');
   private _isTrial   = signal<boolean>(false);
 
-  // ── Injected services ─────────────────────────────────────────
-  private theme   = inject(ThemeService);
-  private router  = inject(Router);
-  private elRef   = inject(ElementRef);
-  auth            = inject(AuthService);
+  // ── INJECTED ────────────────────────────────────────────────
+  private theme  = inject(ThemeService);
+  private router = inject(Router);
+  private elRef  = inject(ElementRef);
+  auth           = inject(AuthService);
 
-  // ── Computed values used directly in template ─────────────────
-  isDark     = computed(() => this.theme.isDark());
-  isLoggedIn = computed(() => !!this.auth.currentUser());
-
+  // ── COMPUTED USER ───────────────────────────────────────────
   currentUser = computed(() => {
     const u = this.auth.currentUser();
     if (!u) return null;
 
-    const fullName = (u.user_metadata?.['full_name'] as string) ?? 'User';
+    const fullName =
+      (u.user_metadata?.['full_name'] as string) ?? 'User';
+
     return {
-      name:      fullName,
+      name: fullName,
       firstName: fullName.split(' ')[0],
-      email:     u.email ?? '',
+      email: u.email ?? '',
+
       avatar:
         (u.user_metadata?.['avatar_url'] as string) ??
         `https://api.dicebear.com/9.x/notionists/svg?seed=${u.email}`,
-      plan:    this._planLabel(),   // reactive — updates after DB fetch
+
+      plan: this._planLabel(),
       isTrial: this._isTrial(),
     };
   });
 
+  isDark = computed(() => this.theme.isDark());
+  isLoggedIn = computed(() => !!this.auth.currentUser());
+
   constructor() {
-    // Watch for user changes → reload plan from DB each time user changes
     effect(() => {
-      const u = this.auth.currentUser();
-      if (u) {
-        // Reset to Free while we fetch
-        this._planLabel.set('Free');
+      const user = this.auth.currentUser();
+
+      if (user) {
+        this._planLabel.set('Loading...');
         this._isTrial.set(false);
         this.loadPlanFromProfile();
       } else {
-        // User signed out — reset plan state immediately
         this._planLabel.set('Free');
         this._isTrial.set(false);
       }
@@ -66,30 +80,46 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  // ── Close dropdown on outside click ──────────────────────────
+  // ── OUTSIDE CLICK ───────────────────────────────────────────
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (!this.isProfileOpen()) return;
-    const clickedInside = this.elRef.nativeElement.contains(event.target as Node);
+
+    const clickedInside =
+      this.elRef.nativeElement.contains(event.target as Node);
+
     if (!clickedInside) {
       this.isProfileOpen.set(false);
     }
   }
 
-  // ── Load real plan from DB ────────────────────────────────────
+  // ── LOAD PROFILE (FIXED LOGIC) ──────────────────────────────
   private async loadPlanFromProfile(): Promise<void> {
     const profile = await this.auth.getProfile();
     if (!profile) return;
 
-    const tier     = profile.payment_price_id ?? 'free';
-    const isActive = profile.membership_type === 'monthly' || profile.membership_type === 'yearly';
+    const planType = profile.plan_type ?? 'basic';
+    const membership = profile.membership_type;
 
-    // Update signals — template re-renders automatically
-    this._planLabel.set(isActive ? (tier === 'pro' ? 'Pro' : 'Basic') : 'Free');
+    const isActive =
+      membership === 'monthly' || membership === 'yearly';
+
+    // Map plan_type → UI label
+    let label = 'Free';
+
+    if (isActive) {
+      if (planType === 'advanced') {
+        label = 'Advanced';
+      } else {
+        label = 'Basic';
+      }
+    }
+
+    this._planLabel.set(label);
     this._isTrial.set(profile.is_trial ?? false);
   }
 
-  // ── Actions ───────────────────────────────────────────────────
+  // ── ACTIONS ────────────────────────────────────────────────
   toggleTheme(): void {
     this.theme.toggle();
   }

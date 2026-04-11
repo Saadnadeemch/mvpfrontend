@@ -12,8 +12,8 @@ export interface UserProfile {
   full_name?: string;
   avatar_url?: string;
   is_paid?: boolean;
-  has_selected_plan?: boolean;
-  membership_type?: 'free' | 'monthly' | 'yearly';
+  plan_type?: 'basic' | 'advanced' | null;
+  membership_type?: 'monthly' | 'yearly' | null;
   membership_start?: string;
   membership_end?: string;
   next_billing_date?: string;
@@ -29,7 +29,7 @@ export interface UserProfile {
 }
 
 export interface SelectPlanPayload {
-  plan: 'basic' | 'pro';
+  plan_type: 'basic' | 'advanced';
   isAnnual: boolean;
 }
 
@@ -85,22 +85,23 @@ export class AuthService {
           if (event === 'SIGNED_IN' && session) {
             clearTimeout(timer);
 
+            // Set the initial session so authHeaders() works for /api/auth/sync
             this.zone.run(() => {
               this.currentSession.set(session);
               this.currentUser.set(session.user ?? null);
               this.isLoading.set(false);
             });
 
-            subscription.unsubscribe();
+            // Unsubscribe AFTER sync+refresh so TOKEN_REFRESHED doesn't re-trigger this block
+            await this.syncAndRefresh(session);
 
-            await this.syncProfile(session); 
+            subscription.unsubscribe();
             this.resolveSession(true);
           }
 
           if (event === 'SIGNED_OUT') {
             clearTimeout(timer);
             subscription.unsubscribe();
-
             this.zone.run(() => this.isLoading.set(false));
             this.resolveSession(false);
           }
@@ -133,10 +134,54 @@ export class AuthService {
     }
   }
 
+  // Calls backend sync then immediately refreshes the JWT so custom
+  // claims (is_paid, trial_end, plan_type) are baked into the token in memory.
+  private async syncAndRefresh(session: Session): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${environment.apiUrl}/api/auth/sync`,
+          {},
+          { headers: this.authHeaders(session) }
+        )
+      );
+    } catch (err) {
+      console.error('[Auth] sync error:', err);
+      // Don't block the flow — user can still proceed, JWT just won't have custom claims
+    }
+
+    // Always attempt refresh even if sync failed, to get the freshest token
+    await this.refreshSession();
+  }
+
+  // Refreshes the Supabase session and updates signals.
+  // Call this any time you write to user_metadata on the backend
+  // (after sync, after plan selection) so in-memory JWT stays current.
+  async refreshSession(): Promise<void> {
+    if (!this.supabase) return;
+
+    try {
+      const { data, error } = await this.supabase.auth.refreshSession();
+
+      if (error) {
+        console.error('[Auth] refreshSession error:', error.message);
+        return;
+      }
+
+      if (data.session) {
+        this.zone.run(() => {
+          this.currentSession.set(data.session!);
+          this.currentUser.set(data.session!.user);
+        });
+      }
+    } catch (err) {
+      console.error('[Auth] refreshSession unexpected error:', err);
+    }
+  }
+
   private isOAuthCallbackUrl(): boolean {
     if (!this.isBrowser) return false;
     const { hash, search } = window.location;
-
     return (
       search.includes('code=') ||
       search.includes('error=') ||
@@ -146,16 +191,13 @@ export class AuthService {
   }
 
   private authHeaders(session?: Session): HttpHeaders {
-    const token =
-      session?.access_token ?? this.currentSession()?.access_token;
+    const token = session?.access_token ?? this.currentSession()?.access_token;
 
     if (!token) {
       throw new Error('No auth token available');
     }
 
-    return new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-    });
+    return new HttpHeaders({ Authorization: `Bearer ${token}` });
   }
 
   waitForSessionReady(): Promise<boolean> {
@@ -191,20 +233,6 @@ export class AuthService {
     await this.supabase.auth.signOut();
   }
 
-  private async syncProfile(session: Session): Promise<void> {
-    try {
-      await firstValueFrom(
-        this.http.post(
-          `${environment.apiUrl}/api/auth/sync`,
-          {},
-          { headers: this.authHeaders(session) }
-        )
-      );
-    } catch (err) {
-      console.error('[Auth] syncProfile error:', err);
-    }
-  }
-
   async getProfile(): Promise<UserProfile | null> {
     try {
       const session = this.currentSession();
@@ -237,6 +265,9 @@ export class AuthService {
         )
       );
 
+      // Refresh JWT so plan_type and membership_type are now in the token
+      await this.refreshSession();
+
       return { error: null };
     } catch (err: any) {
       return { error: err?.message ?? 'Failed to save plan' };
@@ -245,7 +276,7 @@ export class AuthService {
 
   async hasSelectedPlan(): Promise<boolean> {
     const profile = await this.getProfile();
-    return profile?.has_selected_plan ?? false;
+    return profile?.plan_type != null;
   }
 
   isLoggedIn(): boolean {
@@ -254,15 +285,53 @@ export class AuthService {
 
   isPaid(): boolean {
     if (!this.isBrowser) return false;
-
     const session = this.currentSession();
     if (!session) return false;
 
     try {
-      const payload = JSON.parse(
-        atob(session.access_token.split('.')[1])
-      );
-      return payload.is_paid ?? false;
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      return payload.user_metadata?.is_paid ?? false;
+    } catch {
+      return false;
+    }
+  }
+
+  getPlanType(): 'basic' | 'advanced' | null {
+    if (!this.isBrowser) return null;
+    const session = this.currentSession();
+    if (!session) return null;
+
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      return payload.user_metadata?.plan_type ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  getMembershipType(): 'monthly' | 'yearly' | null {
+    if (!this.isBrowser) return null;
+    const session = this.currentSession();
+    if (!session) return null;
+
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      return payload.user_metadata?.membership_type ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  isTrialActive(): boolean {
+    if (!this.isBrowser) return false;
+    const session = this.currentSession();
+    if (!session) return false;
+
+    try {
+      const payload = JSON.parse(atob(session.access_token.split('.')[1]));
+      const trialEnd = payload.user_metadata?.trial_end;
+      if (!trialEnd) return false;
+      return new Date(trialEnd) > new Date();
     } catch {
       return false;
     }

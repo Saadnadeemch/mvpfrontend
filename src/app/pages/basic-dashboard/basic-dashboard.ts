@@ -27,6 +27,9 @@ interface DownloadItem {
   videoUrl: string;
 }
 
+// Union type for all possible plan values returned by userPlan
+type UserPlanType = 'Free' | 'Trial' | 'Basic Monthly' | 'Basic Yearly' | 'Advanced Monthly' | 'Advanced Yearly';
+
 @Component({
   selector: 'app-basic-dashboard',
   standalone: true,
@@ -49,20 +52,65 @@ export class BasicDashboard implements OnInit {
     return ((u.user_metadata?.['full_name'] as string) ?? 'User').split(' ')[0];
   });
 
-  userPlan = computed(() => {
+  userPlan = computed<UserPlanType>(() => {
     const p = this.profile();
     if (!p) return 'Free';
-    const tier = p.payment_price_id ?? 'free';
-    const isActive = p.membership_type === 'monthly' || p.membership_type === 'yearly';
-    if (!isActive) return 'Free';
-    return tier === 'pro' ? 'Pro' : 'Basic';
+
+    const now = new Date();
+
+    const trialActive =
+      p.is_trial === true &&
+      p.trial_end !== undefined &&
+      new Date(p.trial_end) > now;
+
+    const isPaid = p.is_paid === true;
+
+    // ❌ No access
+    if (!isPaid && !trialActive) {
+      return 'Free';
+    }
+
+    // 🟡 Trial user
+    if (trialActive && !isPaid) {
+      return 'Trial';
+    }
+
+    // 🟢 Paid user → based on plan_type
+    if (isPaid) {
+      const plan = p.plan_type ?? 'basic';
+
+      if (plan === 'advanced') {
+        return p.membership_type === 'yearly'
+          ? 'Advanced Yearly'
+          : 'Advanced Monthly';
+      }
+
+      // plan === 'basic'
+      return p.membership_type === 'yearly'
+        ? 'Basic Yearly'
+        : 'Basic Monthly';
+    }
+
+    return 'Free';
   });
 
-  isTrial = computed(() => this.profile()?.is_trial ?? false);
+  isTrial = computed(() => {
+    const p = this.profile();
+    if (!p) return false;
+
+    const now = new Date();
+
+    return !!(
+      p.is_trial === true &&
+      p.trial_end !== undefined &&
+      new Date(p.trial_end) > now
+    );
+  }); 
 
   trialDaysLeft = computed(() => {
     const p = this.profile();
     if (!p?.trial_end) return 0;
+
     const diff = new Date(p.trial_end).getTime() - Date.now();
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   });
@@ -74,7 +122,7 @@ export class BasicDashboard implements OnInit {
     driveUsed: 0,
     driveTotal: 15,     // GB — standard Google Drive free tier
     cloudUsed: 0,
-    cloudTotal: 50,     // GB — Pro personal storage
+    cloudTotal: 50,     // GB — Advanced plan personal storage
   });
 
   storagePercent = computed(() => {
@@ -109,7 +157,7 @@ export class BasicDashboard implements OnInit {
       });
     }
 
-    // Drive storage warnings
+    // Drive storage warnings (applies to all users)
     if (sp >= 95) {
       result.push({
         type: 'danger',
@@ -128,8 +176,11 @@ export class BasicDashboard implements OnInit {
       });
     }
 
-    // Personal cloud warnings (Pro only)
-    if (plan === 'Pro') {
+    // Personal cloud warnings (Advanced plan only)
+    // Fixed: Check for Advanced plans instead of non-existent 'Pro'
+    const isAdvancedPlan = plan === 'Advanced Monthly' || plan === 'Advanced Yearly';
+    
+    if (isAdvancedPlan) {
       if (cp >= 95) {
         result.push({
           type: 'danger',

@@ -13,8 +13,7 @@ import { AuthService } from '../../services/auth';
 export class Pricing {
 
   isAnnual   = false;
-  // null = idle, 'basic' | 'pro' = that specific button is saving
-  savingPlan: 'basic' | 'pro' | null = null;
+  savingPlan: 'basic' | 'advanced' | null = null;
   saveError: string | null = null;
 
   basicFeatures = [
@@ -70,27 +69,27 @@ export class Pricing {
     private auth: AuthService,
   ) {}
 
-  async selectPlan(plan: 'basic' | 'pro'): Promise<void> {
-    if (this.savingPlan !== null) return; // block if already mid-save
 
-    this.savingPlan = plan;
-    this.saveError  = null;
+  async selectPlan(plan_type: 'basic' | 'advanced'): Promise<void> {
+  if (this.savingPlan !== null) return;
 
-    const { error } = await this.auth.savePlanSelection({
-      plan,
-      isAnnual: this.isAnnual,
-    });
+  this.savingPlan = plan_type;
+  this.saveError  = null;
 
-    this.savingPlan = null;
+  const { error } = await this.auth.savePlanSelection({
+    plan_type,
+    isAnnual: this.isAnnual,
+  });
 
-    if (error) {
-      this.saveError = 'Something went wrong saving your plan. Please try again.';
-      console.error('Plan save error:', error);
-      return;
-    }
+  this.savingPlan = null;
 
-    this.router.navigate(['/bdashboard'], {
-      queryParams: { plan, annual: this.isAnnual },
-    });
+  if (error) {
+    this.saveError = 'Something went wrong saving your plan.';
+    return;
   }
+
+  this.router.navigate(['/bdashboard'], {
+    queryParams: { plan: plan_type, annual: this.isAnnual },
+  });
+}
 }

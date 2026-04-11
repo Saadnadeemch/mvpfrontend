@@ -112,15 +112,15 @@
         </li>
       </ul>
 
-      <button
-        (click)="selectPlan('pro')"
+          <button
+        (click)="selectPlan('advanced')"
         [disabled]="savingPlan !== null"
         class="w-full py-3.5 rounded-xl text-sm font-bold bg-primary text-white
                transition-all hover:opacity-90 hover:-translate-y-px shadow-md cursor-pointer mt-2
                disabled:opacity-60 disabled:cursor-not-allowed
                flex items-center justify-center gap-2">
-        <span *ngIf="savingPlan === 'pro'" class="material-icons text-base animate-spin">sync</span>
-        <span>{{ savingPlan === 'pro' ? 'Saving…' : 'Start Free Trial' }}</span>
+        <span *ngIf="savingPlan === 'advanced'" class="material-icons text-base animate-spin">sync</span>
+        <span>{{ savingPlan === 'advanced' ? 'Saving…' : 'Start Free Trial' }}</span>
       </button>
     </div>
 

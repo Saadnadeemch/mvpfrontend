@@ -114,9 +114,9 @@
           <p class="text-xs text-dark/40">{{ storagePercent() }}% used</p>
         </div>
 
-        <!-- Personal Cloud — Pro only -->
+        <!-- Personal Cloud — Advanced plan only -->
         <div
-          *ngIf="userPlan() === 'Pro'"
+          *ngIf="userPlan() === 'Advanced Monthly' || userPlan() === 'Advanced Yearly'"
           class="col-span-2 bg-white border border-neutral/50 rounded-2xl p-4 sm:p-5 flex flex-col gap-3 hover:shadow-md hover:shadow-primary/5 transition-shadow"
           [class.border-amber-300]="cloudPercent() >= 80 && cloudPercent() < 95"
           [class.border-red-300]="cloudPercent() >= 95"
@@ -132,7 +132,7 @@
                   [class.text-amber-500]="cloudPercent() >= 80 && cloudPercent() < 95"
                   [class.text-red-500]="cloudPercent() >= 95">cloud</span>
               </div>
-              <p class="text-xs text-dark/45 font-medium truncate">Personal Storage (Pro)</p>
+              <p class="text-xs text-dark/45 font-medium truncate">Personal Storage (Advanced)</p>
             </div>
             <p class="text-xs font-bold text-dark/50 shrink-0">
               {{ stats().cloudUsed }} / {{ stats().cloudTotal }} GB
