@@ -1,0 +1,110 @@
+Here is the complete flow of what is currently implemented:
+
+New User (First Time Login)
+1. User clicks "Login with Google"
+2. Google OAuth runs → redirects to /auth/callback
+3. Frontend SIGNED_IN event fires
+4. session.provider_token      = Google access token  (valid 60 min)
+5. session.provider_refresh_token = Google refresh token (long-lived)
+        ↓
+6. Frontend calls POST /api/auth/sync with:
+   - Authorization: Bearer <supabase-jwt>
+   - Body: { google_access_token, google_refresh_token }
+        ↓
+7. NestJS AuthGuard verifies Supabase JWT
+8. AuthService.syncProfile() runs:
+   - Profile does NOT exist → creates new row with:
+     - trial_start, trial_end (now + 30 days)
+     - is_trial: true
+     - is_paid: false
+     - plan_type: null
+     - google_access_token saved
+     - google_refresh_token saved
+     - google_token_expires_at = now + 3600s
+        ↓
+9. updateUserMetadata() writes into Supabase JWT:
+   - is_paid: false
+   - trial_end: <date>
+   - plan_type: null
+   - membership_type: null
+        ↓
+10. Frontend calls refreshSession()
+    → new Supabase JWT now has custom claims baked in
+        ↓
+11. Frontend reads has_selected_plan from GET /api/user/profile
+    → plan_type is null → redirect to /pricing
+        ↓
+12. User selects plan on /pricing
+13. Frontend calls POST /api/user/plan
+14. UserService.savePlan() runs:
+    - Updates DB: plan_type, membership_type, membership dates
+    - is_paid stays false (Stripe not confirmed yet)
+        ↓
+15. updateUserMetadata() writes plan_type + membership_type into JWT
+16. Frontend calls refreshSession()
+    → JWT now has plan_type + membership_type
+        ↓
+17. Redirect to /bdashboard
+
+Existing User (Returns and Logs In Again)
+1. User clicks "Login with Google"
+2. Google OAuth runs
+   ⚠️  provider_token      = NEW Google access token
+   ⚠️  provider_refresh_token = may or may not be new
+       (Google only issues a new refresh token if user
+        re-consented. Since prompt:'consent' is set in
+        your loginWithGoogle(), they WILL get a new one
+        every time)
+        ↓
+3. Frontend SIGNED_IN fires
+4. Frontend calls POST /api/auth/sync with:
+   - Body: { google_access_token, google_refresh_token }
+        ↓
+5. AuthService.syncProfile() runs:
+   - Profile EXISTS → update path runs:
+     - Only updates: email, full_name, avatar_url, updated_at
+     - google_access_token → overwritten with new token ✅
+     - google_refresh_token → overwritten with new token ✅
+     - google_token_expires_at → reset to now + 3600s ✅
+     - trial/plan/billing data → NOT touched ✅
+        ↓
+6. updateUserMetadata() refreshes JWT claims
+   (is_paid, plan_type, trial_end stay whatever they were in DB)
+        ↓
+7. Frontend refreshSession() → fresh JWT
+        ↓
+8. Frontend reads has_selected_plan from GET /api/user/profile
+   → plan_type is NOT null → redirect to /bdashboard directly
+
+During a Download Request (Paid/Trial User)
+1. User requests a download
+2. Frontend sends POST /api/video with Supabase JWT
+        ↓
+3. NestJS extracts user from JWT
+   reads: is_paid, is_trial, trial_end → determines is_privileged
+        ↓
+4. VideoService calls AuthService.getValidDriveToken(userId)
+        ↓
+5. getValidDriveToken() reads from DB:
+   google_access_token, google_refresh_token, google_token_expires_at
+
+   if (now < expires_at - 60s):
+     → token still valid, return it directly
+
+   if (now >= expires_at - 60s):
+     → token expired, call refreshDriveToken()
+     → POST https://oauth2.googleapis.com/token
+     → Google returns new access_token + expires_in
+     → DB updated: google_access_token, google_token_expires_at
+     → return new token
+        ↓
+6. VideoService sends to Go engine:
+   { url, quality, user_id, cloud_upload: true, drive_token }
+        ↓
+7. Go engine downloads → uploads to Drive → returns drive URL
+        ↓
+8. NestJS saves metadata to downloads table
+9. Returns response to frontend
+
+The One Gap in Current Implementation
+The token refresh during download (getValidDriveToken) is implemented in AuthService but VideoService is not calling it yet — that wire-up is the next thing to build when you work on the video module.

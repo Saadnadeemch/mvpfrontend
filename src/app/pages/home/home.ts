@@ -11,9 +11,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { DownloadService } from '../../services/download';
+import { AuthService } from '../../services/auth';
 import { finalize } from 'rxjs';
 import { NavigationStateService } from '../../services/navigationsate';
-import { Footer } from "../../components/footer/footer";
 
 interface QualityOption {
   label: string;
@@ -31,6 +31,7 @@ export class Home implements OnDestroy {
   private router = inject(Router);
   private downloadService = inject(DownloadService);
   private navState = inject(NavigationStateService);
+  private authService = inject(AuthService);
 
   url = signal('');
   isAudioOnly = signal(false);
@@ -47,8 +48,8 @@ export class Home implements OnDestroy {
     { label: '720p', isPaid: false },
     { label: '1080p', isPaid: false },
     { label: '1440p', isPaid: false },
-    { label: '2080p', isPaid: true },
-    { label: '4K', isPaid: true }
+    { label: '2080p', isPaid: false },
+    { label: '4K', isPaid: false }
   ];
 
   private placeholders = [
@@ -116,18 +117,25 @@ export class Home implements OnDestroy {
 
     this.isDownloading.set(true);
 
+    // Read JWT from current session — null if user is not logged in
+    const token = this.authService.currentSession()?.access_token ?? '';
+    const isLoggedIn = !!token;
+
+    console.log('[Home] User logged in:', isLoggedIn);
+
     const payload = {
       url: this.url(),
       quality: this.quality(),
       audioOnly: this.isAudioOnly(),
-      uiId: 'UI-TEST-123',
-      userId: 'USER-TEST-456',
-      cloudUpload: false
+      cloudUpload: true,
     };
 
-    console.log('[Home] Sending download payload:', payload);
+    console.log('[Home] Sending payload:', {
+      ...payload,
+      token: token ? '[PRESENT]' : '[EMPTY — anonymous]',
+    });
 
-    this.downloadService.createDownload(payload)
+    this.downloadService.createDownload(payload, token)
       .pipe(finalize(() => this.isDownloading.set(false)))
       .subscribe({
         next: (res) => {
@@ -135,14 +143,13 @@ export class Home implements OnDestroy {
           const requestId = res.request_id;
 
           if (!requestId) {
-            console.error('[Home] requestId missing:', res);
+            console.error('[Home] requestId missing in response:', res);
             alert('Server did not return a valid request ID.');
             return;
           }
 
-          // Store videoInfo in singleton service — survives navigation, works in SSR
           this.navState.setVideoInfo(res.video_info ?? null);
-          console.log('[Home] Stored videoInfo, navigating with requestId:', requestId);
+          console.log('[Home] Navigating to /download with requestId:', requestId);
 
           this.router.navigate(['/download'], {
             queryParams: {

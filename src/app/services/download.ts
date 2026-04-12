@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment';
 
@@ -7,8 +7,6 @@ export interface DownloadRequest {
   url: string;
   quality: string;
   audioOnly: boolean;
-  uiId: string;
-  userId: string;
   cloudUpload: boolean;
 }
 
@@ -36,12 +34,35 @@ export class DownloadService {
   private baseUrl = environment.apiUrl;
   private engine = environment.EngineUrl;
 
-  createDownload(payload: DownloadRequest): Observable<DownloadResponse> {
-    return this.http.post<DownloadResponse>(`${this.baseUrl}/api/video`, payload);
+  createDownload(
+    payload: DownloadRequest,
+    token: string,
+  ): Observable<DownloadResponse> {
+    return this.http.post<DownloadResponse>(
+      `${this.baseUrl}/api/video`,
+      payload,
+      {
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+      },
+    );
   }
 
-  // NOTE: EventSource is browser-only. Always guard with isPlatformBrowser before calling.
   connectToStream(requestId: string): EventSource {
     return new EventSource(`${this.engine}/stream/${requestId}`);
+  }
+
+  // Called after SSE signals completion — tells NestJS to update DB status
+  markComplete(
+    requestId: string,
+    token: string,
+    cloudUrl: string | null,
+  ): Observable<{ ok: boolean }> {
+    return this.http.post<{ ok: boolean }>(
+      `${this.baseUrl}/api/video/complete`,
+      { request_id: requestId, cloud_url: cloudUrl },
+      {
+        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
+      },
+    );
   }
 }

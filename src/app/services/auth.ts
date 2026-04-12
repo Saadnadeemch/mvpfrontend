@@ -85,14 +85,13 @@ export class AuthService {
           if (event === 'SIGNED_IN' && session) {
             clearTimeout(timer);
 
-            // Set the initial session so authHeaders() works for /api/auth/sync
             this.zone.run(() => {
               this.currentSession.set(session);
               this.currentUser.set(session.user ?? null);
               this.isLoading.set(false);
             });
 
-            // Unsubscribe AFTER sync+refresh so TOKEN_REFRESHED doesn't re-trigger this block
+            // Pass full session so syncAndRefresh can extract provider tokens
             await this.syncAndRefresh(session);
 
             subscription.unsubscribe();
@@ -128,35 +127,43 @@ export class AuthService {
         });
 
         if (event === 'SIGNED_OUT') {
-          this.router.navigate(['/login']);
+          this.router.navigate(['/']);
         }
       });
     }
   }
 
-  // Calls backend sync then immediately refreshes the JWT so custom
-  // claims (is_paid, trial_end, plan_type) are baked into the token in memory.
   private async syncAndRefresh(session: Session): Promise<void> {
     try {
+      // provider_token  = Google access token  (valid ~60 min, available only at login)
+      // provider_refresh_token = Google refresh token (long-lived, available only at login)
+      // Both are ONLY present on the session object right after OAuth completes.
+      // After a Supabase JWT refresh these fields become null, so we must save
+      // them to the backend NOW before they disappear.
+      const syncPayload: Record<string, unknown> = {};
+
+      if (session.provider_token) {
+        syncPayload['google_access_token'] = session.provider_token;
+      }
+
+      if (session.provider_refresh_token) {
+        syncPayload['google_refresh_token'] = session.provider_refresh_token;
+      }
+
       await firstValueFrom(
         this.http.post(
           `${environment.apiUrl}/api/auth/sync`,
-          {},
+          syncPayload,
           { headers: this.authHeaders(session) }
         )
       );
     } catch (err) {
       console.error('[Auth] sync error:', err);
-      // Don't block the flow — user can still proceed, JWT just won't have custom claims
     }
 
-    // Always attempt refresh even if sync failed, to get the freshest token
     await this.refreshSession();
   }
 
-  // Refreshes the Supabase session and updates signals.
-  // Call this any time you write to user_metadata on the backend
-  // (after sync, after plan selection) so in-memory JWT stays current.
   async refreshSession(): Promise<void> {
     if (!this.supabase) return;
 
@@ -213,12 +220,22 @@ export class AuthService {
       provider: 'google',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`,
+        // Added drive.file scope — this is what allows uploading to the user's Drive.
+        // drive.file = only files created by this app (safer, less scary for users
+        // than full drive access). Without this scope, provider_token won't
+        // have Drive permissions and the Go engine upload will fail with 403.
         scopes: [
           'openid',
           'https://www.googleapis.com/auth/userinfo.email',
           'https://www.googleapis.com/auth/userinfo.profile',
+          'https://www.googleapis.com/auth/drive.file',
         ].join(' '),
-        queryParams: { access_type: 'offline', prompt: 'consent' },
+        queryParams: {
+          access_type: 'offline',  // This is what gives us the refresh token
+          prompt: 'consent',       // Forces Google to show consent screen so
+                                   // refresh token is always issued (without
+                                   // this, returning users may not get one)
+        },
       },
     });
 
@@ -265,7 +282,6 @@ export class AuthService {
         )
       );
 
-      // Refresh JWT so plan_type and membership_type are now in the token
       await this.refreshSession();
 
       return { error: null };
@@ -335,5 +351,54 @@ export class AuthService {
     } catch {
       return false;
     }
+  }
+
+  async getDriveStorage(): Promise<{ used_gb: number; total_gb: number; percent: number }> {
+  try {
+    const session = this.currentSession();
+    if (!session) return { used_gb: 0, total_gb: 0, percent: 0 };
+
+    return await firstValueFrom(
+      this.http.get<{ used_gb: number; total_gb: number; percent: number }>(
+        `${environment.apiUrl}/api/user/drive-storage`,
+        { headers: this.authHeaders(session) },
+      )
+    );
+  } catch {
+    return { used_gb: 0, total_gb: 0, percent: 0 };
+  }
+}
+
+
+  async getDownloads(): Promise<any[]> {
+  if (!this.supabase) return [];
+
+  const user = this.currentUser();
+  if (!user) return [];
+
+  const { data, error } = await this.supabase
+    .from('downloads')
+    .select('id, title, thumbnail, platform, quality, requested_at, video_page_url, status, cloud_url, uploader, views')
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('requested_at', { ascending: false })
+    .limit(50);
+
+  if (error) {
+    console.error('[Auth] getDownloads error:', error.message);
+    return [];
+  }
+
+  return data ?? [];
+}
+  // Returns the Google OAuth access token from the current Supabase session.
+  // NOTE: This is the Supabase-managed token, NOT the one we store in DB.
+  // After the first JWT refresh, provider_token becomes null in the session,
+  // so this will only return a value immediately after login.
+  // For video download requests, the backend fetches the token from DB
+  // (and refreshes it if needed) — frontend does NOT need to pass it.
+  getProviderToken(): string | null {
+    if (!this.isBrowser) return null;
+    return this.currentSession()?.provider_token ?? null;
   }
 }

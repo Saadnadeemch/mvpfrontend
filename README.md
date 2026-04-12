@@ -1,59 +1,292 @@
-# Frontend
+import { Injectable, signal, inject, PLATFORM_ID, NgZone } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-js';
+import { Router } from '@angular/router';
+import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environment/environment';
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.1.
 
-## Development server
+export interface UserProfile {
+  user_id: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
 
-To start a local development server, run:
+  is_paid?: boolean;
 
-```bash
-ng serve
-```
+  plan_type?: 'basic' | 'advanced';
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+  membership_type?: 'monthly' | 'yearly';
 
-## Code scaffolding
+  membership_start?: string;
+  membership_end?: string;
+  next_billing_date?: string;
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+  is_trial?: boolean;
+  trial_start?: string;
+  trial_end?: string;
 
-```bash
-ng generate component component-name
-```
+  payment_customer_id?: string;
+  payment_subscription_id?: string;
+  payment_provider?: string;
+  payment_price_id?: string;
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+  created_at?: string;
+  updated_at?: string;
+}
 
-```bash
-ng generate --help
-```
+export interface SelectPlanPayload {
+  plan_type: 'basic' | 'advanced';   
+  isAnnual: boolean;
+}
 
-## Building
+@Injectable({ providedIn: 'root' })
+export class AuthService {
+  private supabase: SupabaseClient | null = null;
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
+  private zone = inject(NgZone);
+  private http = inject(HttpClient);
 
-To build the project run:
+  currentUser = signal<User | null>(null);
+  currentSession = signal<Session | null>(null);
+  isLoading = signal<boolean>(true);
 
-```bash
-ng build
-```
+  private _sessionReadyResolve!: (v: boolean) => void;
+  private _sessionReadyPromise = new Promise<boolean>((res) => {
+    this._sessionReadyResolve = res;
+  });
+  private _sessionResolved = false;
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+  private resolveSession(value: boolean): void {
+    if (this._sessionResolved) return;
+    this._sessionResolved = true;
+    this._sessionReadyResolve(value);
+  }
 
-## Running unit tests
+  constructor(private router: Router) {
+    if (!this.isBrowser) {
+      this.isLoading.set(false);
+      return;
+    }
 
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
+    this.supabase = createClient(
+      environment.supabaseUrl,
+      environment.supabaseAnonKey
+    );
 
-```bash
-ng test
-```
+    this.initializeAuth();
+  }
 
-## Running end-to-end tests
+  private initializeAuth(): void {
+    if (!this.supabase) return;
 
-For end-to-end (e2e) testing, run:
+    if (this.isOAuthCallbackUrl()) {
+      const timer = setTimeout(() => {
+        this.zone.run(() => this.isLoading.set(false));
+        this.resolveSession(false);
+      }, 10000);
 
-```bash
-ng e2e
-```
+      const { data: { subscription } } =
+        this.supabase.auth.onAuthStateChange(async (event, session) => {
+          if (event === 'SIGNED_IN' && session) {
+            clearTimeout(timer);
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+            this.zone.run(() => {
+              this.currentSession.set(session);
+              this.currentUser.set(session.user ?? null);
+              this.isLoading.set(false);
+            });
 
-## Additional Resources
+            subscription.unsubscribe();
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+            // 🔥 Sync profile (DB + JWT)
+            await this.syncProfile(session);
+
+            // 🔥 IMPORTANT: Refresh JWT after backend updates metadata
+            await this.supabase?.auth.refreshSession();
+
+            this.resolveSession(true);
+          }
+
+          if (event === 'SIGNED_OUT') {
+            clearTimeout(timer);
+            subscription.unsubscribe();
+
+            this.zone.run(() => this.isLoading.set(false));
+            this.resolveSession(false);
+          }
+        });
+    } else {
+      this.supabase.auth.getSession().then(({ data, error }) => {
+        if (error) {
+          console.error('[Auth] getSession error:', error.message);
+        }
+
+        this.zone.run(() => {
+          this.currentSession.set(data?.session ?? null);
+          this.currentUser.set(data?.session?.user ?? null);
+          this.isLoading.set(false);
+        });
+
+        this.resolveSession(!!data?.session);
+      });
+
+      this.supabase.auth.onAuthStateChange((event, session) => {
+        this.zone.run(() => {
+          this.currentSession.set(session);
+          this.currentUser.set(session?.user ?? null);
+        });
+
+        if (event === 'SIGNED_OUT') {
+          this.router.navigate(['/login']);
+        }
+      });
+    }
+  }
+
+  private isOAuthCallbackUrl(): boolean {
+    if (!this.isBrowser) return false;
+    const { hash, search } = window.location;
+
+    return (
+      search.includes('code=') ||
+      search.includes('error=') ||
+      hash.includes('access_token=') ||
+      hash.includes('error=')
+    );
+  }
+
+  private authHeaders(session?: Session): HttpHeaders {
+    const token =
+      session?.access_token ?? this.currentSession()?.access_token;
+
+    if (!token) {
+      throw new Error('No auth token available');
+    }
+
+    return new HttpHeaders({
+      Authorization: `Bearer ${token}`,
+    });
+  }
+
+  waitForSessionReady(): Promise<boolean> {
+    return this._sessionReadyPromise;
+  }
+
+  async loginWithGoogle(): Promise<void> {
+    if (!this.supabase || !this.isBrowser) return;
+
+    this.isLoading.set(true);
+
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: [
+          'openid',
+          'https://www.googleapis.com/auth/userinfo.email',
+          'https://www.googleapis.com/auth/userinfo.profile',
+        ].join(' '),
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
+    });
+
+    if (error) {
+      this.zone.run(() => this.isLoading.set(false));
+      throw error;
+    }
+  }
+
+  async logout(): Promise<void> {
+    if (!this.supabase) return;
+    await this.supabase.auth.signOut();
+  }
+
+  private async syncProfile(session: Session): Promise<void> {
+    try {
+      await firstValueFrom(
+        this.http.post(
+          `${environment.apiUrl}/api/auth/sync`,
+          {},
+          { headers: this.authHeaders(session) }
+        )
+      );
+    } catch (err) {
+      console.error('[Auth] syncProfile error:', err);
+    }
+  }
+
+  async getProfile(): Promise<UserProfile | null> {
+    try {
+      const session = this.currentSession();
+      if (!session) return null;
+
+      return await firstValueFrom(
+        this.http.get<UserProfile>(
+          `${environment.apiUrl}/api/user/profile`,
+          { headers: this.authHeaders(session) }
+        )
+      );
+    } catch (err) {
+      console.error('[Auth] getProfile error:', err);
+      return null;
+    }
+  }
+
+  async savePlanSelection(
+    payload: SelectPlanPayload
+  ): Promise<{ error: string | null }> {
+    try {
+      const session = this.currentSession();
+      if (!session) return { error: 'No session' };
+
+      await firstValueFrom(
+        this.http.post(
+          `${environment.apiUrl}/api/user/plan`,
+          payload,
+          { headers: this.authHeaders(session) }
+        )
+      );
+
+      return { error: null };
+    } catch (err: any) {
+      return { error: err?.message ?? 'Failed to save plan' };
+    }
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.currentUser();
+  }
+
+  // 🔥 FIXED JWT PARSING
+  private getJwtPayload(): any | null {
+    const session = this.currentSession();
+    if (!session) return null;
+
+    try {
+      return JSON.parse(atob(session.access_token.split('.')[1]));
+    } catch {
+      return null;
+    }
+  }
+
+  isPaid(): boolean {
+    const payload = this.getJwtPayload();
+    return payload?.user_metadata?.is_paid ?? false;
+  }
+
+  isTrialActive(): boolean {
+    const payload = this.getJwtPayload();
+    const trialEnd = payload?.user_metadata?.trial_end;
+
+    if (!trialEnd) return false;
+    return new Date() < new Date(trialEnd);
+  }
+
+  getPlan(): 'basic' | 'advanced' | null {
+    const payload = this.getJwtPayload();
+    return payload?.user_metadata?.plan ?? null;
+  }
+}

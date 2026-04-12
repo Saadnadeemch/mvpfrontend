@@ -12,6 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DownloadService, VideoInfo } from '../../services/download';
 import { NavigationStateService } from '../../services/navigationsate';
+import { AuthService } from '../../services/auth';
 
 interface VideoData {
   title: string;
@@ -66,6 +67,7 @@ export class Download implements OnInit, OnDestroy {
   private downloadService = inject(DownloadService);
   private navState = inject(NavigationStateService);
   private platformId = inject(PLATFORM_ID);
+  private authService = inject(AuthService)
 
   progress = signal(0);
   statusMessage = signal('Initializing...');
@@ -75,33 +77,34 @@ export class Download implements OnInit, OnDestroy {
   videoData = signal<VideoData | null>(null);
   finalDownloadUrl = signal<string | null>(null);
 
-  // private readonly API_BASE = 'http://localhost:8080'; // fallback if environment variable is missing
-  private readonly API_BASE = 'https://videosaver.online'; 
+  private readonly API_BASE = 'https://videosaver.online';
 
   private eventSource: EventSource | null = null;
+  private requestId: string = '';
+  private authToken: string = '';  // store token for markComplete call
 
   ngOnInit() {
     const params = this.route.snapshot.queryParams;
     console.log('[Download] Query params:', params);
 
-    const requestId: string = params['requestId'];
-    if (!requestId?.trim()) {
+    this.requestId = params['requestId'];
+    if (!this.requestId?.trim()) {
       console.error('[Download] Missing requestId');
       this.hasError.set(true);
       this.errorMessage.set('Invalid request ID.');
       return;
     }
 
-    // Read videoInfo from shared service (set by Home before navigating)
+    this.authToken = this.authService.currentSession()?.access_token ?? '';
+
     const info = this.navState.getVideoInfo();
     console.log('[Download] videoInfo from NavigationStateService:', info);
-    this.navState.clear(); // consume it so it doesn't linger
+    this.navState.clear();
 
     this.videoData.set(this.buildVideoData(info, params));
 
-    // EventSource only works in the browser — skip on SSR server render
     if (isPlatformBrowser(this.platformId)) {
-      this.listenToStream(requestId);
+      this.listenToStream(this.requestId);
     }
   }
 
@@ -118,22 +121,17 @@ export class Download implements OnInit, OnDestroy {
     };
   }
 
-private resolveUrl(rawUrl: string): string {
-  if (!rawUrl) return '';
-  if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
-
-  // Ensure path starts with slash
-  const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
-
-  // Encode URI to handle spaces, Arabic letters, emojis, etc.
-  return `${this.API_BASE}${encodeURI(path)}`;
-}
+  private resolveUrl(rawUrl: string): string {
+    if (!rawUrl) return '';
+    if (rawUrl.startsWith('http://') || rawUrl.startsWith('https://')) return rawUrl;
+    const path = rawUrl.startsWith('/') ? rawUrl : `/${rawUrl}`;
+    return `${this.API_BASE}${encodeURI(path)}`;
+  }
 
   private listenToStream(requestId: string) {
     console.log('[Download] Connecting to SSE stream for requestId:', requestId);
     this.eventSource = this.downloadService.connectToStream(requestId);
 
-    // Use only onmessage to prevent duplicate handler firing
     this.eventSource.onmessage = (event: MessageEvent) => {
       console.log('[Download] Raw SSE data:', event.data);
 
@@ -147,7 +145,7 @@ private resolveUrl(rawUrl: string): string {
 
       console.log('[Download] Parsed SSE payload:', data);
 
-      // SSE video_info update (some backends send this mid-stream)
+      // Mid-stream video_info update
       if (data.video_info) {
         console.log('[Download] SSE video_info update:', data.video_info);
         this.videoData.update(prev => this.buildVideoData(data.video_info, { url: prev?.requestedUrl }));
@@ -161,7 +159,7 @@ private resolveUrl(rawUrl: string): string {
         console.log(`[Download] Progress: ${data.percent}% | status: ${data.status}`);
       }
 
-      // Completion — final message carries result.download_url
+      // Completion
       if (data.status === 'completed') {
         console.log('[Download] Status completed. Full SSE payload:', data);
 
@@ -172,7 +170,6 @@ private resolveUrl(rawUrl: string): string {
         console.log('[Download] download_url:', rawUrl);
 
         if (!rawUrl) {
-          // Not the final message yet (intermediate "completed" without result) — keep waiting
           console.warn('[Download] No download_url yet, waiting for final message...');
           return;
         }
@@ -183,11 +180,24 @@ private resolveUrl(rawUrl: string): string {
         this.finalDownloadUrl.set(resolvedUrl);
         this.isCompleted.set(true);
         this.eventSource?.close();
+
+        // Tell NestJS to update DB status to completed
+        // Only call if we have a token — anonymous users don't have DB records
+        if (this.authToken) {
+          const cloudUrl = result?.cloud_url ?? null;
+          console.log('[Download] Notifying backend of completion — request_id:', requestId, '| cloud_url:', cloudUrl);
+
+          this.downloadService.markComplete(requestId, this.authToken, cloudUrl).subscribe({
+            next: (res) => console.log('[Download] Backend marked complete:', res),
+            error: (err) => console.error('[Download] Failed to notify backend of completion:', err),
+          });
+        } else {
+          console.log('[Download] No auth token — skipping backend completion notify (anonymous user)');
+        }
       }
     };
 
     this.eventSource.onerror = () => {
-      // Only treat as error if download hasn't completed
       if (!this.isCompleted()) {
         console.error('[Download] SSE connection error');
         this.hasError.set(true);
@@ -198,23 +208,21 @@ private resolveUrl(rawUrl: string): string {
   }
 
   saveVideo() {
-  const url = this.finalDownloadUrl();
-  if (!url) {
-    this.hasError.set(true);
-    this.errorMessage.set('Download URL not available.');
-    return;
+    const url = this.finalDownloadUrl();
+    if (!url) {
+      this.hasError.set(true);
+      this.errorMessage.set('Download URL not available.');
+      return;
+    }
+
+    const fileName = this.videoData()?.title || 'video.mp4';
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
-
-  // Use the original file name from videoData if available
-  const fileName = this.videoData()?.title || 'video.mp4';
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = fileName;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-}
 
   goHome() {
     this.router.navigate(['/']);
