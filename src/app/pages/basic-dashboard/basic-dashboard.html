@@ -1,108 +1,146 @@
-<!-- Dashboard Container -->
-<div class="min-h-screen w-full" 
-     style="background: color-mix(in srgb, var(--color-primary) 3%, var(--color-white))">
-  
-  <main class="w-full h-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+<div class="w-full overflow-x-hidden" style="background: color-mix(in srgb, var(--color-primary) 3%, var(--color-white))">
 
-    <div class="dashboard-wrapper">
+  <main class="w-full px-3 sm:px-4 md:px-6 lg:px-8 py-4 sm:py-6 md:py-8 flex justify-center overflow-x-hidden">
+    <div class="w-full max-w-5xl min-w-0">
 
-      <!-- ══ LOADING STATE ══ -->
+      <!-- ─── SKELETON ──────────────────────────────────────────── -->
       <ng-container *ngIf="isLoading()">
         <div class="space-y-4 w-full">
-          <!-- Greeting skeleton -->
-          <div class="h-8 sm:h-10 bg-neutral/10 rounded-2xl animate-pulse w-2/3"></div>
-          
-          <!-- Stats grid skeleton -->
-          <div class="stats-grid">
-            <div class="bg-white rounded-2xl p-4 sm:p-5 md:p-6 h-24 sm:h-28 animate-pulse"></div>
-            <div class="bg-white rounded-2xl p-4 sm:p-5 md:p-6 h-24 sm:h-28 animate-pulse"></div>
-            <div class="bg-white rounded-2xl p-4 sm:p-5 md:p-6 h-24 sm:h-28 animate-pulse hidden lg:block"></div>
+
+          <!-- Greeting row -->
+          <div class="flex items-center justify-between gap-2 mb-5">
+            <div class="h-7 sm:h-8 bg-neutral/10 rounded-xl animate-pulse w-1/2 sm:w-2/5"></div>
+            <div class="h-6 sm:h-7 bg-neutral/10 rounded-full animate-pulse w-24 shrink-0"></div>
           </div>
 
-          <!-- Auto-save toggle skeleton -->
-          <div class="h-16 sm:h-20 bg-white rounded-2xl animate-pulse"></div>
+          <!-- Stats grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 w-full mb-4">
+            <div class="flex items-center gap-2 sm:gap-3 bg-white border border-neutral/20 rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-3 shadow-sm min-h-[60px] sm:min-h-[68px] min-w-0 overflow-hidden">
+              <div class="w-4 h-4 sm:w-5 sm:h-5 rounded bg-neutral/10 animate-pulse shrink-0"></div>
+              <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <div class="h-2 sm:h-2.5 bg-neutral/10 rounded animate-pulse w-3/4"></div>
+                <div class="h-4 sm:h-5 bg-neutral/10 rounded animate-pulse w-1/2"></div>
+              </div>
+            </div>
 
-          <!-- Recent downloads skeleton -->
-          <div class="bg-white rounded-2xl p-4 sm:p-5 md:p-6">
-            <div class="h-6 bg-neutral/10 rounded mb-4 w-1/3 animate-pulse"></div>
-            <div class="space-y-3">
-              <div class="h-16 bg-neutral/10 rounded-xl animate-pulse"></div>
-              <div class="h-16 bg-neutral/10 rounded-xl animate-pulse"></div>
-              <div class="h-16 bg-neutral/10 rounded-xl animate-pulse"></div>
+            <div class="flex items-center gap-2 sm:gap-3 bg-white border border-neutral/20 rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-3 shadow-sm min-h-[60px] sm:min-h-[68px] min-w-0 overflow-hidden">
+              <div class="w-4 h-4 sm:w-5 sm:h-5 rounded bg-neutral/10 animate-pulse shrink-0"></div>
+              <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <div class="h-2 sm:h-2.5 bg-neutral/10 rounded animate-pulse w-3/4"></div>
+                <div class="h-4 sm:h-5 bg-neutral/10 rounded animate-pulse w-1/2"></div>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 sm:gap-3 bg-white border border-neutral/20 rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-3 shadow-sm min-h-[60px] sm:min-h-[68px] col-span-2 lg:col-span-1 min-w-0 overflow-hidden">
+              <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <div class="h-2 sm:h-2.5 bg-neutral/10 rounded animate-pulse w-3/4"></div>
+                <div class="h-4 sm:h-5 bg-neutral/10 rounded animate-pulse w-1/2"></div>
+              </div>
+              <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-neutral/10 animate-pulse shrink-0"></div>
             </div>
           </div>
+
+          <!-- Auto-save -->
+          <div class="flex items-center justify-between gap-2 sm:gap-3 bg-white border border-neutral/20 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-3 shadow-sm min-w-0 overflow-hidden">
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-neutral/10 animate-pulse shrink-0"></div>
+              <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                <div class="h-2.5 sm:h-3 bg-neutral/10 rounded animate-pulse w-28"></div>
+                <div class="h-2 bg-neutral/10 rounded animate-pulse w-40 max-w-full"></div>
+              </div>
+            </div>
+            <div class="w-8 h-5 sm:w-9 rounded-full bg-neutral/10 animate-pulse shrink-0"></div>
+          </div>
+
+          <!-- Recent downloads skeleton -->
+          <div class="bg-white border border-neutral/20 rounded-lg sm:rounded-xl overflow-hidden shadow-sm w-full min-w-0">
+            <div class="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 border-b border-neutral/20 gap-2">
+              <div class="h-3.5 sm:h-4 bg-neutral/10 rounded animate-pulse w-32 sm:w-36 shrink-0"></div>
+              <div class="h-3.5 sm:h-4 bg-neutral/10 rounded animate-pulse w-12 sm:w-14 shrink-0"></div>
+            </div>
+            <div class="divide-y divide-neutral/10 w-full">
+              <div *ngFor="let i of [0,1,2,3,4]" class="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 min-w-0">
+                <div class="w-14 h-10 sm:w-[60px] sm:h-[42px] bg-neutral/10 rounded-md sm:rounded-lg animate-pulse shrink-0"></div>
+                <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+                  <div class="h-2.5 sm:h-3 bg-neutral/10 rounded animate-pulse w-4/5"></div>
+                  <div class="h-2 bg-neutral/10 rounded animate-pulse w-2/5"></div>
+                </div>
+                <div class="h-6 sm:h-7 w-12 sm:w-14 bg-neutral/10 rounded-full animate-pulse shrink-0"></div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </ng-container>
+      <!-- ─── END SKELETON ──────────────────────────────────────── -->
 
-      <!-- ══ LOADED CONTENT ══ -->
+
+      <!-- ─── LOADED CONTENT ────────────────────────────────────── -->
       <ng-container *ngIf="!isLoading()">
-        <div class="space-y-4 sm:space-y-5 md:space-y-6 w-full content-wrapper">
+        <div class="space-y-3 sm:space-y-4 w-full min-w-0">
 
-          <!-- Greeting Section - Top Row Mobile Layout -->
-          <div class="greeting-section">
-            <h1 class="font-display font-extrabold tracking-tight text-dark leading-tight break-words">
+          <!-- Greeting -->
+          <div class="flex items-center justify-between gap-2 min-w-0">
+            <h1 class="font-display font-extrabold text-lg sm:text-xl md:text-2xl truncate min-w-0">
               Hey, {{ userFirstName() }} 👋
             </h1>
             <span *ngIf="isTrial()"
-                  class="trial-badge inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold px-3 sm:px-3.5 py-1.5 sm:py-2 
-                         rounded-full bg-primary/10 text-primary">
-              <span class="material-icons" style="font-size: clamp(12px, 2vw, 16px)">schedule</span>
-              <span class="text-xs sm:text-sm">Trial · {{ trialDaysLeft() }}d left</span>
+                  class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-bold
+                         px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full bg-primary/10 text-primary whitespace-nowrap shrink-0">
+              <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+              </svg>
+              Trial · {{ trialDaysLeft() }}d
             </span>
           </div>
 
-          <!-- Stats Grid - 2 Columns Mobile, 3 Desktop -->
-          <div class="stats-grid">
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3">
 
-            <!-- Total Downloads Card -->
-            <div class="stat-card bg-white border border-neutral/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 
-                        shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
-              <div class="icon-wrapper w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 
-                          rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                <span class="material-icons text-primary" style="font-size: clamp(24px, 4vw, 32px)">download</span>
-              </div>
-              <div class="content flex flex-col flex-1 min-w-0">
-                <p class="text-xs sm:text-sm text-dark/40 font-medium">Total Downloads</p>
-                <p class="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark leading-tight mt-1">
-                  {{ stats().totalDownloads }}
-                </p>
+            <!-- Total Downloads -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-white border border-neutral/20
+                        rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-2.5 sm:py-3 shadow-sm
+                        hover:shadow-md transition-all min-h-15 sm:min-h-17 min-w-0 overflow-hidden">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14"/>
+              </svg>
+              <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
+                <p class="text-[9px] sm:text-xs text-dark/50 font-medium truncate leading-tight">Total Downloads</p>
+                <p class="text-base sm:text-lg font-bold text-dark leading-tight truncate pt-1">{{ stats().totalDownloads }}</p>
               </div>
             </div>
 
-            <!-- Total Uploaded Videos Card -->
-            <div class="stat-card bg-white border border-neutral/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 
-                        shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
-              <div class="icon-wrapper w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 
-                          rounded-lg sm:rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
-                <span class="material-icons text-blue-500" style="font-size: clamp(24px, 4vw, 32px)">cloud_upload</span>
-              </div>
-              <div class="content flex flex-col flex-1 min-w-0">
-                <p class="text-xs sm:text-sm text-dark/40 font-medium">Uploaded Videos</p>
-                <p class="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark leading-tight mt-1">
-                  {{ stats().totalDriveUploads }}
-                </p>
+            <!-- Uploaded Videos -->
+            <div class="flex items-center gap-2 sm:gap-3 bg-white border border-neutral/20
+                        rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-2.5 sm:py-3 shadow-sm
+                        hover:shadow-md transition-all min-h-15 sm:min-h-17 min-w-0 overflow-hidden">
+              <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 21V9m0 0l-4 4m4-4l4 4M5 3h14"/>
+              </svg>
+              <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
+                <p class="text-[9px] sm:text-xs text-dark/50 font-medium truncate leading-tight">Uploaded Videos</p>
+                <p class="text-base sm:text-lg font-bold text-dark leading-tight truncate pt-1">{{ stats().totalDriveUploads }}</p>
               </div>
             </div>
 
-            <!-- Storage Usage Card with Circular Progress -->
-            <div class="stat-card storage-card bg-white border border-neutral/30 rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 
-                        shadow-sm hover:shadow-md transition-shadow duration-200 w-full">
-              <div class="content flex flex-col flex-1 min-w-0">
-                <p class="text-xs sm:text-sm text-dark/40 font-medium">Total Storage Used</p>
-                <p class="text-xl sm:text-2xl md:text-3xl font-extrabold text-dark leading-tight mt-1">
-                  {{ formatStorageUsage() }}
-                </p>
+            <!-- Storage Usage -->
+            <div class="flex items-center justify-between gap-2 sm:gap-3 bg-white border border-neutral/20
+                        rounded-lg sm:rounded-xl px-2.5 sm:px-3 py-2.5 sm:py-3 shadow-sm
+                        hover:shadow-md transition-all min-h-15 sm:min-h-17
+                        col-span-2 lg:col-span-1 min-w-0 overflow-hidden">
+              <div class="flex flex-col min-w-0 flex-1 overflow-hidden">
+                <p class="text-[9px] sm:text-xs text-dark/50 font-medium truncate leading-tight">Storage Used</p>
+                <p class="text-base sm:text-lg font-bold text-dark leading-tight pt-1 truncate">{{ formatStorageUsage() }}</p>
               </div>
-
-              <!-- Circular Progress -->
-              <div class="storage-progress relative shrink-0">
-                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="45" stroke="#e5e7eb" stroke-width="4" fill="none"></circle>
-                  <circle cx="50" cy="50" r="45" stroke="var(--color-primary)" stroke-width="4" fill="none"
-                          stroke-linecap="round" [attr.stroke-dasharray]="282"
-                          [attr.stroke-dashoffset]="282 - (282 * storagePercent()) / 100"></circle>
+              <div class="relative w-10 h-10 sm:w-12 sm:h-12 shrink-0">
+                <svg class="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="42" stroke="#e5e7eb" stroke-width="6" fill="none"/>
+                  <circle cx="50" cy="50" r="42"
+                          stroke="var(--color-primary)" stroke-width="6" fill="none" stroke-linecap="round"
+                          [attr.stroke-dasharray]="264"
+                          [attr.stroke-dashoffset]="264 - (264 * storagePercent()) / 100"/>
                 </svg>
-                <div class="absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-bold text-dark">
+                <div class="absolute inset-0 flex items-center justify-center text-[9px] sm:text-[10px] font-semibold text-dark">
                   {{ storagePercent() }}%
                 </div>
               </div>
@@ -110,229 +148,241 @@
 
           </div>
 
-          <!-- Auto-save to Drive Toggle - Full Width -->
-          <div class="auto-save-section bg-white border border-neutral/30 rounded-xl sm:rounded-2xl px-4 sm:px-5 md:px-6 py-3 sm:py-4 
-                      shadow-sm hover:shadow-sm transition-shadow duration-200 w-full">
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
-                <span class="material-icons text-blue-500" style="font-size: clamp(16px, 2vw, 20px)">cloud_upload</span>
+          <!-- Auto-save Toggle -->
+          <div class="flex items-center justify-between gap-2 sm:gap-3 bg-white border border-neutral/30
+                      rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 shadow-sm
+                      w-full min-w-0 overflow-hidden">
+            <div class="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-md sm:rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                <svg class="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="1.8"
+                     stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                  <path d="M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7M12 3v8m0 0l-3-3m3 3l3-3"/>
+                  <path d="M7 20h10M6 17a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3"/>
+                </svg>
               </div>
-              <div class="min-w-0 flex-1">
-                <p class="text-sm sm:text-base font-semibold text-dark leading-tight">Auto-save to Drive</p>
-                <p class="text-xs sm:text-sm text-dark/35 truncate mt-0.5">Upload each download automatically</p>
+              <div class="min-w-0 flex-1 overflow-hidden">
+                <p class="text-sm font-semibold text-dark leading-tight truncate">Auto-save to Drive</p>
+                <p class="text-[11px] sm:text-xs text-dark/40 truncate mt-0.5">Upload automatically</p>
               </div>
             </div>
-            <div class="flex items-center gap-3 shrink-0">
-              <button (click)="toggleCloudUpload()"
-                      class="relative inline-flex h-5 sm:h-6 w-9 sm:w-11 items-center rounded-full 
-                             transition-colors duration-200 focus:outline-none cursor-pointer border-0 shrink-0"
-                      [style.background]="cloudUploadEnabled() ? 'var(--color-primary)' : '#d1d5db'"
-                      [attr.aria-label]="'Auto-save is ' + (cloudUploadEnabled() ? 'enabled' : 'disabled')">
-                <span class="inline-block h-3.5 sm:h-4 w-3.5 sm:w-4 rounded-full bg-white shadow 
-                           transition-transform duration-200"
-                      [style.transform]="cloudUploadEnabled() ? 'translateX(18px)' : 'translateX(3px)'"></span>
-              </button>
-            </div>
+            <button (click)="toggleCloudUpload()"
+                    class="relative inline-flex h-5 w-9 items-center rounded-full
+                           transition-colors duration-200 focus:outline-none cursor-pointer border-0 shrink-0"
+                    [style.background]="cloudUploadEnabled() ? 'var(--color-primary)' : '#d1d5db'"
+                    [attr.aria-label]="'Auto-save is ' + (cloudUploadEnabled() ? 'enabled' : 'disabled')">
+              <span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform duration-200"
+                    [style.transform]="cloudUploadEnabled() ? 'translateX(18px)' : 'translateX(3px)'"></span>
+            </button>
           </div>
 
-          <!-- Recent Downloads Card - Horizontal Layout -->
-          <div class="downloads-section bg-white border border-neutral/30 rounded-xl sm:rounded-2xl overflow-hidden 
-                      shadow-sm hover:shadow-md transition-shadow duration-200 w-full downloads-item-wrapper">
-            
+          <!-- Recent Downloads -->
+          <div class="bg-white border border-neutral/30 rounded-lg sm:rounded-xl overflow-hidden shadow-sm
+                      hover:shadow-md transition-shadow duration-200 w-full min-w-0">
+
             <!-- Header -->
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 px-4 sm:px-5 md:px-6 py-3 sm:py-4 
-                        border-b border-neutral/20">
-              <h2 class="font-display font-bold text-sm sm:text-base text-dark tracking-tight">
+            <div class="flex items-center justify-between px-3 py-2 sm:px-4 sm:py-3 border-b border-neutral/20 min-w-0">
+              <h2 class="font-display font-bold text-sm sm:text-base text-dark truncate">
                 Recent Downloads
               </h2>
               <button (click)="openHistoryModal()"
-                      class="text-xs sm:text-sm font-bold text-primary hover:opacity-70 transition-opacity 
-                             cursor-pointer bg-transparent border-none p-0 w-fit">
+                      class="text-xs sm:text-sm font-bold text-primary hover:opacity-70 transition-opacity
+                             bg-transparent border-none p-0 ml-2 whitespace-nowrap shrink-0">
                 View all →
               </button>
             </div>
 
-            <!-- Download Items -->
+            <!-- Items -->
             <ng-container *ngIf="!isDownloadsLoading()">
               <ng-container *ngIf="recentDownloads().length > 0; else emptyState">
-                <div class="downloads-list divide-y divide-neutral/10 w-full">
+
+                <div class="divide-y divide-neutral/10">
                   <div *ngFor="let item of recentDownloads()"
-                       class="download-item hover:bg-primary/5 transition-colors duration-150">
-                    
-                    <!-- Thumbnail -->
+                       class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3
+                              hover:bg-primary/5 transition min-w-0 overflow-hidden">
+
                     <img [src]="item.thumbnail" [alt]="item.title"
-                         class="rounded-lg object-cover bg-neutral/20 shrink-0" />
-                    
-                    <!-- Content -->
-                    <div class="content">
-                      <p class="text-sm sm:text-base font-semibold text-dark truncate leading-tight">
-                        {{ item.title }}
-                      </p>
-                      <p class="text-xs sm:text-sm text-dark/40 truncate mt-1">
+                         class="w-12 h-9 sm:w-[56px] sm:h-[40px] rounded-md object-cover bg-neutral/20 shrink-0" />
+
+                    <div class="flex-1 min-w-0 overflow-hidden">
+                      <p class="text-xs sm:text-sm font-semibold text-dark truncate">{{ item.title }}</p>
+                      <p class="text-[10px] sm:text-xs text-dark/40 truncate">
                         {{ item.platform }} · {{ item.quality }} · {{ item.date }}
                       </p>
                     </div>
-                    
-                    <!-- Action Button -->
+
                     <button (click)="openVideo(item.videoUrl)"
-                            class="flex items-center justify-center gap-1 text-xs sm:text-sm font-bold px-2 sm:px-3 py-1.5 sm:py-2 
-                                   rounded-full shrink-0 border border-primary/20 text-primary bg-primary/5 
-                                   hover:bg-primary/10 transition-all cursor-pointer whitespace-nowrap">
-                      <span class="material-icons" style="font-size: clamp(12px, 2vw, 16px)">open_in_new</span>
-                      <span class="hidden sm:inline text-xs sm:text-sm">Open</span>
+                            class="flex items-center justify-center gap-1 text-[10px] sm:text-xs font-bold
+                                   px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shrink-0
+                                   border border-primary/20 text-primary bg-primary/5
+                                   hover:bg-primary/10 transition whitespace-nowrap">
+                      <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor"
+                           stroke-width="2.5" viewBox="0 0 24 24">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                      </svg>
+                      Open
                     </button>
+
                   </div>
                 </div>
+
               </ng-container>
-              
+
+              <!-- Empty State -->
               <ng-template #emptyState>
-                <div class="flex flex-col items-center justify-center gap-3 py-12 sm:py-16 text-dark/30 w-full px-4">
-                  <span class="material-icons text-4xl sm:text-5xl opacity-40">download_for_offline</span>
-                  <p class="text-sm sm:text-base text-center">No downloads yet.<br class="sm:hidden"> Go grab a video!</p>
+                <div class="flex flex-col items-center justify-center gap-2 py-8 text-dark/30 px-4">
+                  <svg class="w-8 h-8 opacity-40" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                    <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14"/>
+                  </svg>
+                  <p class="text-xs text-center">No downloads yet. Go grab a video!</p>
                 </div>
               </ng-template>
+
             </ng-container>
 
-            <!-- Downloads Loading State -->
+            <!-- Downloads Skeleton -->
             <ng-container *ngIf="isDownloadsLoading()">
-              <div class="downloads-list divide-y divide-neutral/10 w-full">
-                <div *ngFor="let i of [0,1,2,3,4]" class="download-item">
-                  <div class="w-full sm:w-12 sm:h-9 md:w-14 md:h-10 lg:w-16 lg:h-12 bg-neutral/10 rounded-lg animate-pulse shrink-0 aspect-video sm:aspect-auto"></div>
-                  <div class="content flex-1 space-y-2 min-w-0">
-                    <div class="h-4 bg-neutral/10 rounded w-3/4 animate-pulse"></div>
-                    <div class="h-3 bg-neutral/10 rounded w-1/2 animate-pulse"></div>
+              <div class="divide-y divide-neutral/10">
+                <div *ngFor="let i of [0,1,2,3,4]"
+                     class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 min-w-0">
+                  <div class="w-12 h-9 sm:w-[56px] sm:h-[40px] bg-neutral/10 rounded-md animate-pulse shrink-0"></div>
+                  <div class="flex flex-col gap-1 flex-1 min-w-0">
+                    <div class="h-2.5 bg-neutral/10 rounded animate-pulse w-4/5"></div>
+                    <div class="h-2 bg-neutral/10 rounded animate-pulse w-2/5"></div>
                   </div>
-                  <div class="h-8 w-full sm:w-16 bg-neutral/10 rounded-full animate-pulse shrink-0 hidden sm:block"></div>
+                  <div class="h-6 w-12 bg-neutral/10 rounded-full animate-pulse shrink-0"></div>
                 </div>
               </div>
             </ng-container>
+
           </div>
 
         </div>
       </ng-container>
+      <!-- ─── END LOADED CONTENT ────────────────────────────────── -->
 
     </div>
   </main>
 </div>
 
-<!-- ══ HISTORY MODAL ══ -->
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HISTORY MODAL                                              -->
+<!-- ═══════════════════════════════════════════════════════════ -->
 <div *ngIf="isHistoryOpen()"
-     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 w-full"
-     (click)="closeHistoryModal()"
-     style="animation: fadeIn 200ms ease-in-out;">
+     class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+     style="animation: fadeIn 200ms ease-in-out"
+     (click)="closeHistoryModal()">
 
   <!-- Backdrop -->
-  <div class="absolute inset-0 bg-black/30 transition-opacity duration-300"
-       style="backdrop-filter: blur(4px)"></div>
+  <div class="absolute inset-0 bg-black/30 backdrop-blur-sm"></div>
 
-  <!-- Modal Content -->
-  <div class="relative bg-white w-full sm:w-full sm:max-w-xl md:max-w-2xl flex flex-col overflow-hidden
-              rounded-t-3xl sm:rounded-2xl shadow-2xl"
-       style="max-height: clamp(50vh, 88vh, calc(100vh - 32px))"
+  <!-- Sheet -->
+  <div class="relative bg-white w-full h-[90vh] sm:h-auto sm:max-w-xl md:max-w-2xl flex flex-col
+              rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden"
+       style="max-height: 88dvh;"
        (click)="$event.stopPropagation()">
 
-    <!-- Mobile Drag Handle -->
-    <div class="flex justify-center pt-3 pb-2 sm:hidden">
+    <!-- Drag Handle (mobile) -->
+    <div class="flex justify-center pt-2.5 pb-1 sm:hidden shrink-0">
       <div class="w-10 h-1 rounded-full bg-neutral/30"></div>
     </div>
 
     <!-- Modal Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-4 sm:px-6 md:px-7 py-4 sm:py-5 
-                border-b border-neutral/20 shrink-0">
-      <div class="min-w-0 flex-1">
-        <h3 class="font-display font-bold text-lg sm:text-xl md:text-2xl text-dark tracking-tight break-words">
+    <div class="flex items-center justify-between gap-2 px-3 sm:px-6 py-2.5 sm:py-4
+                border-b border-neutral/20 shrink-0 min-w-0 overflow-hidden">
+      <div class="min-w-0 flex-1 overflow-hidden">
+        <h3 class="font-display font-bold text-base sm:text-lg text-dark tracking-tight truncate">
           Download History
         </h3>
-        <p class="text-xs sm:text-sm text-dark/40 mt-1">{{ allDownloads().length }} total downloads</p>
+        <p class="text-xs text-dark/40 mt-0.5 truncate">{{ allDownloads().length }} total downloads</p>
       </div>
       <button (click)="closeHistoryModal()"
-              class="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center shrink-0
-                     border border-neutral/30 text-dark/40 hover:border-primary/40 hover:text-primary 
+              class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center shrink-0
+                     border border-neutral/30 text-dark/40 hover:border-primary/40 hover:text-primary
                      hover:bg-primary/5 transition-all cursor-pointer bg-transparent">
-        <span class="material-icons" style="font-size: clamp(18px, 2vw, 22px)">close</span>
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path d="M6 18L18 6M6 6l12 12"/>
+        </svg>
       </button>
     </div>
 
-    <!-- Scrollable Content -->
-    <div class="overflow-y-auto flex-1 overscroll-contain w-full"
-         [style.max-height]="'calc(88vh - 100px)'">
+    <!-- Scrollable List -->
+    <div class="overflow-y-auto overflow-x-hidden flex-1 overscroll-contain min-h-0 w-full">
 
-      <!-- Download History List -->
       <ng-container *ngIf="!isDownloadsLoading()">
         <ng-container *ngIf="visibleHistory().length > 0; else historyEmpty">
           <div class="divide-y divide-neutral/10 w-full">
             <div *ngFor="let item of visibleHistory()"
-                 class="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 md:px-7 py-3 sm:py-4 
-                        hover:bg-primary/5 transition-colors duration-150 w-full">
-              
-              <!-- Thumbnail -->
+                 class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3
+                        hover:bg-primary/5 transition-colors duration-150 min-w-0 overflow-hidden">
               <img [src]="item.thumbnail" [alt]="item.title"
-                   class="w-full sm:w-12 sm:h-9 md:w-14 md:h-10 lg:w-16 lg:h-12 rounded-lg object-cover 
-                         bg-neutral/20 shrink-0 aspect-video sm:aspect-auto" />
-              
-              <!-- Content -->
-              <div class="flex-1 min-w-0 w-full">
-                <p class="text-sm sm:text-base font-semibold text-dark truncate leading-tight">
-                  {{ item.title }}
-                </p>
-                <p class="text-xs sm:text-sm text-dark/40 truncate mt-1">
+                   class="w-14 h-10 sm:w-[60px] sm:h-[42px] rounded-md sm:rounded-lg object-cover bg-neutral/20 shrink-0" />
+              <div class="flex-1 min-w-0 overflow-hidden">
+                <p class="text-xs sm:text-sm font-semibold text-dark truncate leading-tight">{{ item.title }}</p>
+                <p class="text-[10px] sm:text-xs text-dark/40 truncate mt-0.5">
                   {{ item.platform }} · {{ item.quality }} · {{ item.date }}
                 </p>
               </div>
-              
-              <!-- Action Button -->
               <button (click)="openVideo(item.videoUrl)"
-                      class="flex items-center justify-center gap-1 text-xs sm:text-sm font-bold px-2 sm:px-3 py-1.5 sm:py-2 
-                             rounded-full shrink-0 border border-primary/20 text-primary bg-primary/5 
-                             hover:bg-primary/10 transition-all cursor-pointer whitespace-nowrap w-full sm:w-auto">
-                <span class="material-icons" style="font-size: clamp(12px, 2vw, 16px)">open_in_new</span>
-                <span class="hidden sm:inline text-xs sm:text-sm">Open</span>
+                      class="flex items-center justify-center gap-1 text-[10px] sm:text-xs font-bold
+                             px-2 sm:px-2.5 py-1.5 rounded-full shrink-0
+                             border border-primary/20 text-primary bg-primary/5
+                             hover:bg-primary/10 transition-all cursor-pointer whitespace-nowrap">
+                <svg class="w-2.5 h-2.5 sm:w-3 sm:h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                </svg>
+                Open
               </button>
             </div>
           </div>
         </ng-container>
 
         <ng-template #historyEmpty>
-          <div class="flex flex-col items-center justify-center gap-3 py-16 sm:py-20 text-dark/30 w-full px-4">
-            <span class="material-icons text-5xl sm:text-6xl opacity-40">download_for_offline</span>
-            <p class="text-sm sm:text-base text-center">No downloads yet.<br class="sm:hidden"> Start downloading videos!</p>
+          <div class="flex flex-col items-center justify-center gap-2 sm:gap-3 py-12 sm:py-16 text-dark/30 px-4 w-full">
+            <svg class="w-10 h-10 sm:w-12 sm:h-12 opacity-40 shrink-0" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14"/>
+            </svg>
+            <p class="text-xs sm:text-sm text-center">No downloads yet. Start downloading videos!</p>
           </div>
         </ng-template>
       </ng-container>
 
-      <!-- History Loading State -->
+      <!-- History Skeleton -->
       <ng-container *ngIf="isDownloadsLoading()">
         <div class="divide-y divide-neutral/10 w-full">
-          <div *ngFor="let i of [0,1,2,3,4,5]" class="flex flex-col sm:flex-row sm:items-center gap-3 px-4 sm:px-6 md:px-7 py-3 sm:py-4 w-full">
-            <div class="w-full sm:w-12 sm:h-9 md:w-14 md:h-10 lg:w-16 lg:h-12 bg-neutral/10 rounded-lg animate-pulse shrink-0 aspect-video sm:aspect-auto"></div>
-            <div class="flex-1 space-y-2 min-w-0 w-full">
-              <div class="h-4 bg-neutral/10 rounded w-3/4 animate-pulse"></div>
-              <div class="h-3 bg-neutral/10 rounded w-1/2 animate-pulse"></div>
+          <div *ngFor="let i of [0,1,2,3,4,5]" class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3 min-w-0">
+            <div class="w-14 h-10 sm:w-[60px] sm:h-[42px] bg-neutral/10 rounded-md sm:rounded-lg animate-pulse shrink-0"></div>
+            <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
+              <div class="h-2.5 sm:h-3 bg-neutral/10 rounded animate-pulse w-4/5"></div>
+              <div class="h-2 bg-neutral/10 rounded animate-pulse w-2/5"></div>
             </div>
-            <div class="h-8 w-full sm:w-20 bg-neutral/10 rounded-full animate-pulse shrink-0 hidden sm:block"></div>
+            <div class="h-6 sm:h-7 w-12 sm:w-14 bg-neutral/10 rounded-full animate-pulse shrink-0"></div>
           </div>
         </div>
       </ng-container>
 
-      <!-- Load More Section -->
-      <div *ngIf="hasMoreHistory()" class="border-t border-neutral/15 px-4 sm:px-6 md:px-7 py-4 sm:py-5 w-full">
+      <!-- Load More -->
+      <div *ngIf="hasMoreHistory()" class="border-t border-neutral/15 px-3 sm:px-6 py-3 sm:py-4 shrink-0 w-full">
         <button (click)="loadMore()"
                 [disabled]="isLoadingMore()"
-                class="w-full py-2.5 sm:py-3 rounded-xl sm:rounded-2xl text-sm sm:text-base font-bold 
+                class="w-full py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-xs sm:text-sm font-bold
                        border border-primary/30 text-primary hover:bg-primary/5 hover:border-primary/50
-                       transition-all cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-wait
-                       disabled:hover:bg-transparent disabled:hover:border-primary/30">
-          <span *ngIf="!isLoadingMore()" class="flex items-center justify-center gap-2">
-            <span class="material-icons" style="font-size: 18px">add</span>
+                       transition-all cursor-pointer bg-transparent disabled:opacity-50 disabled:cursor-wait">
+          <span *ngIf="!isLoadingMore()" class="flex items-center justify-center gap-1.5 sm:gap-2">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
             Load {{ remaining() }} more
           </span>
-          <span *ngIf="isLoadingMore()" class="flex items-center justify-center gap-2">
-            <span class="material-icons animate-spin" style="font-size: 18px">autorenew</span>
+          <span *ngIf="isLoadingMore()" class="flex items-center justify-center gap-1.5 sm:gap-2">
+            <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 animate-spin shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M21 12a9 9 0 11-6.219-8.56"/>
+            </svg>
             Loading…
           </span>
         </button>
       </div>
-    </div>
 
+    </div>
   </div>
 </div>

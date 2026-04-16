@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DownloadService, VideoInfo } from '../../services/download';
 import { NavigationStateService } from '../../services/navigationsate';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../services/auth.service';
 
 interface VideoData {
   title: string;

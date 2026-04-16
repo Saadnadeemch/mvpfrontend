@@ -2,3 +2,12 @@
 :host {
   display: block;
 }
+
+main {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+main::-webkit-scrollbar {
+  display: none;
+}

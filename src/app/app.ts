@@ -10,7 +10,6 @@ import {
   signal,
 } from '@angular/core';
 import { RouterModule, RouterOutlet, Router } from '@angular/router';
-import { AuthService } from './services/auth';
 import { Footer } from "./components/footer/footer";
 import { NavbarComponent } from "./components/navbar/navbar";
 import { ThemeService } from './services/themeService';

@@ -1,6 +1,6 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   standalone: true,
