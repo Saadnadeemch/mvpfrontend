@@ -38,6 +38,7 @@ export class DownloadService {
     payload: DownloadRequest,
     token: string,
   ): Observable<DownloadResponse> {
+    console.log('[DownloadService] Creating download with payload:', payload);
     return this.http.post<DownloadResponse>(
       `${this.baseUrl}/api/video`,
       payload,

@@ -7,6 +7,7 @@ import { Pricing } from './pages/pricing/pricing';
 import { Privacy } from './pages/privacy/privacy';
 import { Termservice } from './pages/termservice/termservice';
 import { Dashboard } from './pages/dashboard/dashboard';
+import { Notfound } from './pages/notfound/notfound';
 
 export const routes: Routes = [
   { path: '', component: Home },
@@ -17,5 +18,5 @@ export const routes: Routes = [
   { path: 'dashboard' , component:Dashboard},
   { path: 'privacy-and-policy' , component:Privacy},
   { path: 'terms-of-service' , component:Termservice},
-  { path: '**', redirectTo: '' }
+  { path: '**', component: Notfound }
 ];

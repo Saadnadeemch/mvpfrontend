@@ -56,43 +56,59 @@
           <div class="flex items-center gap-2 flex-wrap justify-end">
 
             <!-- Quality Dropdown -->
-            <div class="relative">
-              <button
-                (click)="toggleDropdown($event)"
-                [disabled]="isAudioOnly()"
-                type="button"
-                class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold border rounded-lg transition
-                       border-primary text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <span>{{ quality() }}</span>
-                <mat-icon class="text-sm">expand_more</mat-icon>
-              </button>
+          <div class="relative">
+  <button
+    (click)="toggleDropdown($event)"
+    [disabled]="isAudioOnly()"
+    type="button"
+    class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold border rounded-lg transition
+           border-primary text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+  >
+    <span>{{ quality() }}</span>
+    <mat-icon class="text-sm">expand_more</mat-icon>
+  </button>
 
-              @if (isDropdownOpen()) {
-                <div class="absolute right-0 bottom-full mb-2 w-40
-                            bg-white border border-neutral/20
-                            rounded-xl shadow-lg z-50 py-1">
-                  @for (q of qualities; track q.label) {
-                    <button
-                      (click)="selectQuality(q)"
-                      [disabled]="q.isPaid"
-                      type="button"
-                      class="w-full text-left px-3 py-2 text-xs flex justify-between items-center transition text-dark
-                             disabled:opacity-50 disabled:cursor-not-allowed"
-                      [ngClass]="{
-                        'bg-primary/10 text-primary font-semibold': quality() === q.label,
-                        'hover:bg-neutral/20': quality() !== q.label && !q.isPaid
-                      }"
-                    >
-                      <span>{{ q.label }}</span>
-                      @if (q.isPaid) {
-                        <mat-icon class="text-sm text-neutral">lock</mat-icon>
-                      }
-                    </button>
-                  }
-                </div>
-              }
+  @if (isDropdownOpen()) {
+    <div class="absolute right-0 bottom-full mb-2 w-40
+                bg-white border border-neutral/20
+                rounded-xl shadow-lg z-50 py-1">
+      @for (q of qualities(); track q.label) {
+        <div class="relative group">
+          <button
+            (click)="selectQuality(q)"
+            [disabled]="q.isPaid"
+            type="button"
+            class="w-full text-left px-3 py-2 text-xs flex justify-between items-center transition text-dark
+                   disabled:opacity-50 disabled:cursor-not-allowed"
+            [ngClass]="{
+              'bg-primary/10 text-primary font-semibold': quality() === q.label,
+              'hover:bg-neutral/20': quality() !== q.label && !q.isPaid
+            }"
+          >
+            <span>{{ q.label }}</span>
+            @if (q.isPaid) {
+              <mat-icon class="text-sm text-neutral">lock</mat-icon>
+            }
+          </button>
+
+          <!-- Tooltip shown on hover for locked qualities -->
+          @if (q.isPaid) {
+            <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2
+                        bg-dark text-white text-[10px] font-medium
+                        px-2 py-1 rounded-lg whitespace-nowrap
+                        opacity-0 group-hover:opacity-100
+                        pointer-events-none transition-opacity duration-200 z-50">
+              ✦ Upgrade to Pro
+              <!-- Tooltip arrow -->
+              <span class="absolute -right-1 top-1/2 -translate-y-1/2
+                           border-4 border-transparent border-l-dark"></span>
             </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</div>
 
             <!-- Paste & Download Button -->
             <button

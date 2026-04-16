@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { UserProfile } from '../../services/Models/auth.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
+import { UserPreferencesService } from '../../services/user-preferences.service';
 
 interface DownloadItem {
   title: string;
@@ -23,12 +24,13 @@ interface Stats {
 }
 @Component({
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule , NavbarComponent],
+  imports: [CommonModule, FormsModule, NavbarComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-   private auth = inject(AuthService);
+  private auth = inject(AuthService);
+  private prefs = inject(UserPreferencesService);
   private router = inject(Router);
 
   readonly PAGE_SIZE = 20;
@@ -40,7 +42,7 @@ export class Dashboard {
   isLoading = signal(true);
   isDownloadsLoading = signal(true);
   isLoadingMore = signal(false);
-  cloudUploadEnabled = signal(true);
+  readonly cloudUploadEnabled = this.prefs.cloudUploadEnabled
   isHistoryOpen = signal(false);
   private loadedPages = signal(1);
 
@@ -142,7 +144,7 @@ export class Dashboard {
     this.cloudUploadEnabled.update(v => !v);
   }
 
-  openVideo(url: string): void {}
+  openVideo(url: string): void { }
 
   openHistoryModal(): void {
     this.loadedPages.set(1);

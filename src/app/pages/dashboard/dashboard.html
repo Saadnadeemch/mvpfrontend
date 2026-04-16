@@ -207,7 +207,7 @@
                                   hover:bg-primary/5 transition min-w-0 overflow-hidden">
 
                         <img [src]="item.thumbnail" [alt]="item.title"
-                             class="w-12 h-9 sm:w-[56px] sm:h-[40px] rounded-md object-cover bg-neutral/20 shrink-0" />
+                             class="w-12 h-9 sm:w-14 sm:h-10 rounded-md object-cover bg-neutral/20 shrink-0" />
 
                         <div class="flex-1 min-w-0 overflow-hidden">
                           <p class="text-xs sm:text-sm font-semibold text-dark truncate">{{ item.title }}</p>
@@ -250,7 +250,7 @@
                   <div class="divide-y divide-neutral/10">
                     <div *ngFor="let i of [0,1,2,3,4]"
                          class="flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 min-w-0">
-                      <div class="w-12 h-9 sm:w-[56px] sm:h-[40px] bg-neutral/10 rounded-md animate-pulse shrink-0"></div>
+                      <div class="w-12 h-9 sm:w-14 sm:h-10 bg-neutral/10 rounded-md animate-pulse shrink-0"></div>
                       <div class="flex flex-col gap-1 flex-1 min-w-0">
                         <div class="h-2.5 bg-neutral/10 rounded animate-pulse w-4/5"></div>
                         <div class="h-2 bg-neutral/10 rounded animate-pulse w-2/5"></div>
@@ -326,7 +326,7 @@
                  class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3
                         hover:bg-primary/5 transition-colors duration-150 min-w-0 overflow-hidden">
               <img [src]="item.thumbnail" [alt]="item.title"
-                   class="w-14 h-10 sm:w-[60px] sm:h-[42px] rounded-md sm:rounded-lg object-cover bg-neutral/20 shrink-0" />
+                   class="w-14 h-10 sm:w-15 sm:h-10.5 rounded-md sm:rounded-lg object-cover bg-neutral/20 shrink-0" />
               <div class="flex-1 min-w-0 overflow-hidden">
                 <p class="text-xs sm:text-sm font-semibold text-dark truncate leading-tight">{{ item.title }}</p>
                 <p class="text-[10px] sm:text-xs text-dark/40 truncate mt-0.5">
@@ -361,7 +361,7 @@
       <ng-container *ngIf="isDownloadsLoading()">
         <div class="divide-y divide-neutral/10 w-full">
           <div *ngFor="let i of [0,1,2,3,4,5]" class="flex items-center gap-2 sm:gap-3 px-3 sm:px-6 py-2.5 sm:py-3 min-w-0">
-            <div class="w-14 h-10 sm:w-[60px] sm:h-[42px] bg-neutral/10 rounded-md sm:rounded-lg animate-pulse shrink-0"></div>
+            <div class="w-14 h-10 sm:w-15 sm:h-10.5 bg-neutral/10 rounded-md sm:rounded-lg animate-pulse shrink-0"></div>
             <div class="flex flex-col gap-1.5 sm:gap-2 flex-1 min-w-0">
               <div class="h-2.5 sm:h-3 bg-neutral/10 rounded animate-pulse w-4/5"></div>
               <div class="h-2 bg-neutral/10 rounded animate-pulse w-2/5"></div>

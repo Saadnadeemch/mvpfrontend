@@ -3,6 +3,7 @@ import {
   Component,
   HostListener,
   OnDestroy,
+  computed,
   inject,
   signal
 } from '@angular/core';
@@ -16,6 +17,7 @@ import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { Footer } from '../../components/footer/footer';
 import { NavbarComponent } from "../../components/navbar/navbar";
+import { UserPreferencesService } from '../../services/user-preferences.service';
 
 interface QualityOption {
   label: string;
@@ -36,6 +38,7 @@ export class Home implements OnDestroy {
   private downloadSvc = inject(DownloadService);
   private navState    = inject(NavigationStateService);
   private authService = inject(AuthService);
+  private prefs = inject(UserPreferencesService);
 
   // ── State ────────────────────────────────────────────────────────────────
   url             = signal('');
@@ -48,17 +51,21 @@ export class Home implements OnDestroy {
   private currentPlaceholderIndex = signal(0);
   private typingTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // ── Quality Options ──────────────────────────────────────────────────────
-  qualities: QualityOption[] = [
+
+  // Remove the static qualities array and replace with:
+readonly qualities = computed<QualityOption[]>(() => {
+  const loggedIn = this.authService.isLoggedIn();
+  return [
     { label: '240p',  isPaid: false },
     { label: '360p',  isPaid: false },
     { label: '480p',  isPaid: false },
     { label: '720p',  isPaid: false },
-    { label: '1080p', isPaid: false },
-    { label: '1440p', isPaid: false },
-    { label: '2160p', isPaid: false },
-    { label: '4K',    isPaid: false },
+    { label: '1080p', isPaid: !loggedIn },
+    { label: '1440p', isPaid: !loggedIn },
+    { label: '2160p', isPaid: !loggedIn },
+    { label: '4K',    isPaid: !loggedIn },
   ];
+});
 
   // ── Typewriter Placeholders ──────────────────────────────────────────────
   private placeholders = [
@@ -71,6 +78,11 @@ export class Home implements OnDestroy {
   constructor() {
     this.startTypewriter();
   }
+
+  isQualityAllowed(q: QualityOption): boolean {
+  if (this.authService.isLoggedIn()) return true;   
+  return !q.isPaid;                                  
+}
 
   // ── Typewriter Effect ────────────────────────────────────────────────────
   private startTypewriter() {
@@ -157,7 +169,7 @@ export class Home implements OnDestroy {
       url:         this.url(),
       quality:     this.quality(),
       audioOnly:   this.isAudioOnly(),
-      cloudUpload: true,
+      cloudUpload: this.prefs.cloudUploadEnabled(),
     };
 
     this.downloadSvc

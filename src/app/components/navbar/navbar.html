@@ -3,27 +3,27 @@
 
   <!-- Logo -->
   <div class="flex items-center gap-2 cursor-pointer" routerLink="/">
-    <img src="buckty.png" alt="Logo" class="h-9 w-auto object-contain rounded-xl" />
+    <img src="buckty.png" alt="Logo" class="h-9 md:h-[2.585rem] w-auto object-contain rounded-xl" />
   </div>
 
   <!-- Right side -->
-  <div class="flex items-center gap-3">
+  <div class="flex items-center gap-2 sm:gap-3">
 
     <!-- Theme toggle -->
     <button
       (click)="toggleTheme()"
       [attr.title]="isDark() ? 'Switch to Light mode' : 'Switch to Dark mode'"
-      class="relative w-14 h-7 rounded-full transition-all duration-500 border-2 focus:outline-none flex items-center px-1 shrink-0"
+      class="relative w-11 h-6 sm:w-14 sm:h-7 rounded-full transition-all duration-500 border-2 focus:outline-none flex items-center px-0.5 sm:px-1 shrink-0"
       [ngClass]="isDark() ? 'bg-primary border-primary' : 'bg-transparent border-primary'"
     >
       <span
-        class="w-5 h-5 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm"
-        [ngClass]="isDark() ? 'translate-x-6 bg-white' : 'translate-x-0 bg-primary'"
+        class="w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center transition-all duration-500 shadow-sm"
+        [ngClass]="isDark() ? 'translate-x-5.5 sm:translate-x-6 bg-white' : 'translate-x-0 bg-primary'"
       >
-        <svg *ngIf="!isDark()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+        <svg *ngIf="!isDark()" xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
           <path d="M17.293 13.293A8 8 0 016.707 2.707 8.001 8.001 0 1017.293 13.293z"/>
         </svg>
-        <svg *ngIf="isDark()" xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
+        <svg *ngIf="isDark()" xmlns="http://www.w3.org/2000/svg" class="w-2.5 h-2.5 sm:w-3.5 sm:h-3.5 text-primary" fill="currentColor" viewBox="0 0 20 20">
           <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"/>
         </svg>
       </span>
@@ -33,7 +33,7 @@
     <button
       *ngIf="!isLoggedIn()"
       routerLink="/login"
-      class="px-5 md:px-8 py-2.5 rounded-2xl border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-300 text-sm"
+      class="px-3 py-1.5 sm:px-5 sm:py-2.5 md:px-8 rounded-2xl border border-primary text-primary font-medium hover:bg-primary hover:text-white transition-all duration-300 text-xs sm:text-sm"
     >
       Login
     </button>
@@ -44,20 +44,20 @@
       <!-- Pill trigger -->
       <button
         (click)="toggleProfile()"
-        class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-full border transition-all cursor-pointer"
+        class="flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2 pr-2 sm:pr-3 py-1 sm:py-1.5 rounded-full border transition-all cursor-pointer"
         [ngClass]="isDark() ? 'bg-white/5 border-primary/50' : 'bg-white border-primary/40'"
       >
         <img
           [src]="currentUser()!.avatar"
           [alt]="currentUser()!.name"
-          class="w-7 h-7 rounded-full object-cover shrink-0"
+          class="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover shrink-0"
         />
         <span
-          class="text-sm font-semibold hidden sm:block truncate max-w-24"
+          class="text-xs sm:text-sm font-semibold hidden sm:block truncate max-w-24"
           [ngClass]="isDark() ? 'text-[#e8e8e8]' : 'text-dark'"
         >{{ currentUser()!.firstName }}</span>
         <span
-          class="material-icons text-base transition-transform duration-200 shrink-0"
+          class="material-icons text-sm sm:text-base transition-transform duration-200 shrink-0"
           [ngClass]="isDark() ? 'text-[#e8e8e8]/40' : 'text-dark/30'"
           [style.transform]="isProfileOpen() ? 'rotate(180deg)' : 'rotate(0)'"
         >expand_more</span>
@@ -65,7 +65,7 @@
 
       <!-- Dropdown -->
       <div
-        class="absolute top-full right-0 mt-2 w-64 border rounded-2xl shadow-xl overflow-hidden transition-all duration-200 origin-top-right z-50"
+        class="absolute top-full right-0 mt-2 w-56 sm:w-64 border rounded-2xl shadow-xl overflow-hidden transition-all duration-200 origin-top-right z-50"
         [ngClass]="isDark() ? 'bg-[#242424] border-white/10' : 'bg-white border-neutral/50'"
         [class.opacity-0]="!isProfileOpen()"
         [class.scale-95]="!isProfileOpen()"
@@ -77,14 +77,14 @@
         <!-- User info — clickable → dashboard -->
         <button
           (click)="goToDashboard()"
-          class="w-full px-4 py-4 flex items-center gap-3 transition-colors text-left border-none bg-transparent cursor-pointer"
+          class="w-full px-4 py-3 sm:py-4 flex items-center gap-3 transition-colors text-left border-none bg-transparent cursor-pointer"
           [ngClass]="isDark()
             ? 'border-b border-white/10 hover:bg-white/5'
             : 'border-b border-neutral/30 hover:bg-neutral/10'"
         >
           <img
             [src]="currentUser()!.avatar"
-            class="w-10 h-10 rounded-full object-cover border-2 shrink-0"
+            class="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover border-2 shrink-0"
             [ngClass]="isDark() ? 'border-white/20' : 'border-neutral/40'"
           />
           <div class="min-w-0 flex-1">
