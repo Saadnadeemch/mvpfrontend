@@ -134,7 +134,7 @@ export class NavbarComponent implements OnInit {
 
   goToDashboard(): void {
     this.isProfileOpen.set(false);
-    this.router.navigate(['/bdashboard']);
+    this.router.navigate(['/dashboard']);
   }
 
   logout(): void {

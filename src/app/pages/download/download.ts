@@ -13,6 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DownloadService, VideoInfo } from '../../services/download';
 import { NavigationStateService } from '../../services/navigationsate';
 import { AuthService } from '../../services/auth.service';
+import { NavbarComponent } from "../../components/navbar/navbar";
 
 interface VideoData {
   title: string;
@@ -29,7 +30,7 @@ interface VideoData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-download',
   standalone: true,
-  imports: [CommonModule, MatIconModule],
+  imports: [CommonModule, MatIconModule, NavbarComponent],
   templateUrl: './download.html',
   styles: [`
     .svg-border-container {

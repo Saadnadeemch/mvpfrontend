@@ -49,6 +49,6 @@ export class AuthCallback implements OnInit {
     const alreadyChosePlan = await this.auth.hasSelectedPlan();
     console.log('[Callback] hasSelectedPlan:', alreadyChosePlan);
 
-    this.router.navigateByUrl(alreadyChosePlan ? '/bdashboard' : '/pricing');
+    this.router.navigateByUrl(alreadyChosePlan ? '/dashboard' : '/pricing');
   }
 }

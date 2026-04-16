@@ -16,7 +16,7 @@ import { ThemeService } from './services/themeService';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule, RouterModule, Footer, NavbarComponent],
+  imports: [RouterOutlet],
   templateUrl: './app.html',
   styleUrl: './app.css',
 })

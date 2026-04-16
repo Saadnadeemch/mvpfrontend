@@ -1,124 +1,156 @@
-<div class="flex flex-col items-center justify-center ">
-  <div class="relative sm:w-full w-[95%] max-w-sm">
+<div class="h-screen w-screen flex flex-col overflow-hidden">
 
-    <svg
-      class="svg-border-container"
-      viewBox="0 0 400 520"
-      preserveAspectRatio="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <defs>
-        <marker
-          id="chevron-tip"
-          viewBox="-2 -5 10 10"
-          refX="5"
-          refY="0"
-          markerWidth="6"
-          markerHeight="6"
-          markerUnits="strokeWidth"
-          orient="auto"
+  <!-- Navbar -->
+  <app-navbar />
+
+  <!-- Main -->
+  <main class="flex-1 flex items-center justify-center px-4 overflow-hidden">
+
+    <div class="flex flex-col items-center justify-center w-full max-w-sm">
+
+      <!-- Card Wrapper -->
+      <div class="relative w-full sm:w-full">
+
+        <!-- SVG BORDER (UNCHANGED LOGIC) -->
+        <svg
+          class="svg-border-container"
+          viewBox="0 0 400 520"
+          preserveAspectRatio="none"
+          xmlns="http://www.w3.org/2000/svg"
         >
-          <polyline
-            points="0,-4 5,0 0,4"
-            fill="none"
-            stroke="var(--color-primary)"
-            stroke-width="1.5"
-            stroke-linecap="round"
-            stroke-linejoin="round"
+          <defs>
+            <marker
+              id="chevron-tip"
+              viewBox="-2 -5 10 10"
+              refX="5"
+              refY="0"
+              markerWidth="6"
+              markerHeight="6"
+              markerUnits="strokeWidth"
+              orient="auto"
+            >
+              <polyline
+                points="0,-4 5,0 0,4"
+                fill="none"
+                stroke="var(--color-primary)"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </marker>
+          </defs>
+
+          <rect
+            x="6" y="6" width="388" height="508"
+            rx="20" ry="20"
+            class="svg-track-rect"
           />
-        </marker>
-      </defs>
 
-      <rect
-        x="6" y="6" width="388" height="508"
-        rx="20" ry="20"
-        class="svg-track-rect"
-      />
+          <rect
+            x="6" y="6" width="388" height="508"
+            rx="20" ry="20"
+            pathLength="1"
+            class="svg-border-rect"
+            marker-end="url(#chevron-tip)"
+            [style.strokeDashoffset]="1 - (progress() / 100)"
+          />
+        </svg>
 
-      <rect
-        x="6" y="6" width="388" height="508"
-        rx="20" ry="20"
-        pathLength="1"
-        class="svg-border-rect"
-        marker-end="url(#chevron-tip)"
-        [style.strokeDashoffset]="1 - (progress() / 100)"
-      />
-    </svg>
+        <!-- Card -->
+        <div class="bg-white rounded-2xl overflow-hidden chat-box-shadow border border-neutral/20 relative z-0">
 
-    <div class="bg-white rounded-2xl overflow-hidden chat-box-shadow border border-neutral/20 relative z-0">
-
-      <div class="p-3">
-        <div class="aspect-video w-full bg-neutral/10 relative overflow-hidden rounded-xl">
-          <img [src]="videoData()?.thumbnail" alt="Thumbnail" class="w-full h-full object-cover" />
-          <div class="absolute inset-0 bg-black/5"></div>
-        </div>
-      </div>
-
-      <div class="px-6 pb-10 pt-2 space-y-5">
-        <div class="space-y-1">
-          <h2 class="text-lg font-bold text-dark line-clamp-2 leading-tight">
-            {{ videoData()?.title }}
-          </h2>
-          <p class="text-[10px] text-neutral font-medium truncate opacity-60">
-            {{ videoData()?.requestedUrl }}
-          </p>
-        </div>
-
-        <p class="text-xs text-dark/70 line-clamp-3 leading-relaxed">
-          {{ videoData()?.description }}
-        </p>
-
-        <div class="flex items-center justify-between pt-5 border-t border-neutral/10">
-          <div class="flex items-center gap-3">
-            <div class="flex items-center gap-1 text-neutral">
-              <mat-icon class="text-xs h-3 w-3">visibility</mat-icon>
-              <span class="text-[9px] font-bold">{{ videoData()?.views }}</span>
+          <!-- Thumbnail -->
+          <div class="p-3">
+            <div class="aspect-video w-full bg-neutral/10 relative overflow-hidden rounded-xl">
+              <img
+                [src]="videoData()?.thumbnail"
+                alt="Thumbnail"
+                class="w-full h-full object-cover"
+              />
+              <div class="absolute inset-0 bg-black/5"></div>
             </div>
-            <div class="flex items-center gap-1 text-neutral">
-              <mat-icon class="text-xs h-3 w-3">thumb_up</mat-icon>
-              <span class="text-[9px] font-bold">{{ videoData()?.likes }}</span>
+          </div>
+
+          <!-- Content -->
+          <div class="px-6 pb-10 pt-2 space-y-5">
+
+            <div class="space-y-1">
+              <h2 class="text-lg font-bold text-dark line-clamp-2 leading-tight">
+                {{ videoData()?.title }}
+              </h2>
+              <p class="text-[10px] text-neutral font-medium truncate opacity-60">
+                {{ videoData()?.requestedUrl }}
+              </p>
             </div>
-            <div class="flex items-center gap-1 text-neutral">
-              <mat-icon class="text-xs h-3 w-3">chat_bubble</mat-icon>
-              <span class="text-[9px] font-bold">{{ videoData()?.comments }}</span>
+
+            <p class="text-xs text-dark/70 line-clamp-3 leading-relaxed">
+              {{ videoData()?.description }}
+            </p>
+
+            <!-- Stats -->
+            <div class="flex items-center justify-between pt-5 border-t border-neutral/10">
+              <div class="flex items-center gap-3">
+
+                <div class="flex items-center gap-1 text-neutral">
+                  <mat-icon class="text-xs h-3 w-3">visibility</mat-icon>
+                  <span class="text-[9px] font-bold">{{ videoData()?.views }}</span>
+                </div>
+
+                <div class="flex items-center gap-1 text-neutral">
+                  <mat-icon class="text-xs h-3 w-3">thumb_up</mat-icon>
+                  <span class="text-[9px] font-bold">{{ videoData()?.likes }}</span>
+                </div>
+
+                <div class="flex items-center gap-1 text-neutral">
+                  <mat-icon class="text-xs h-3 w-3">chat_bubble</mat-icon>
+                  <span class="text-[9px] font-bold">{{ videoData()?.comments }}</span>
+                </div>
+
+              </div>
             </div>
+
           </div>
         </div>
       </div>
+
+      <!-- Bottom Section -->
+      <div class="mt-6 text-center space-y-4 w-full">
+
+        @if (!isCompleted()) {
+          <div class="space-y-1">
+            <span class="text-4xl font-display font-bold text-primary tabular-nums">
+              {{ progress() }}%
+            </span>
+            <p class="text-[10px] uppercase tracking-widest font-bold text-neutral/60">
+              {{ statusMessage() || 'Video Downloading...' }}
+            </p>
+          </div>
+        } @else {
+          <button
+            (click)="saveVideo()"
+            class="px-10 sm:px-12 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 transition-colors duration-200 hover:bg-secondary"
+          >
+            Save Video to Device
+          </button>
+        }
+
+        @if (hasError()) {
+          <div
+            class="max-w-xs sm:max-w-md mx-auto
+                   px-4 py-2.5
+                   text-[11px] sm:text-xs
+                   font-medium
+                   text-red-500
+                   bg-red-50
+                   rounded-xl
+                   border border-red-200">
+            {{ errorMessage() }}
+          </div>
+        }
+
+      </div>
+
     </div>
-  </div>
+  </main>
 
-  <div class="mt-8 text-center space-y-4">
-    @if (!isCompleted()) {
-      <div class="space-y-1">
-        <span class="text-4xl font-display font-bold text-primary tabular-nums">
-          {{ progress() }}%
-        </span>
-        <p class="text-[10px] uppercase tracking-widest font-bold text-neutral/60">
-          {{ statusMessage() || 'Video Downloading...' }}
-        </p>
-      </div>
-    } @else {
-      <button
-        (click)="saveVideo()"
-        class="px-12 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 transition-colors duration-200 hover:bg-secondary"
-      >
-        Save Video to Device
-      </button>
-    }
-
-    @if (hasError()) {
-      <div
-        class="max-w-xs sm:max-w-md mx-auto
-               px-4 py-2.5
-               text-[11px] sm:text-xs
-               font-medium
-               text-red-500
-               bg-red-50
-               rounded-xl
-               border border-red-200">
-        {{ errorMessage() }}
-      </div>
-    }
-  </div>
 </div>

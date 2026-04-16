@@ -1,190 +1,164 @@
-import {
-  ChangeDetectionStrategy, Component, signal,
-  computed, HostListener, ElementRef, inject
-} from '@angular/core';
+import { Component, signal, computed, effect, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MatIconModule } from '@angular/material/icon';
+import { Router } from '@angular/router';
+import { AuthService } from '../../services/auth.service';
+import { UserProfile } from '../../services/Models/auth.model';
+import { NavbarComponent } from '../../components/navbar/navbar';
 
-interface Video {
-  id: string;
+interface DownloadItem {
   title: string;
   thumbnail: string;
-  platform: 'YouTube' | 'Instagram' | 'TikTok' | 'Facebook';
-  likes: string;
-  views: string;
-  comments: string;
-  description: string;
-  downloadDate: Date;
-  isFavorite: boolean;
-  type: 'Video' | 'Audio';
+  platform: string;
+  quality: string;
+  date: string;
+  videoUrl: string;
 }
 
+interface Stats {
+  totalDownloads: number;
+  totalDriveUploads: number;
+  driveUsed: number;
+  driveTotal: number;
+}
 @Component({
-  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-dashboard',
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule , NavbarComponent],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-  private el = inject(ElementRef);
+   private auth = inject(AuthService);
+  private router = inject(Router);
 
-  searchQuery        = signal('');
-  selectedPlatform   = signal('All Platforms');
-  selectedSort       = signal('Recent');
-  selectedType       = signal('All Types');
-  showFavoritesOnly  = signal(false);
+  readonly PAGE_SIZE = 20;
 
-  platforms    = ['All Platforms', 'YouTube', 'Instagram', 'TikTok', 'Facebook'];
-  sortOptions  = ['Recent', 'Oldest', 'A-Z'];
-  typeOptions  = ['All Types', 'Video', 'Audio'];
+  // State
+  profile = signal<UserProfile | null>(null);
+  allDownloads = signal<DownloadItem[]>([]);
+  stats = signal<Stats>({ totalDownloads: 0, totalDriveUploads: 0, driveUsed: 0, driveTotal: 15 });
+  isLoading = signal(true);
+  isDownloadsLoading = signal(true);
+  isLoadingMore = signal(false);
+  cloudUploadEnabled = signal(true);
+  isHistoryOpen = signal(false);
+  private loadedPages = signal(1);
 
-  isPlatformDropdownOpen = signal(false);
-  isSortDropdownOpen     = signal(false);
-  isTypeDropdownOpen     = signal(false);
-
-  // Modal
-  selectedVideo = signal<Video | null>(null);
-
-  videos = signal<Video[]>([
-    {
-      id: '1',
-      title: 'Cinematic Masterclass 2024: Advanced Editing Techniques',
-      thumbnail: 'https://picsum.photos/seed/vid1/800/450',
-      platform: 'YouTube',
-      likes: '12.4K',
-      views: '1.2M',
-      comments: '3.1K',
-      description: 'Dive deep into professional video editing workflows. Learn color grading, sound design, and cinematic transitions used by top creators worldwide.',
-      downloadDate: new Date('2024-02-20'),
-      isFavorite: true,
-      type: 'Video'
-    },
-    {
-      id: '2',
-      title: 'Summer Vibes - Tropical House Mix',
-      thumbnail: 'https://picsum.photos/seed/vid2/800/450',
-      platform: 'Instagram',
-      likes: '8.2K',
-      views: '450K',
-      comments: '920',
-      description: 'A smooth tropical house mix perfect for beach parties, road trips, or just chilling at home. Features the best summer tracks of the season.',
-      downloadDate: new Date('2024-02-25'),
-      isFavorite: false,
-      type: 'Audio'
-    },
-    {
-      id: '3',
-      title: 'Quick Pasta Recipe in 60 Seconds',
-      thumbnail: 'https://picsum.photos/seed/vid3/800/450',
-      platform: 'TikTok',
-      likes: '45K',
-      views: '2.8M',
-      comments: '8.4K',
-      description: 'This ridiculously simple pasta recipe has taken the internet by storm. Only 4 ingredients and 60 seconds stand between you and the perfect meal.',
-      downloadDate: new Date('2024-02-26'),
-      isFavorite: true,
-      type: 'Video'
-    },
-    {
-      id: '4',
-      title: 'Tech Review: The Future of AI',
-      thumbnail: 'https://picsum.photos/seed/vid4/800/450',
-      platform: 'YouTube',
-      likes: '5.1K',
-      views: '120K',
-      comments: '1.2K',
-      description: 'An in-depth look at where artificial intelligence is headed in 2025 and beyond. Covering LLMs, robotics, and the societal implications of the AI revolution.',
-      downloadDate: new Date('2024-01-15'),
-      isFavorite: false,
-      type: 'Video'
-    },
-    {
-      id: '5',
-      title: 'Morning Motivation Podcast',
-      thumbnail: 'https://picsum.photos/seed/vid5/800/450',
-      platform: 'Facebook',
-      likes: '2.3K',
-      views: '89K',
-      comments: '340',
-      description: 'Start your day right with this energising morning podcast. Topics include mindset, productivity hacks, and stories from successful entrepreneurs.',
-      downloadDate: new Date('2024-02-10'),
-      isFavorite: false,
-      type: 'Audio'
-    },
-    {
-      id: '6',
-      title: 'Street Photography Tips',
-      thumbnail: 'https://picsum.photos/seed/vid6/800/450',
-      platform: 'Instagram',
-      likes: '15.7K',
-      views: '900K',
-      comments: '2.7K',
-      description: 'Master the art of candid street photography. Learn how to compose shots, use natural light, and connect with strangers for authentic portraits.',
-      downloadDate: new Date('2024-02-27'),
-      isFavorite: true,
-      type: 'Video'
-    }
-  ]);
-
-  filteredVideos = computed(() => {
-    const result = this.videos().filter(v => {
-      const matchesSearch    = v.title.toLowerCase().includes(this.searchQuery().toLowerCase());
-      const matchesPlatform  = this.selectedPlatform() === 'All Platforms' || v.platform === this.selectedPlatform();
-      const matchesType      = this.selectedType() === 'All Types' || v.type === this.selectedType();
-      const matchesFavorite  = !this.showFavoritesOnly() || v.isFavorite;
-      return matchesSearch && matchesPlatform && matchesType && matchesFavorite;
-    });
-
-    if (this.selectedSort() === 'Recent') {
-      result.sort((a, b) => b.downloadDate.getTime() - a.downloadDate.getTime());
-    } else if (this.selectedSort() === 'Oldest') {
-      result.sort((a, b) => a.downloadDate.getTime() - b.downloadDate.getTime());
-    } else if (this.selectedSort() === 'A-Z') {
-      result.sort((a, b) => a.title.localeCompare(b.title));
-    }
-
-    return result;
+  // Computed
+  visibleHistory = computed(() => this.allDownloads().slice(0, this.PAGE_SIZE * this.loadedPages()));
+  hasMoreHistory = computed(() => this.visibleHistory().length < this.allDownloads().length);
+  remaining = computed(() => Math.min(this.PAGE_SIZE, this.allDownloads().length - this.visibleHistory().length));
+  recentDownloads = computed(() => this.allDownloads().slice(0, 5));
+  storagePercent = computed(() => {
+    const { driveUsed, driveTotal } = this.stats();
+    return driveTotal ? Math.round((driveUsed / driveTotal) * 100) : 0;
+  });
+  formatStorageUsage = computed(() => {
+    const { driveUsed, driveTotal } = this.stats();
+    return `${driveUsed}GB / ${driveTotal}GB`;
+  });
+  userFirstName = computed(() => {
+    const user = this.auth.currentUser();
+    const fullName = (user?.user_metadata?.['full_name'] as string) ?? 'User';
+    return user ? fullName.split(' ')[0] : 'there';
+  });
+  isTrial = computed(() => {
+    const p = this.profile();
+    return !!(p?.is_trial && p?.trial_end && new Date(p.trial_end) > new Date());
+  });
+  trialDaysLeft = computed(() => {
+    const trialEnd = this.profile()?.trial_end;
+    if (!trialEnd) return 0;
+    return Math.max(0, Math.ceil((new Date(trialEnd).getTime() - Date.now()) / 86_400_000));
   });
 
-  // ── Close all dropdowns when clicking outside the filter bar ──────────────
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    const filterBar = this.el.nativeElement.querySelector('.filter-bar');
-    if (filterBar && !filterBar.contains(event.target as Node)) {
-      this.closeAllDropdowns();
+  constructor() {
+    effect(() => {
+      if (this.auth.currentUser()) {
+        this.loadProfile();
+        this.loadDownloads();
+      } else {
+        this.profile.set(null);
+        this.allDownloads.set([]);
+        this.isLoading.set(false);
+        this.isDownloadsLoading.set(false);
+      }
+    });
+  }
+
+  private async loadProfile(): Promise<void> {
+    this.isLoading.set(true);
+    try {
+      const [profile, drive] = await Promise.all([
+        this.auth.getProfile(),
+        this.auth.getDriveStorage(),
+      ]);
+      this.profile.set(profile);
+      this.stats.update(s => ({ ...s, driveUsed: drive.used_gb, driveTotal: drive.total_gb || 15 }));
+    } catch (e) {
+      console.error('Failed to load profile:', e);
+    } finally {
+      this.isLoading.set(false);
     }
   }
 
-  closeAllDropdowns() {
-    this.isPlatformDropdownOpen.set(false);
-    this.isSortDropdownOpen.set(false);
-    this.isTypeDropdownOpen.set(false);
-  }
-
-  toggleFavorite(id: string) {
-    this.videos.update(list =>
-      list.map(v => v.id === id ? { ...v, isFavorite: !v.isFavorite } : v)
-    );
-    // Keep modal in sync
-    const cur = this.selectedVideo();
-    if (cur && cur.id === id) {
-      this.selectedVideo.update(v => v ? { ...v, isFavorite: !v.isFavorite } : null);
+  private async loadDownloads(): Promise<void> {
+    this.isDownloadsLoading.set(true);
+    try {
+      const rows = await this.auth.getDownloads();
+      const items: DownloadItem[] = rows.map((row: any) => ({
+        title: row.title ?? 'Untitled',
+        thumbnail: row.thumbnail ?? '',
+        platform: row.platform ?? '—',
+        quality: row.quality ?? '—',
+        date: this.formatDate(row.requested_at),
+        videoUrl: row.video_page_url ?? row.cloud_url ?? '#',
+      }));
+      this.allDownloads.set(items);
+      this.stats.update(s => ({
+        ...s,
+        totalDownloads: rows.length,
+        totalDriveUploads: rows.filter((r: any) => !!r.cloud_url).length,
+      }));
+    } catch (e) {
+      console.error('Failed to load downloads:', e);
+    } finally {
+      this.isDownloadsLoading.set(false);
     }
   }
 
-  selectPlatform(p: string) { this.selectedPlatform.set(p); this.isPlatformDropdownOpen.set(false); }
-  selectSort(s: string)     { this.selectedSort.set(s);     this.isSortDropdownOpen.set(false);     }
-  selectType(t: string)     { this.selectedType.set(t);     this.isTypeDropdownOpen.set(false);     }
+  private formatDate(iso: string | null): string {
+    if (!iso) return '—';
+    const date = new Date(iso);
+    const diffDays = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays}d ago`;
+    return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  }
 
-  openVideo(video: Video)   { this.selectedVideo.set(video); }
-  closeModal()              { this.selectedVideo.set(null);  }
+  // Actions
+  toggleCloudUpload(): void {
+    this.cloudUploadEnabled.update(v => !v);
+  }
 
-  onOverlayClick(event: MouseEvent) {
-    // Close only when clicking the dark overlay, not the modal panel itself
-    if ((event.target as HTMLElement).classList.contains('modal-overlay')) {
-      this.closeModal();
-    }
+  openVideo(url: string): void {}
+
+  openHistoryModal(): void {
+    this.loadedPages.set(1);
+    this.isHistoryOpen.set(true);
+  }
+
+  closeHistoryModal(): void {
+    this.isHistoryOpen.set(false);
+  }
+
+  loadMore(): void {
+    if (this.isLoadingMore() || !this.hasMoreHistory()) return;
+    this.isLoadingMore.set(true);
+    setTimeout(() => {
+      this.loadedPages.update(p => p + 1);
+      this.isLoadingMore.set(false);
+    }, 300);
   }
 }

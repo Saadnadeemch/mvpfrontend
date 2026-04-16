@@ -1,12 +1,14 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
+import { NavbarComponent } from '../../components/navbar/navbar';
+import { Footer } from '../../components/footer/footer';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, NavbarComponent, Footer],
   templateUrl: './login.html',
 })
 export class Login {

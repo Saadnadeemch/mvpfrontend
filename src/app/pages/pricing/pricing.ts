@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Footer } from "../../components/footer/footer";
+import { NavbarComponent } from "../../components/navbar/navbar";
 
 @Component({
   selector: 'app-pricing',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, Footer, NavbarComponent],
   templateUrl: './pricing.html',
   styleUrl: './pricing.css',
 })

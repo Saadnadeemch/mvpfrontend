@@ -14,6 +14,8 @@ import { DownloadService } from '../../services/download';
 import { NavigationStateService } from '../../services/navigationsate';
 import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
+import { Footer } from '../../components/footer/footer';
+import { NavbarComponent } from "../../components/navbar/navbar";
 
 interface QualityOption {
   label: string;
@@ -23,7 +25,7 @@ interface QualityOption {
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatIconModule],
+  imports: [CommonModule, FormsModule, Footer, MatIconModule, NavbarComponent],
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
