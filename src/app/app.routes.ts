@@ -1,4 +1,5 @@
-import {Routes} from '@angular/router';
+// app.routes.ts
+import { Routes } from '@angular/router';
 import { Home } from './pages/home/home';
 import { Download } from './pages/download/download';
 import { Login } from './pages/login/login';
@@ -10,13 +11,51 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Notfound } from './pages/notfound/notfound';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  { path: 'download', component: Download },
-  { path: 'login', component: Login },
-  { path: 'auth/callback', component: AuthCallback },
-  { path: 'pricing' , component:Pricing },
-  { path: 'dashboard' , component:Dashboard},
-  { path: 'privacy-and-policy' , component:Privacy},
-  { path: 'terms-of-service' , component:Termservice},
-  { path: '**', component: Notfound }
+  {
+    path: '',
+    component: Home,
+    
+  },
+  {
+    path: 'download',
+    component: Download,
+    data: { robots: 'noindex, nofollow' }
+  },
+  {
+    path: 'login',
+    title: 'Sign in to Buckty',
+    component: Login,
+  },
+  {
+    path: 'auth/callback',
+    component: AuthCallback,
+    data: { robots: 'noindex, nofollow' }
+  },
+  {
+    path: 'pricing',
+    title: 'Pricing — Buckty',
+    component: Pricing,
+  },
+  {
+    path: 'dashboard',
+    title: 'Dashboard — Buckty',
+    component: Dashboard,
+    data: { robots: 'noindex, nofollow' }
+  },
+  {
+    path: 'privacy-and-policy',
+    title: 'Privacy Policy — Buckty',
+    component: Privacy,
+  },
+  {
+    path: 'terms-of-service',
+    title: 'Terms of Service — Buckty',
+    component: Termservice,
+  },
+  {
+    path: '**',
+    title: 'Page Not Found — Buckty',
+    component: Notfound,
+    data: { robots: 'noindex, nofollow' }
+  }
 ];

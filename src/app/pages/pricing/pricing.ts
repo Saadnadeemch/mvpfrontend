@@ -18,25 +18,26 @@ export class Pricing {
   savingPlan: 'basic' | 'advanced' | null = null;
   saveError: string | null = null;
 
-  basicFeatures = [
-    'Download from 144p up to 1440p quality',
-    'All major platforms including YouTube, Instagram and TikTok',
-    'Connect your Google Drive',
-    'Videos auto-upload to your Drive after download',
-    'Download history for the last 30 days',
-    'Standard download speed',
-  ];
+basicFeatures = [
+  'Download from 144p up to 4K quality',
+  'All major platforms including YouTube, Instagram and TikTok',
+  'Connect your Google Drive',
+  'Auto video upload to your Drive',
+  'Download history for the last 30 days',
+  'Standard download speed',
+  'No personal storage included',
+];
 
-  proFeatures = [
-    'Everything in Basic',
-    '2K and 4K quality downloads',
-    '50 GB personal cloud storage',
-    'Connect your Google Drive',
-    'Auto-upload to Drive and personal storage',
-    'Priority download speed',
-    'Full download history with no limits',
-    'Early access to new features',
-  ];
+proFeatures = [
+  'Everything in Basic',
+  '2K and 4K optimized ultra-fast downloads',
+  '50 GB personal cloud storage',
+  'Connect Google Drive + personal storage',
+  'Auto-upload to Drive and personal storage',
+  'Priority download speed',
+  'Unlimited download history',
+  'Early access to new features',
+];
 
   faqs: { q: string; a: string; open: boolean }[] = [
     {
