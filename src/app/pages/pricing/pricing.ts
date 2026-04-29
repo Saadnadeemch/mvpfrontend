@@ -18,6 +18,38 @@ export class Pricing {
   savingPlan: 'basic' | 'advanced' | null = null;
   saveError: string | null = null;
 
+
+  constructor(
+    private router: Router,
+    private auth: AuthService,
+  ) {}
+
+
+  async selectPlan(plan_type: 'basic' | 'advanced'): Promise<void> {
+  if (this.savingPlan !== null) return;
+
+  this.savingPlan = plan_type;
+  this.saveError  = null;
+
+  const { error } = await this.auth.savePlanSelection({
+    plan_type,
+    isAnnual: this.isAnnual,
+  });
+
+  this.savingPlan = null;
+
+  if (error) {
+    this.saveError = 'Something went wrong saving your plan.';
+    this.router.navigate(['/']);
+    return;
+  }
+
+  this.router.navigate(['/bdashboard'], {
+    queryParams: { plan: plan_type, annual: this.isAnnual },
+  });
+}
+
+
 basicFeatures = [
   'Download from 144p up to 4K quality',
   'All major platforms including YouTube, Instagram and TikTok',
@@ -66,33 +98,4 @@ proFeatures = [
       open: false,
     },
   ];
-
-  constructor(
-    private router: Router,
-    private auth: AuthService,
-  ) {}
-
-
-  async selectPlan(plan_type: 'basic' | 'advanced'): Promise<void> {
-  if (this.savingPlan !== null) return;
-
-  this.savingPlan = plan_type;
-  this.saveError  = null;
-
-  const { error } = await this.auth.savePlanSelection({
-    plan_type,
-    isAnnual: this.isAnnual,
-  });
-
-  this.savingPlan = null;
-
-  if (error) {
-    this.saveError = 'Something went wrong saving your plan.';
-    return;
-  }
-
-  this.router.navigate(['/bdashboard'], {
-    queryParams: { plan: plan_type, annual: this.isAnnual },
-  });
-}
 }

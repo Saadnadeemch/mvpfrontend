@@ -139,7 +139,7 @@ export class AuthService {
     const { error } = await this.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: `${environment.FrontendURL}/auth/callback`,
         scopes: [
           'openid',
           'https://www.googleapis.com/auth/userinfo.email',

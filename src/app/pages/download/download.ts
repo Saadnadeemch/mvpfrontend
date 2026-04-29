@@ -185,7 +185,7 @@ export class Download implements OnInit, OnDestroy {
         // Tell NestJS to update DB status to completed
         // Only call if we have a token — anonymous users don't have DB records
         if (this.authToken) {
-          const cloudUrl = result?.cloud_url ?? null;
+          const cloudUrl = data.cloud_url ?? null;
           console.log('[Download] Notifying backend of completion — request_id:', requestId, '| cloud_url:', cloudUrl);
 
           this.downloadService.markComplete(requestId, this.authToken, cloudUrl).subscribe({

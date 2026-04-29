@@ -13,7 +13,7 @@ interface DownloadItem {
   platform: string;
   quality: string;
   date: string;
-  videoUrl: string;
+  cloud_url: string;
 }
 
 interface Stats {
@@ -114,7 +114,7 @@ export class Dashboard {
         platform: row.platform ?? '—',
         quality: row.quality ?? '—',
         date: this.formatDate(row.requested_at),
-        videoUrl: row.video_page_url ?? row.cloud_url ?? '#',
+        cloud_url: row.video_page_url ?? row.cloud_url ?? '#',
       }));
       this.allDownloads.set(items);
       this.stats.update(s => ({

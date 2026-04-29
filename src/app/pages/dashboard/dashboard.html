@@ -216,7 +216,7 @@
                           </p>
                         </div>
 
-                        <button (click)="openVideo(item.videoUrl)"
+                        <button (click)="openVideo(item.cloud_url)"
                                 class="flex items-center justify-center gap-1 text-[10px] sm:text-xs font-bold
                                        px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-full shrink-0
                                        border border-primary/20 text-primary bg-primary/5
@@ -333,7 +333,7 @@
                   {{ item.platform }} · {{ item.quality }} · {{ item.date }}
                 </p>
               </div>
-              <button (click)="openVideo(item.videoUrl)"
+              <button (click)="openVideo(item.cloud_url)"
                       class="flex items-center justify-center gap-1 text-[10px] sm:text-xs font-bold
                              px-2 sm:px-2.5 py-1.5 rounded-full shrink-0
                              border border-primary/20 text-primary bg-primary/5

@@ -7,6 +7,9 @@ export const environment = {
 
 
 
+  // current URL Frotnend 
+  FrontendURL: 'http://localhost:4200',
+  // FrontendURL : 'https://buckty.online',
   //nest js api url 
   apiUrl : 'http://localhost:3000',
 };
