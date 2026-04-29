@@ -6,10 +6,7 @@
 
       <!-- Top on mobile: Branding -->
       <div class="flex justify-center">
-        <span
-          class="text-[10px] font-medium"
-          style="color: var(--color-neutral)"
-        >
+        <span class="text-[10px] font-medium" style="color: var(--color-neutral)">
           © 2026 Buckty
         </span>
       </div>
@@ -17,26 +14,19 @@
       <!-- Bottom on mobile: Legal links -->
       <div class="flex flex-col items-center gap-3">
         <div class="flex items-center gap-2 flex-wrap justify-center">
-          <span
-            [routerLink]="['/privacy-and-policy']"
+          <span [routerLink]="['/privacy-and-policy']"
             class="text-[10px] font-medium transition-opacity hover:opacity-70 cursor-pointer"
-            style="color: var(--color-neutral)"
-          >
+            style="color: var(--color-neutral)">
             Privacy Policy
           </span>
 
-          <span
-            class="text-[10px]"
-            style="color: var(--color-neutral); opacity: 0.35"
-          >
+          <span class="text-[10px]" style="color: var(--color-neutral); opacity: 0.35">
             ·
           </span>
 
-          <span
-            [routerLink]="['/terms-of-service']"
+          <span [routerLink]="['/terms-of-service']"
             class="text-[10px] font-medium transition-opacity hover:opacity-70 cursor-pointer"
-            style="color: var(--color-neutral)"
-          >
+            style="color: var(--color-neutral)">
             Terms of Service
           </span>
         </div>
@@ -48,38 +38,27 @@
 
       <!-- Left side: Branding -->
       <div class="flex items-center">
-        <span
-          class="text-xs font-medium"
-          style="color: var(--color-neutral)"
-        >
+        <span class="text-xs font-medium" style="color: var(--color-neutral)">
           © 2026 Buckty
         </span>
       </div>
 
       <!-- Right side: Legal links -->
       <div class="flex items-center gap-2 shrink-0">
-        <span
-          [routerLink]="['/privacy-and-policy']"
-          class="text-xs font-medium transition-opacity hover:opacity-70 cursor-pointer"
-          style="color: var(--color-neutral)"
-        >
-          Privacy Policy
-        </span>
 
-        <span
-          class="text-xs"
-          style="color: var(--color-neutral); opacity: 0.35"
-        >
+        <a href="/privacy-and-policy" class="text-xs font-medium transition-opacity hover:opacity-70 cursor-pointer"
+          style="color: var(--color-neutral)">
+          Privacy Policy
+        </a>
+
+        <span class="text-xs" style="color: var(--color-neutral); opacity: 0.35">
           ·
         </span>
 
-        <span
-          [routerLink]="['/terms-of-service']"
-          class="text-xs font-medium transition-opacity hover:opacity-70 cursor-pointer"
-          style="color: var(--color-neutral)"
-        >
+        <a href="/terms-of-service" class="text-xs font-medium transition-opacity hover:opacity-70 cursor-pointer"
+          style="color: var(--color-neutral)">
           Terms of Service
-        </span>
+        </a>
       </div>
     </div>
 
