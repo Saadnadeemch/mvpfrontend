@@ -64,6 +64,7 @@
             <div class="aspect-video w-full bg-neutral/10 relative overflow-hidden rounded-xl">
               <img
                 [src]="videoData()?.thumbnail"
+                (error)="onThumbnailError()"
                 alt="Thumbnail"
                 class="w-full h-full object-cover"
               />
@@ -111,46 +112,185 @@
 
           </div>
         </div>
+      </div><!-- Bottom Section -->
+<div class="mt-6 text-center space-y-4 w-full">
+
+  <!-- ===================== -->
+  <!-- PROGRESS STATE (KEEP EXACTLY AS IS) -->
+  <!-- ===================== -->
+  @if (!isCompleted()) {
+    <div class="space-y-2">
+
+      <!-- Progress -->
+      <div class="relative inline-flex items-end gap-1">
+        <span class="text-4xl font-display font-bold text-primary tabular-nums">
+          {{ progress() }}
+        </span>
+        <span class="text-lg font-bold text-primary">%</span>
       </div>
 
-      <!-- Bottom Section -->
-      <div class="mt-6 text-center space-y-4 w-full">
+      <!-- Status Text (UPDATED COLORS USING GLOBALS) -->
+      <p
+        class="text-[10px] uppercase tracking-widest font-bold animate-pulse"
+        [ngClass]="{
+          'text-primary': cloudStatus() === 'uploading',
+          'text-secondary': cloudStatus() === 'success',
+          'text-red-500': cloudStatus() === 'error'
+        }"
+      >
+        {{ statusMessage() || 'Video Downloading...' }}
+      </p>
 
-        @if (!isCompleted()) {
-          <div class="space-y-1">
-            <span class="text-4xl font-display font-bold text-primary tabular-nums">
-              {{ progress() }}%
-            </span>
-            <p class="text-[10px] uppercase tracking-widest font-bold text-neutral/60">
-              {{ statusMessage() || 'Video Downloading...' }}
-            </p>
-          </div>
-        } @else {
-          <button
-            (click)="saveVideo()"
-            class="px-10 sm:px-12 py-3.5 bg-primary text-white rounded-2xl font-bold shadow-lg shadow-primary/20 transition-colors duration-200 hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2"
-          >
-            Save Video to Device
-          </button>
-        }
-
-        @if (hasError()) {
-          <div
-            class="max-w-xs sm:max-w-md mx-auto
-                   px-4 py-2.5
-                   text-[11px] sm:text-xs
-                   font-medium
-                   text-red-500
-                   bg-red-50
-                   rounded-xl
-                   border border-red-200">
-            {{ errorMessage() }}
-          </div>
-        }
-
-      </div>
+    
 
     </div>
-  </main>
+  }
+
+
+  <!-- ===================== -->
+  <!-- COMPLETED ACTIONS -->
+  <!-- ===================== -->
+  @if (isCompleted()) {
+
+    <div class="flex items-center justify-center gap-3 flex-nowrap">
+
+      <!-- SAVE BUTTON -->
+      <button
+        (click)="saveVideo()"
+        class="h-[52px] px-8 sm:px-12 
+               bg-primary text-white 
+               rounded-2xl font-semibold
+               flex items-center justify-center
+               whitespace-nowrap
+               shadow-lg shadow-primary/20
+               transition-all duration-200 ease-in-out
+               hover:bg-secondary active:scale-[0.98] cursor-pointer"
+      >
+        Save Video to Device
+      </button>
+
+      <!-- HOME BUTTON -->
+      <button
+        (click)="goHome()"
+        aria-label="Download more"
+        class="h-13 w-13
+               flex items-center justify-center
+               rounded-2xl
+               border border-neutral/40
+               bg-white dark:bg-white/5
+               text-primary
+               transition-all duration-200
+               hover:bg-neutral/10
+               active:scale-95
+               focus:outline-none focus:ring-2 focus:ring-primary/40
+               group cursor-pointer"
+      >
+        <mat-icon
+          class="text-[20px]
+                 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
+                 group-hover:scale-110"
+        >
+          add
+        </mat-icon>
+      </button>
+
+    </div>
+
+
+    <!-- ===================== -->
+    <!-- CLOUD STATUS PILL (CLEAN + GLOBAL COLORS) -->
+    <!-- ===================== -->
+    @if (cloudStatus() !== null) {
+
+      <div
+        class="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium
+               w-fit mx-auto mt-6 sm:mt-3
+               transition-all duration-300 ease-in-out shadow-sm
+               border border-neutral/20"
+
+        [ngClass]="{
+          'bg-primary/10 text-primary': cloudStatus() === 'uploading',
+          'bg-secondary/10 text-secondary': cloudStatus() === 'success',
+          'bg-red-500/10 text-red-500': cloudStatus() === 'error'
+        }"
+      >
+
+        <!-- ICON (FIXED ALIGNMENT) -->
+        <div class="w-4 h-4 flex items-center justify-center shrink-0">
+
+          @if (cloudStatus() === 'uploading') {
+            <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          }
+
+          @if (cloudStatus() === 'success') {
+            <div class="text-secondary leading-none">✓</div>
+          }
+
+          @if (cloudStatus() === 'error') {
+            <div class="text-red-500 leading-none">✕</div>
+          }
+
+        </div>
+
+        <!-- TEXT -->
+        <span class="tracking-wide">
+          @if (cloudStatus() === 'uploading') {
+            Cloud uploading
+          }
+          @if (cloudStatus() === 'success') {
+            Uploaded
+          }
+          @if (cloudStatus() === 'error') {
+            Upload failed
+          }
+        </span>
+
+        <!-- COPY BUTTON (NO SHIFT ISSUE) -->
+       @if (cloudStatus() === 'success') {
+  <button
+    (click)="copyDriveLink()"
+    class="ml-2 text-[10px] px-2 py-0.5 rounded-md
+           bg-primary/10 text-primary
+           hover:bg-primary/20
+           transition whitespace-nowrap"
+  >
+    @if (copyState() === 'copied') {
+      Link Copied
+    } @else {
+      Copy Link
+    }
+  </button>
+}
+
+      </div>
+    }
+
+
+
+
+    
+  }
+
+
+  <!-- ===================== -->
+  <!-- GLOBAL ERROR -->
+  <!-- ===================== -->
+  @if (hasError()) {
+    <div
+      class="max-w-xs sm:max-w-md mx-auto mt-2
+             px-3 py-2
+             text-[11px] sm:text-xs
+             font-medium
+             text-red-500
+             bg-red-500/5
+             border border-red-500/20
+             rounded-xl
+             flex items-center gap-2
+             animate-pulse"
+    >
+      <span class="text-red-500">⚠</span>
+      {{ errorMessage() }}
+    </div>
+  }
 
 </div>

@@ -32,10 +32,6 @@ export class AuthCallback implements OnInit {
   private auth   = inject(AuthService);
 
   async ngOnInit(): Promise<void> {
-    // waitForSessionReady() always returns the real promise.
-    // It never short-circuits using isLoading() — that was the SSR bug.
-    // On the server this promise stays pending; in the browser it resolves
-    // only after Supabase fires SIGNED_IN (post OAuth code exchange).
     const hasSession = await this.auth.waitForSessionReady();
 
     console.log('[Callback] hasSession:', hasSession);

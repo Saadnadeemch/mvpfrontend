@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth.service';
 import { Footer } from '../../components/footer/footer';
 import { NavbarComponent } from "../../components/navbar/navbar";
 import { UserPreferencesService } from '../../services/user-preferences.service';
+import { Playaudio } from '../../services/playaudio';
 
 interface QualityOption {
   label: string;
@@ -38,6 +39,7 @@ export class Home implements OnDestroy {
   private downloadSvc = inject(DownloadService);
   private navState    = inject(NavigationStateService);
   private authService = inject(AuthService);
+  private audioService = inject(Playaudio)
   private prefs = inject(UserPreferencesService);
 
   // ── State ────────────────────────────────────────────────────────────────
@@ -85,32 +87,51 @@ readonly qualities = computed<QualityOption[]>(() => {
 }
 
   // ── Typewriter Effect ────────────────────────────────────────────────────
-  private startTypewriter() {
-    let charIndex  = 0;
-    let isDeleting = false;
+ private startTypewriter() {
+  let charIndex = 0;
+  let isDeleting = false;
 
-    const tick = () => {
-      const fullText = this.placeholders[this.currentPlaceholderIndex()];
-      isDeleting ? charIndex-- : charIndex++;
-      this.placeholderText.set(fullText.substring(0, charIndex));
+  const getTypingDelay = (char: string, deleting: boolean) => {
+    if (deleting) {
+      return 35 + Math.random() * 15; // smooth, not too fast
+    }
 
-      let delay = isDeleting ? 30 : 60;
+    // slight pause on punctuation
+    if (['.', ',', '!', '?'].includes(char)) {
+      return 180;
+    }
 
-      if (!isDeleting && charIndex === fullText.length) {
-        delay      = 2000;
-        isDeleting = true;
-      } else if (isDeleting && charIndex === 0) {
-        isDeleting = false;
-        this.currentPlaceholderIndex.update(i => (i + 1) % this.placeholders.length);
-        delay = 500;
-      }
+    // natural typing variation
+    return 50 + Math.random() * 40;
+  };
 
-      this.typingTimer = setTimeout(tick, delay);
-    };
+  const tick = () => {
+    const fullText = this.placeholders[this.currentPlaceholderIndex()];
 
-    tick();
-  }
+    charIndex = isDeleting ? charIndex - 1 : charIndex + 1;
 
+    this.placeholderText.set(fullText.substring(0, charIndex));
+
+    let delay = getTypingDelay(fullText[charIndex] || '', isDeleting);
+
+    // finished typing
+    if (!isDeleting && charIndex === fullText.length) {
+      isDeleting = true;
+      delay = 1800; // pause before delete
+    }
+
+    // finished deleting
+    else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      this.currentPlaceholderIndex.update(i => (i + 1) % this.placeholders.length);
+      delay = 400; // short pause before next word
+    }
+
+    this.typingTimer = setTimeout(tick, delay);
+  };
+
+  tick();
+}
   // ── Audio Toggle ─────────────────────────────────────────────────────────
   toggleAudio() {
     this.isAudioOnly.update(v => !v);
@@ -160,7 +181,7 @@ readonly qualities = computed<QualityOption[]>(() => {
 
   handleDownload() {
     if (!this.url().trim() || this.isDownloading()) return;
-
+    this.audioService.unlock();
     this.isDownloading.set(true);
 
     const token = this.authService.currentSession()?.access_token ?? '';

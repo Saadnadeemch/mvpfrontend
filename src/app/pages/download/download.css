@@ -1,4 +1,4 @@
-   .svg-border-container {
+ .svg-border-container {
       position: absolute;
       inset: -5px;
       width: calc(100% + 10px);
@@ -7,8 +7,6 @@
       z-index: 10;
       overflow: visible;
     }
-
-    /* Faint track outline — always visible */
     .svg-track-rect {
       fill: none;
       stroke: var(--color-primary);
@@ -17,8 +15,6 @@
       stroke-linecap: round;
       stroke-linejoin: round;
     }
-
-    /* Progress stroke — ease-in-out so every tick glides smoothly */
     .svg-border-rect {
       fill: none;
       stroke: var(--color-primary);

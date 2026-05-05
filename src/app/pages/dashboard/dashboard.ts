@@ -7,13 +7,15 @@ import { UserProfile } from '../../services/Models/auth.model';
 import { NavbarComponent } from '../../components/navbar/navbar';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 
+
+
 interface DownloadItem {
   title: string;
   thumbnail: string;
   platform: string;
   quality: string;
   date: string;
-  cloud_url: string;
+  cloud_url: string | null; // strictly Drive URL only
 }
 
 interface Stats {
@@ -46,6 +48,10 @@ export class Dashboard {
   isHistoryOpen = signal(false);
   private loadedPages = signal(1);
 
+  onThumbnailError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.src = 'default.png'; 
+}
   // Computed
   visibleHistory = computed(() => this.allDownloads().slice(0, this.PAGE_SIZE * this.loadedPages()));
   hasMoreHistory = computed(() => this.visibleHistory().length < this.allDownloads().length);
@@ -108,14 +114,16 @@ export class Dashboard {
     this.isDownloadsLoading.set(true);
     try {
       const rows = await this.auth.getDownloads();
+
+     
       const items: DownloadItem[] = rows.map((row: any) => ({
-        title: row.title ?? 'Untitled',
-        thumbnail: row.thumbnail ?? '',
-        platform: row.platform ?? '—',
-        quality: row.quality ?? '—',
-        date: this.formatDate(row.requested_at),
-        cloud_url: row.video_page_url ?? row.cloud_url ?? '#',
-      }));
+  title: row.title ?? 'Untitled',
+  thumbnail: row.thumbnail ?? '',
+  platform: row.platform ?? '—',
+  quality: row.quality ?? '—',
+  date: this.formatDate(row.requested_at),
+  cloud_url: row.cloud_url ?? null,   // strictly Drive URL only
+}));
       this.allDownloads.set(items);
       this.stats.update(s => ({
         ...s,
@@ -144,8 +152,11 @@ export class Dashboard {
     this.cloudUploadEnabled.update(v => !v);
   }
 
-  openVideo(url: string): void { }
-
+  
+  openVideo(url: string | null): void {
+  if (!url) return;
+  window.open(url, '_blank', 'noopener,noreferrer');
+}
   openHistoryModal(): void {
     this.loadedPages.set(1);
     this.isHistoryOpen.set(true);
@@ -154,6 +165,8 @@ export class Dashboard {
   closeHistoryModal(): void {
     this.isHistoryOpen.set(false);
   }
+
+
 
   loadMore(): void {
     if (this.isLoadingMore() || !this.hasMoreHistory()) return;
