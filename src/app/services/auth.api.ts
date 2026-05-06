@@ -73,7 +73,7 @@ export class AuthApi {
   ): Promise<any[]> {
     const { data, error } = await supabase
       .from('downloads')
-      .select('id, title, thumbnail, platform, quality, requested_at, video_page_url, status, cloud_url, uploader, views')
+      .select('id, title, thumbnail, platform, quality, requested_at, video_page_url, status, cloud_url, uploader, views, video_type, audio_only')
       .eq('user_id', userId)
       .eq('status', 'completed')
       .order('requested_at', { ascending: false })

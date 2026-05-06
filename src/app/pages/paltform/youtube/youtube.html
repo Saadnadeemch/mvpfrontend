@@ -1,0 +1,167 @@
+<div class="h-screen w-screen flex flex-col overflow-hidden">
+
+  <app-navbar />
+
+  <main class="flex-1 flex flex-col items-center justify-center px-6 overflow-hidden">
+
+
+<div class="flex items-center gap-2 mb-5 select-none">
+      <span class="w-7 h-px bg-primary/40"></span>
+      <span class="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
+      <span class="text-[10px] font-semibold tracking-widest uppercase text-primary/70">Free · Fast · No sign-up</span>
+      <span class="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
+      <span class="w-7 h-px bg-primary/40"></span>
+    </div>
+
+    <!-- Heading -->
+    <h1 class="text-4xl md:text-5xl font-semibold text-dark text-center leading-tight tracking-tight mb-2 select-none">
+      Save any YouTube video<br />
+      <span class="text-primary">in seconds.</span>
+    </h1>
+    
+
+   <!-- Card -->
+<div class="w-full max-w-xl bg-white border border-neutral/20 rounded-3xl px-5 py-5 shadow-sm">
+
+ 
+  <!-- URL Input Zone -->
+<div class="flex items-center gap-3 bg-white border border-primary/40 rounded-2xl px-4 py-3.5 mb-5
+            focus-within:border-primary/60 focus-within:shadow-sm transition dark:bg-neutral/5 dark:border-neutral/20
+            dark:focus-within:border-primary/40 dark:focus-within:bg-neutral/5">
+
+  <mat-icon class="text-neutral-400 text-lg">link</mat-icon>
+
+  <input
+    type="text"
+    [(ngModel)]="url"
+    (keydown.enter)="handleDownload()"
+    [placeholder]="placeholderText()"
+    class="flex-1 bg-transparent outline-none text-[13px] text-dark placeholder:text-neutral-400"
+  />
+
+</div>
+
+  <!-- Divider -->
+  <div class="w-full h-px bg-neutral/15 mb-4"></div>
+
+  <!-- Controls Row -->
+  <div class="flex items-center justify-between gap-3">
+
+    <!-- Left: Toggle + Quality -->
+    <div class="flex items-center gap-5">
+
+      <!-- Audio Toggle -->
+      <div
+        class="flex items-center gap-2 cursor-pointer select-none"
+        (click)="toggleAudio()"
+      >
+        <button
+          type="button"
+          class="relative inline-flex h-[18px] w-[32px] items-center rounded-full transition-all duration-200 flex-shrink-0"
+          [ngClass]="isAudioOnly() ? 'bg-primary shadow-sm' : 'bg-neutral-300'"
+        >
+          <span
+            class="inline-block h-3 w-3 transform rounded-full bg-white transition-all duration-200"
+            [ngClass]="isAudioOnly() ? 'translate-x-[17px]' : 'translate-x-[3px]'"
+          ></span>
+        </button>
+
+        <span
+          class="text-[11px] font-medium transition-colors"
+          [ngClass]="isAudioOnly() ? 'text-primary' : 'text-neutral-400'"
+        >
+          Audio only
+        </span>
+      </div>
+
+      <!-- Quality -->
+      <div class="relative">
+        <button
+          (click)="toggleDropdown($event)"
+          [disabled]="isAudioOnly()"
+          type="button"
+          class="flex items-center gap-1.5 text-[11px] font-medium text-dark
+                 px-3 py-1.5 border border-neutral/25 rounded-xl transition-all
+                 hover:border-neutral/40 hover:bg-neutral/5
+                 disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {{ quality() }}
+          <mat-icon class="text-[16px] leading-none">expand_more</mat-icon>
+        </button>
+
+        @if (isDropdownOpen()) {
+          <div class="absolute left-0 bottom-full mb-2 w-36
+                      bg-white border border-neutral/15 rounded-2xl shadow-md z-50 py-1">
+
+            @for (q of qualities(); track q.label) {
+              <div class="relative group">
+                <button
+                  (click)="selectQuality(q)"
+                  [disabled]="q.isPaid"
+                  type="button"
+                  class="w-full text-left px-4 py-2 text-[11px] flex justify-between items-center
+                         transition-all text-dark
+                         disabled:opacity-40 disabled:cursor-not-allowed"
+                  [ngClass]="{
+                    'text-primary font-semibold': quality() === q.label,
+                    'hover:bg-neutral/5': quality() !== q.label && !q.isPaid
+                  }"
+                >
+                  <span>{{ q.label }}</span>
+
+                  @if (q.isPaid) {
+                    <mat-icon class="text-[14px] text-neutral-300">lock</mat-icon>
+                  }
+                </button>
+
+                @if (q.isPaid) {
+                  <div class="absolute left-full top-1/2 -translate-y-1/2 ml-2
+                              bg-dark text-white text-[10px] font-medium
+                              px-2 py-1 rounded-lg whitespace-nowrap
+                              opacity-0 group-hover:opacity-100
+                              pointer-events-none transition-opacity z-50">
+                    ✦ Upgrade to Pro
+                    <span class="absolute -left-1 top-1/2 -translate-y-1/2
+                                 border-4 border-transparent border-r-dark"></span>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+
+    </div>
+
+    <!-- Paste Button -->
+    <button
+      (click)="handlePaste()"
+      [disabled]="isDownloading()"
+      type="button"
+      class="w-9 h-9 flex items-center justify-center rounded-full bg-primary
+             text-white transition-all duration-200
+             hover:scale-105 hover:bg-primary/90 active:scale-95
+             disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+    >
+      @if (isDownloading()) {
+        <mat-icon class="animate-spin text-[15px]">autorenew</mat-icon>
+      } @else {
+        <mat-icon class="text-[15px]">content_paste_go</mat-icon>
+      }
+    </button>
+
+  </div>
+</div>
+
+    <!-- Hint -->
+    <p class="text-[11px] text-neutral-400 mt-4 select-none tracking-wide">
+      Only download content you have permission to use.
+    </p>
+
+
+  </main>
+
+  <app-footer />
+
+</div>

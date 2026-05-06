@@ -9,12 +9,17 @@ import { Privacy } from './pages/privacy/privacy';
 import { Termservice } from './pages/termservice/termservice';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Notfound } from './pages/notfound/notfound';
+import { Youtube } from './pages/paltform/youtube/youtube';
 
 export const routes: Routes = [
   {
     path: '',
     component: Home,
     
+  },
+  {
+    path: 'youtube-downloader',
+    component: Youtube
   },
   {
     path: 'download',
