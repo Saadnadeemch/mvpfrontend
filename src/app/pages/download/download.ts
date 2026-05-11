@@ -5,7 +5,7 @@ import {
   OnInit,
   OnDestroy,
   inject,
-  PLATFORM_ID
+  PLATFORM_ID,
 } from '@angular/core';
 import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,7 +13,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DownloadService, VideoInfo } from '../../services/download';
 import { NavigationStateService } from '../../services/navigationsate';
 import { AuthService } from '../../services/auth.service';
-import { NavbarComponent } from "../../components/navbar/navbar";
+import { NavbarComponent } from '../../components/navbar/navbar';
 import { Playaudio } from '../../services/playaudio';
 
 interface VideoData {
@@ -27,6 +27,8 @@ interface VideoData {
   requestedUrl: string;
 }
 
+type CloudStatus = 'idle' | 'uploading' | 'success' | 'error';
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-download',
@@ -36,64 +38,186 @@ interface VideoData {
   styleUrl: './download.css',
 })
 export class Download implements OnInit, OnDestroy {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private downloadService = inject(DownloadService);
-  private navState = inject(NavigationStateService);
-  private platformId = inject(PLATFORM_ID);
-  private authService = inject(AuthService);
+
+  private route        = inject(ActivatedRoute);
+  private router       = inject(Router);
+  private downloadSvc  = inject(DownloadService);
+  private navState     = inject(NavigationStateService);
+  private platformId   = inject(PLATFORM_ID);
+  private authService  = inject(AuthService);
   private audioService = inject(Playaudio);
 
-  progress = signal(0);
-  statusMessage = signal('Initializing...');
-  isCompleted = signal(false);
-  cloudStatus = signal<'idle' | 'uploading' | 'success' | 'error'>('idle');
-  cloudMessage = signal('');
-  cloudUrl = signal<string | null>(null);
-  hasError = signal(false);
-  errorMessage = signal('');
-  videoData = signal<VideoData | null>(null);
+  progress         = signal(0);
+  statusMessage    = signal('Initializing...');
+  isCompleted      = signal(false);
+  cloudStatus      = signal<CloudStatus>('idle');
+  cloudMessage     = signal('');
+  cloudUrl         = signal<string | null>(null);
+  hasError         = signal(false);
+  errorMessage     = signal('');
+  videoData        = signal<VideoData | null>(null);
   finalDownloadUrl = signal<string | null>(null);
-  copyState = signal<'idle' | 'copied'>('idle');
+  copyState        = signal<'idle' | 'copied'>('idle');
 
-  private readonly API_BASE = 'https://buckty.cloud';
+  // Plain boolean so onerror can read it synchronously before Angular's
+  // next CD cycle flushes the isCompleted signal write.
+  private downloadDone = false;
 
+  private readonly API_BASE = 'http://localhost:8080';
   private eventSource: EventSource | null = null;
-  private requestId: string = '';
-  private authToken: string = '';
 
-  ngOnInit() {
-    const params = this.route.snapshot.queryParams;
-    this.requestId = params['requestId'];
+  ngOnInit(): void {
+    const params    = this.route.snapshot.queryParams;
+    const requestId = params['requestId']?.trim();
 
-    if (!this.requestId?.trim()) {
-      this.hasError.set(true);
-      this.errorMessage.set('Invalid request ID.');
+    if (!requestId) {
+      this.setError('Invalid request ID.');
       return;
     }
 
-    this.authToken = this.authService.currentSession()?.access_token ?? '';
-
-    const info = this.navState.getVideoInfo();
+    const videoInfo = this.navState.getVideoInfo();
     this.navState.clear();
-    this.videoData.set(this.buildVideoData(info, params));
+    this.videoData.set(this.buildVideoData(videoInfo, params));
 
     if (isPlatformBrowser(this.platformId)) {
-      this.listenToStream(this.requestId);
+      const token = this.authService.currentSession()?.access_token ?? '';
+      this.connectStream(requestId, token);
     }
   }
 
-  private buildVideoData(info: VideoInfo | null, params: any): VideoData {
-    return {
-      title: info?.title ?? '',
-      thumbnail: info?.thumbnail ?? '',
-      description: info?.description ?? '',
-      views: info?.views ?? 0,
-      likes: info?.likes ?? '—',
-      comments: info?.comments ?? '—',
-      uploader: info?.uploader ?? '',
-      requestedUrl: info?.url ?? params['url'] ?? ''
+  ngOnDestroy(): void {
+    this.eventSource?.close();
+  }
+
+  private connectStream(requestId: string, token: string): void {
+    this.eventSource = this.downloadSvc.connectToStream(requestId, token);
+
+    this.eventSource.onmessage = (event: MessageEvent) => {
+      let data: Record<string, any>;
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        return;
+      }
+      this.handleEvent(data);
     };
+
+    this.eventSource.onerror = () => {
+      if (this.downloadDone) {
+        this.eventSource?.close();
+        return;
+      }
+      this.setError('Connection lost. Please try again.');
+      this.eventSource?.close();
+    };
+  }
+
+  private handleEvent(data: Record<string, any>): void {
+    if (data['video_info']) {
+      this.videoData.update(prev =>
+        this.buildVideoData(data['video_info'], { url: prev?.requestedUrl }),
+      );
+      return;
+    }
+
+    if (typeof data['percent'] === 'number') this.progress.set(data['percent']);
+    if (data['message']) this.statusMessage.set(data['message']);
+
+    switch (data['status']) {
+
+      case 'downloading':
+        break;
+
+      case 'stream_end':
+        this.eventSource?.close();
+        break;
+
+      case 'completed': {
+        const rawUrl: string =
+          data['result']?.download_url ??
+          data['download_url']         ??
+          data['url']                  ??
+          '';
+
+        if (!rawUrl) {
+          this.markDone();
+          this.setError('Download finished but the file URL was missing. Please try again.');
+          this.eventSource?.close();
+          return;
+        }
+
+        this.finalDownloadUrl.set(this.resolveUrl(rawUrl));
+        this.markDone();
+        this.audioService.playCompletion();
+        break;
+      }
+
+      case 'uploading':
+        this.cloudStatus.set('uploading');
+        this.cloudMessage.set(data['message'] ?? 'Uploading to Google Drive...');
+        break;
+
+      case 'cloud_success':
+        this.cloudUrl.set(data['cloud_url'] ?? null);
+        this.cloudStatus.set('success');
+        this.cloudMessage.set(data['message'] ?? 'Uploaded to Google Drive!');
+        this.markDone();
+        this.eventSource?.close();
+        break;
+
+      case 'cloud_error':
+        this.cloudStatus.set('error');
+        this.cloudMessage.set(data['message'] ?? 'Drive upload failed.');
+        this.markDone();
+        this.eventSource?.close();
+        break;
+
+      case 'error':
+        this.setError(data['message'] ?? 'Something went wrong.');
+        this.eventSource?.close();
+        break;
+    }
+  }
+
+  saveVideo(): void {
+    const url = this.finalDownloadUrl();
+    if (!url) {
+      this.setError('Download URL not available.');
+      return;
+    }
+    const link    = document.createElement('a');
+    link.href     = url;
+    link.download = this.videoData()?.title || 'video.mp4';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  copyDriveLink(): void {
+    const url = this.cloudUrl();
+    if (!url) return;
+    navigator.clipboard.writeText(url).then(() => {
+      this.copyState.set('copied');
+      setTimeout(() => this.copyState.set('idle'), 1500);
+    });
+  }
+
+  onThumbnailError(): void {
+    this.videoData.update(v => v ? { ...v, thumbnail: 'default.png' } : null);
+  }
+
+  goHome(): void {
+    this.router.navigate(['/']);
+  }
+
+  private markDone(): void {
+    this.downloadDone = true;
+    this.isCompleted.set(true);
+  }
+
+  private setError(message: string): void {
+    this.hasError.set(true);
+    this.errorMessage.set(message);
   }
 
   private resolveUrl(rawUrl: string): string {
@@ -103,127 +227,16 @@ export class Download implements OnInit, OnDestroy {
     return `${this.API_BASE}${encodeURI(path)}`;
   }
 
-  private listenToStream(requestId: string) {
-    // Token passed as query param — EventSource doesn't support custom headers
-    this.eventSource = this.downloadService.connectToStream(requestId, this.authToken);
-
-    this.eventSource.onmessage = (event: MessageEvent) => {
-      let data: any;
-      try {
-        data = JSON.parse(event.data);
-      } catch {
-        console.error('[Download] Failed to parse SSE payload:', event.data);
-        return;
-      }
-
-      // Mid-stream video info update
-      if (data.video_info) {
-        this.videoData.update(prev => this.buildVideoData(data.video_info, { url: prev?.requestedUrl }));
-        return;
-      }
-
-      if (typeof data.percent === 'number') {
-        this.progress.set(data.percent);
-      }
-      if (data.message) {
-        this.statusMessage.set(data.message);
-      }
-
-      switch (data.status) {
-
-        case 'completed': {
-          const rawUrl: string = data.result?.download_url ?? '';
-          if (!rawUrl) {
-            console.warn('[Download] completed event has no download_url');
-            return;
-          }
-          this.finalDownloadUrl.set(this.resolveUrl(rawUrl));
-          this.isCompleted.set(true);
-          // SSE stays open — cloud events may still follow if upload was requested
-          this.audioService.playCompletion();
-          break;
-        }
-
-        case 'uploading': {
-          this.cloudStatus.set('uploading');
-          this.cloudMessage.set(data.message ?? 'Uploading to Google Drive...');
-          break;
-        }
-
-        case 'cloud_success': {
-          this.cloudUrl.set(data.cloud_url ?? null);
-          this.cloudStatus.set('success');
-          this.cloudMessage.set(data.message ?? 'Uploaded to Google Drive!');
-          this.eventSource?.close();
-          // DB update handled automatically by NestJS SSE interception
-          break;
-        }
-
-        case 'cloud_error': {
-          this.cloudStatus.set('error');
-          this.cloudMessage.set(data.message ?? 'Drive upload failed.');
-          this.eventSource?.close();
-          // DB update handled automatically by NestJS SSE interception
-          break;
-        }
-
-        case 'error': {
-          this.hasError.set(true);
-          this.errorMessage.set(data.message ?? 'Something went wrong.');
-          this.eventSource?.close();
-          break;
-        }
-      }
+  private buildVideoData(info: VideoInfo | null, params: Record<string, any>): VideoData {
+    return {
+      title:        info?.title       ?? '',
+      thumbnail:    info?.thumbnail   ?? '',
+      description:  info?.description ?? '',
+      views:        info?.views       ?? 0,
+      likes:        info?.likes       ?? '—',
+      comments:     info?.comments    ?? '—',
+      uploader:     info?.uploader    ?? '',
+      requestedUrl: info?.url         ?? params['url'] ?? '',
     };
-
-    this.eventSource.onerror = () => {
-      if (!this.isCompleted()) {
-        this.hasError.set(true);
-        this.errorMessage.set('Connection lost. Please try again.');
-      }
-      this.eventSource?.close();
-    };
-  }
-
-  saveVideo() {
-    const url = this.finalDownloadUrl();
-    if (!url) {
-      this.hasError.set(true);
-      this.errorMessage.set('Download URL not available.');
-      return;
-    }
-    const fileName = this.videoData()?.title || 'video.mp4';
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-
-  onThumbnailError() {
-    this.videoData.update(v => v ? { ...v, thumbnail: 'default.png' } : null);
-  }
-
-  goHome() {
-    this.router.navigate(['/']);
-  }
-
-  copyDriveLink() {
-    const url = this.cloudUrl();
-    if (!url) {
-      console.warn('No cloud URL available to copy');
-      return;
-    }
-    navigator.clipboard.writeText(url).then(() => {
-      this.copyState.set('copied');
-      setTimeout(() => this.copyState.set('idle'), 1500);
-    }).catch(err => {
-      console.error('Clipboard write failed:', err);
-    });
-  }
-
-  ngOnDestroy() {
-    this.eventSource?.close();
   }
 }
