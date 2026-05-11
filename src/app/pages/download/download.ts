@@ -42,11 +42,11 @@ export class Download implements OnInit, OnDestroy {
   private navState = inject(NavigationStateService);
   private platformId = inject(PLATFORM_ID);
   private authService = inject(AuthService);
-  private audioService = inject(Playaudio)
+  private audioService = inject(Playaudio);
 
   progress = signal(0);
   statusMessage = signal('Initializing...');
-  isCompleted = signal(false);         
+  isCompleted = signal(false);
   cloudStatus = signal<'idle' | 'uploading' | 'success' | 'error'>('idle');
   cloudMessage = signal('');
   cloudUrl = signal<string | null>(null);
@@ -55,7 +55,6 @@ export class Download implements OnInit, OnDestroy {
   videoData = signal<VideoData | null>(null);
   finalDownloadUrl = signal<string | null>(null);
   copyState = signal<'idle' | 'copied'>('idle');
-
 
   private readonly API_BASE = 'https://buckty.cloud';
 
@@ -105,7 +104,8 @@ export class Download implements OnInit, OnDestroy {
   }
 
   private listenToStream(requestId: string) {
-    this.eventSource = this.downloadService.connectToStream(requestId);
+    // Token passed as query param — EventSource doesn't support custom headers
+    this.eventSource = this.downloadService.connectToStream(requestId, this.authToken);
 
     this.eventSource.onmessage = (event: MessageEvent) => {
       let data: any;
@@ -122,7 +122,6 @@ export class Download implements OnInit, OnDestroy {
         return;
       }
 
-      // Update progress bar and message for any event that has them
       if (typeof data.percent === 'number') {
         this.progress.set(data.percent);
       }
@@ -140,9 +139,7 @@ export class Download implements OnInit, OnDestroy {
           }
           this.finalDownloadUrl.set(this.resolveUrl(rawUrl));
           this.isCompleted.set(true);
-          // SSE stays open — we still expect cloud events if upload was requested
-
-          // 🔊 play sound
+          // SSE stays open — cloud events may still follow if upload was requested
           this.audioService.playCompletion();
           break;
         }
@@ -154,12 +151,11 @@ export class Download implements OnInit, OnDestroy {
         }
 
         case 'cloud_success': {
-          const url = data.cloud_url ?? null;
-          this.cloudUrl.set(url);
+          this.cloudUrl.set(data.cloud_url ?? null);
           this.cloudStatus.set('success');
           this.cloudMessage.set(data.message ?? 'Uploaded to Google Drive!');
           this.eventSource?.close();
-          this.notifyBackend(requestId, url);
+          // DB update handled automatically by NestJS SSE interception
           break;
         }
 
@@ -167,7 +163,7 @@ export class Download implements OnInit, OnDestroy {
           this.cloudStatus.set('error');
           this.cloudMessage.set(data.message ?? 'Drive upload failed.');
           this.eventSource?.close();
-          this.notifyBackend(requestId, null);
+          // DB update handled automatically by NestJS SSE interception
           break;
         }
 
@@ -181,21 +177,12 @@ export class Download implements OnInit, OnDestroy {
     };
 
     this.eventSource.onerror = () => {
-      // If download is done and no cloud upload was pending, this is a normal close
       if (!this.isCompleted()) {
         this.hasError.set(true);
         this.errorMessage.set('Connection lost. Please try again.');
       }
       this.eventSource?.close();
     };
-  }
-
-  private notifyBackend(requestId: string, cloudUrl: string | null) {
-    if (!this.authToken) return;
-    this.downloadService.markComplete(requestId, this.authToken, cloudUrl).subscribe({
-      next: (res) => console.log('[Download] Backend marked complete:', res),
-      error: (err) => console.error('[Download] Failed to notify backend:', err),
-    });
   }
 
   saveVideo() {
@@ -223,23 +210,18 @@ export class Download implements OnInit, OnDestroy {
   }
 
   copyDriveLink() {
-  const url = this.cloudUrl();
-
-  if (!url) {
-    console.warn('No cloud URL available to copy');
-    return;
+    const url = this.cloudUrl();
+    if (!url) {
+      console.warn('No cloud URL available to copy');
+      return;
+    }
+    navigator.clipboard.writeText(url).then(() => {
+      this.copyState.set('copied');
+      setTimeout(() => this.copyState.set('idle'), 1500);
+    }).catch(err => {
+      console.error('Clipboard write failed:', err);
+    });
   }
-
-  navigator.clipboard.writeText(url).then(() => {
-    this.copyState.set('copied');          
-
-    setTimeout(() => {
-      this.copyState.set('idle');          
-    }, 1500);
-  }).catch(err => {
-    console.error('Clipboard write failed:', err);
-  });
-}
 
   ngOnDestroy() {
     this.eventSource?.close();

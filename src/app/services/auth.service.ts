@@ -77,31 +77,45 @@ export class AuthService {
       });
   }
 
-  private handleNormalInit(): void {
-    if (!this.supabase) return;
+private handleNormalInit(): void {
+  if (!this.supabase) return;
 
-    this.supabase.auth.getSession().then(({ data }) => {
+  // getUser() validates the token with Supabase server and auto-refreshes if expired
+  // getSession() just reads localStorage blindly — that's what caused the bug
+  this.supabase.auth.getUser().then(async ({ data, error }) => {
+    if (error || !data.user) {
       this.zone.run(() => {
-        this.currentSession.set(data?.session ?? null);
-        this.currentUser.set(data?.session?.user ?? null);
+        this.currentSession.set(null);
+        this.currentUser.set(null);
         this.isLoading.set(false);
       });
+      this.markSessionReady(false);
+      return;
+    }
 
-      this.markSessionReady(!!data?.session);
+    // By the time getUser() resolves, the session in localStorage is fresh
+    const { data: sessionData } = await this.supabase!.auth.getSession();
+
+    this.zone.run(() => {
+      this.currentSession.set(sessionData.session ?? null);
+      this.currentUser.set(data.user);
+      this.isLoading.set(false);
     });
 
-    this.supabase.auth.onAuthStateChange((event, session) => {
-      this.zone.run(() => {
-        this.currentSession.set(session);
-        this.currentUser.set(session?.user ?? null);
-      });
+    this.markSessionReady(true);
+  });
 
-      if (event === 'SIGNED_OUT') {
-        this.router.navigate(['/']);
-      }
+  this.supabase.auth.onAuthStateChange((event, session) => {
+    this.zone.run(() => {
+      this.currentSession.set(session);
+      this.currentUser.set(session?.user ?? null);
     });
-  }
 
+    if (event === 'SIGNED_OUT') {
+      this.router.navigate(['/']);
+    }
+  });
+}
   // ================= SESSION =================
 
   private markSessionReady(value: boolean) {
@@ -165,6 +179,11 @@ export class AuthService {
   }
 
   // ================= API =================
+async getFreshToken(): Promise<string | null> {
+  if (!this.supabase) return null;
+  const { data } = await this.supabase.auth.getSession();
+  return data.session?.access_token ?? null;
+}
 
   async getProfile() {
     const session = this.currentSession();

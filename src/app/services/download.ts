@@ -31,14 +31,13 @@ export interface DownloadResponse {
 })
 export class DownloadService {
   private http = inject(HttpClient);
-  private baseUrl = environment.apiUrl;
-  private engine = environment.EngineUrl;
+  private baseUrl = environment.apiUrl; // NestJS base URL
 
   createDownload(
     payload: DownloadRequest,
     token: string,
   ): Observable<DownloadResponse> {
-    console.log('[DownloadService] Creating download with payload:', payload);
+    console.log('[DownloadService] Creating download:', payload);
     return this.http.post<DownloadResponse>(
       `${this.baseUrl}/api/video`,
       payload,
@@ -48,22 +47,15 @@ export class DownloadService {
     );
   }
 
-  connectToStream(requestId: string): EventSource {
-    return new EventSource(`${this.engine}/stream/${requestId}`);
+  /**
+   * Connect to the NestJS SSE bridge instead of Go directly.
+   * NestJS forwards all Go events and handles DB updates internally.
+   * The token is passed as a query param because EventSource doesn't
+   * support custom headers.
+   */
+  connectToStream(requestId: string, token: string): EventSource {
+    const url = `${this.baseUrl}/api/video/stream/${requestId}?token=${encodeURIComponent(token)}`;
+    return new EventSource(url);
   }
 
-  // Called after SSE signals completion — tells NestJS to update DB status
-  markComplete(
-    requestId: string,
-    token: string,
-    cloudUrl: string | null,
-  ): Observable<{ ok: boolean }> {
-    return this.http.post<{ ok: boolean }>(
-      `${this.baseUrl}/api/video/complete`,
-      { request_id: requestId, cloud_url: cloudUrl },
-      {
-        headers: new HttpHeaders({ Authorization: `Bearer ${token}` }),
-      },
-    );
-  }
 }

@@ -15,11 +15,17 @@ export const routes: Routes = [
   {
     path: '',
     component: Home,
-    
   },
   {
     path: 'youtube-downloader',
-    component: Youtube
+    title: 'Buckty - Free YouTube Downloader Online 2026',
+    component: Youtube,
+    data: {
+      description:
+        'Download YouTube videos online for free with Buckty. Save videos in HD and 4K quality, convert YouTube videos to MP3, and enjoy fast downloads without complicated steps.',
+      keywords:
+        'youtube downloader, free youtube downloader, youtube video downloader, download youtube videos, youtube to mp3, youtube mp4 downloader, 4k youtube downloader, online video downloader, buckty'
+    }
   },
   {
     path: 'download',
