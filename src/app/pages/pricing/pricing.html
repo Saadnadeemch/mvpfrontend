@@ -3,26 +3,26 @@
   <app-navbar />
 
   <main class="flex-1">
-    <section class="px-4 py-16 md:py-24">
+    <section class="px-4 pt-10 pb-8 md:pt-14">
 
       <!-- Header -->
-      <div class="max-w-2xl mx-auto text-center mb-16">
-        <h1 class="font-display font-extrabold text-4xl md:text-5xl leading-tight tracking-tight text-dark mb-5">
+      <div class="max-w-2xl mx-auto text-center mb-8">
+        <h1 class="font-display font-extrabold text-3xl md:text-4xl leading-tight tracking-tight text-dark mb-3">
           Download anything, free.<br />
           <span class="text-primary">Upgrade when you want more.</span>
         </h1>
-        <p class="text-base text-dark/55 max-w-lg mx-auto leading-relaxed mb-8">
+        <p class="text-sm text-dark/55 max-w-lg mx-auto leading-relaxed">
           No credit card needed. Automatic sync to Google Drive
         </p>
       </div>
 
       <!-- Plan Cards -->
-      <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
+      <div class="max-w-3xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
 
         <!-- Basic (MOST POPULAR) -->
-        <div class="relative flex flex-col gap-6 bg-white rounded-2xl border-2 border-primary p-8 transition-shadow hover:shadow-xl">
+        <div class="relative flex flex-col gap-4 bg-white rounded-2xl border-2 border-primary p-6 transition-shadow hover:shadow-xl">
 
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1.5">
             <div class="flex items-center gap-2">
               <span class="self-start text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-primary text-white">
                 Basic
@@ -32,26 +32,26 @@
               </span>
             </div>
 
-            <div class="flex items-baseline gap-1.5 mt-2">
-              <span class="font-display font-extrabold text-5xl tracking-tight text-dark leading-none">
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="font-display font-extrabold text-4xl tracking-tight text-dark leading-none">
                 $4.99
               </span>
-              <span class="text-base font-medium text-dark/40">per month</span>
+              <span class="text-sm font-medium text-dark/40">per month</span>
             </div>
 
-            <p class="text-base text-dark/55 leading-relaxed mt-1">
+            <p class="text-sm text-dark/55 leading-relaxed">
               Perfect for most users — fast downloads with high quality and cloud integration.
             </p>
           </div>
 
-          <div class="flex items-center gap-2 text-sm font-semibold text-primary bg-primary/10 px-4 py-3 rounded-xl">
-            <span class="material-icons text-base">star</span>
+          <div class="flex items-center gap-2 text-xs font-semibold text-primary bg-primary/10 px-3 py-2.5 rounded-xl">
+            <span class="material-icons text-sm">star</span>
             First month is completely free, no card needed
           </div>
 
-          <ul class="flex flex-col gap-3.5 flex-1">
-            <li *ngFor="let f of basicFeatures" class="flex items-start gap-3 text-sm text-dark leading-snug">
-              <span class="material-icons text-base text-primary mt-0.5 shrink-0">check_circle</span>
+          <ul class="flex flex-col gap-2.5 flex-1">
+            <li *ngFor="let f of basicFeatures" class="flex items-start gap-2.5 text-sm text-dark leading-snug">
+              <span class="material-icons text-sm text-primary mt-0.5 shrink-0">check_circle</span>
               {{ f }}
             </li>
           </ul>
@@ -59,51 +59,51 @@
           <button
             (click)="selectPlan('basic')"
             [disabled]="savingPlan !== null"
-            class="w-full py-3.5 rounded-xl text-sm font-bold bg-primary text-white
-                   transition-all hover:opacity-90 hover:-translate-y-px shadow-md cursor-pointer mt-2
+            class="w-full py-3 rounded-xl text-sm font-bold bg-primary text-white
+                   transition-all hover:opacity-90 hover:-translate-y-px shadow-md cursor-pointer
                    disabled:opacity-60 disabled:cursor-not-allowed
                    flex items-center justify-center gap-2">
-            <span *ngIf="savingPlan === 'basic'" class="material-icons text-base animate-spin">sync</span>
+            <span *ngIf="savingPlan === 'basic'" class="material-icons text-sm animate-spin">sync</span>
             <span>{{ savingPlan === 'basic' ? 'Saving…' : 'Start Free Trial' }}</span>
           </button>
         </div>
 
         <!-- Pro (COMING SOON) -->
-        <div class="relative flex flex-col gap-6 bg-white rounded-2xl border border-neutral p-8 opacity-60 pointer-events-none">
+        <div class="relative flex flex-col gap-4 bg-white rounded-2xl border border-neutral p-6 opacity-60 pointer-events-none">
 
-          <div class="flex flex-col gap-2">
+          <div class="flex flex-col gap-1.5">
             <span class="self-start text-xs font-bold tracking-widest uppercase px-3 py-1 rounded-full bg-neutral/20 text-dark/60">
               Pro
             </span>
 
-            <div class="flex items-baseline gap-1.5 mt-2">
-              <span class="font-display font-extrabold text-5xl tracking-tight text-dark leading-none">
+            <div class="flex items-baseline gap-1.5 mt-1">
+              <span class="font-display font-extrabold text-4xl tracking-tight text-dark leading-none">
                 $13.99
               </span>
-              <span class="text-base font-medium text-dark/40">per month</span>
+              <span class="text-sm font-medium text-dark/40">per month</span>
             </div>
 
-            <p class="text-base text-dark/55 leading-relaxed mt-1">
+            <p class="text-sm text-dark/55 leading-relaxed">
               Advanced features and personal storage — launching soon.
             </p>
           </div>
 
-          <div class="flex items-center gap-2 text-sm font-semibold text-dark/40 bg-neutral/20 px-4 py-3 rounded-xl">
-            <span class="material-icons text-base">schedule</span>
+          <div class="flex items-center gap-2 text-xs font-semibold text-dark/40 bg-neutral/20 px-3 py-2.5 rounded-xl">
+            <span class="material-icons text-sm">schedule</span>
             This plan is not available yet
           </div>
 
-          <ul class="flex flex-col gap-3.5 flex-1">
-            <li *ngFor="let f of proFeatures" class="flex items-start gap-3 text-sm text-dark leading-snug">
-              <span class="material-icons text-base text-primary mt-0.5 shrink-0">check_circle</span>
+          <ul class="flex flex-col gap-2.5 flex-1">
+            <li *ngFor="let f of proFeatures" class="flex items-start gap-2.5 text-sm text-dark leading-snug">
+              <span class="material-icons text-sm text-primary mt-0.5 shrink-0">check_circle</span>
               {{ f }}
             </li>
           </ul>
 
           <button
             disabled
-            class="w-full py-3.5 rounded-xl text-sm font-bold bg-neutral/30 text-dark/50
-                   cursor-not-allowed mt-2 flex items-center justify-center">
+            class="w-full py-3 rounded-xl text-sm font-bold bg-neutral/30 text-dark/50
+                   cursor-not-allowed flex items-center justify-center">
             Coming Soon
           </button>
         </div>
@@ -111,7 +111,7 @@
       </div>
 
       <!-- Error message -->
-      <div *ngIf="saveError" class="max-w-3xl mx-auto mb-6">
+      <div *ngIf="saveError" class="max-w-3xl mx-auto mb-4">
         <div class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-xl">
           <span class="material-icons text-base">error_outline</span>
           {{ saveError }}
@@ -119,7 +119,7 @@
       </div>
 
       <!-- Compare note -->
-      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-dark/40 mb-20">
+      <div class="flex flex-wrap items-center justify-center gap-2 text-sm text-dark/40 mb-16">
         <span class="material-icons text-base">info_outline</span>
         No account? No problem. You can still download unlimited videos up to 720p quality for free, always.
         <a href="#" class="text-primary font-semibold hover:opacity-70 transition-opacity">See full comparison →</a>

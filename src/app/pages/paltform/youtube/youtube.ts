@@ -54,7 +54,8 @@ export class Youtube implements OnDestroy {
   private typingTimer: ReturnType<typeof setTimeout> | null = null;
 
 
-  // Remove the static qualities array and replace with:
+  
+
 readonly qualities = computed<QualityOption[]>(() => {
   const loggedIn = this.authService.isLoggedIn();
   return [
@@ -174,9 +175,8 @@ private placeholders = [
         this.url.set(text.trim());
         this.handleDownload();
       }
-    } catch {
-      // Clipboard permission denied — silently ignore
-    }
+    } catch {}
+
   }
 
   handleDownload() {
@@ -224,20 +224,3 @@ private placeholders = [
     if (this.typingTimer) clearTimeout(this.typingTimer);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

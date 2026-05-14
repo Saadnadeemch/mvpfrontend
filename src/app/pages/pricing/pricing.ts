@@ -44,7 +44,7 @@ export class Pricing {
     return;
   }
 
-  this.router.navigate(['/bdashboard'], {
+  this.router.navigate(['/dashboard'], {
     queryParams: { plan: plan_type, annual: this.isAnnual },
   });
 }

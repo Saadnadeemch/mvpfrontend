@@ -1,17 +1,14 @@
 <div class="h-screen w-screen flex flex-col overflow-hidden">
 
-  <!-- Navbar -->
   <app-navbar />
 
-  <!-- Main -->
   <main class="flex-1 flex items-center justify-center px-4 overflow-hidden">
-
     <div class="flex flex-col items-center justify-center w-full max-w-sm">
 
       <!-- Card Wrapper -->
-      <div class="relative w-full sm:w-full">
+      <div class="relative w-full">
 
-        <!-- SVG BORDER (UNCHANGED LOGIC) -->
+        <!-- Animated SVG Border -->
         <svg
           class="svg-border-container"
           viewBox="0 0 400 520"
@@ -22,10 +19,8 @@
             <marker
               id="chevron-tip"
               viewBox="-2 -5 10 10"
-              refX="5"
-              refY="0"
-              markerWidth="6"
-              markerHeight="6"
+              refX="5" refY="0"
+              markerWidth="6" markerHeight="6"
               markerUnits="strokeWidth"
               orient="auto"
             >
@@ -40,15 +35,10 @@
             </marker>
           </defs>
 
-          <rect
-            x="6" y="6" width="388" height="508"
-            rx="20" ry="20"
-            class="svg-track-rect"
-          />
+          <rect x="6" y="6" width="388" height="508" rx="20" ry="20" class="svg-track-rect" />
 
           <rect
-            x="6" y="6" width="388" height="508"
-            rx="20" ry="20"
+            x="6" y="6" width="388" height="508" rx="20" ry="20"
             pathLength="1"
             class="svg-border-rect"
             marker-end="url(#chevron-tip)"
@@ -89,208 +79,137 @@
             </p>
 
             <!-- Stats -->
-            <div class="flex items-center justify-between pt-5 border-t border-neutral/10">
-              <div class="flex items-center gap-3">
-
-                <div class="flex items-center gap-1 text-neutral">
-                  <mat-icon class="text-xs h-3 w-3">visibility</mat-icon>
-                  <span class="text-[9px] font-bold">{{ videoData()?.views }}</span>
-                </div>
-
-                <div class="flex items-center gap-1 text-neutral">
-                  <mat-icon class="text-xs h-3 w-3">thumb_up</mat-icon>
-                  <span class="text-[9px] font-bold">{{ videoData()?.likes }}</span>
-                </div>
-
-                <div class="flex items-center gap-1 text-neutral">
-                  <mat-icon class="text-xs h-3 w-3">chat_bubble</mat-icon>
-                  <span class="text-[9px] font-bold">{{ videoData()?.comments }}</span>
-                </div>
-
+            <div class="flex items-center gap-3 pt-5 border-t border-neutral/10">
+              <div class="flex items-center gap-1 text-neutral">
+                <mat-icon class="text-xs h-3 w-3">visibility</mat-icon>
+                <span class="text-[9px] font-bold">{{ videoData()?.views }}</span>
+              </div>
+              <div class="flex items-center gap-1 text-neutral">
+                <mat-icon class="text-xs h-3 w-3">thumb_up</mat-icon>
+                <span class="text-[9px] font-bold">{{ videoData()?.likes }}</span>
+              </div>
+              <div class="flex items-center gap-1 text-neutral">
+                <mat-icon class="text-xs h-3 w-3">chat_bubble</mat-icon>
+                <span class="text-[9px] font-bold">{{ videoData()?.comments }}</span>
               </div>
             </div>
 
           </div>
         </div>
-      </div><!-- Bottom Section -->
-<div class="mt-6 text-center space-y-4 w-full">
-
-  <!-- ===================== -->
-  <!-- PROGRESS STATE (KEEP EXACTLY AS IS) -->
-  <!-- ===================== -->
-  @if (!isCompleted()) {
-    <div class="space-y-2">
-
-      <!-- Progress -->
-      <div class="relative inline-flex items-end gap-1">
-        <span class="text-4xl font-display font-bold text-primary tabular-nums">
-          {{ progress() }}
-        </span>
-        <span class="text-lg font-bold text-primary">%</span>
       </div>
 
-      <!-- Status Text (UPDATED COLORS USING GLOBALS) -->
-      <p
-        class="text-[10px] uppercase tracking-widest font-bold animate-pulse"
-        [ngClass]="{
-          'text-primary': cloudStatus() === 'uploading',
-          'text-secondary': cloudStatus() === 'success',
-          'text-red-500': cloudStatus() === 'error'
-        }"
-      >
-        {{ statusMessage() || 'Video Downloading...' }}
-      </p>
+      <!-- Bottom Section -->
+      <div class="mt-6 text-center space-y-4 w-full">
 
-    
+        <!-- In-Progress State -->
+        @if (!isCompleted()) {
+          <div class="space-y-2">
+            <div class="relative inline-flex items-end gap-1">
+              <span class="text-4xl font-display font-bold text-primary tabular-nums">{{ progress() }}</span>
+              <span class="text-lg font-bold text-primary">%</span>
+            </div>
+            <p
+              class="text-[10px] uppercase tracking-widest font-bold animate-pulse"
+              [ngClass]="{
+                'text-primary':   cloudStatus() === 'uploading',
+                'text-secondary': cloudStatus() === 'success',
+                'text-red-500':   cloudStatus() === 'error'
+              }"
+            >
+              {{ statusMessage() || 'Video Downloading...' }}
+            </p>
+          </div>
+        }
 
-    </div>
-  }
+        <!-- Completed State -->
+        @if (isCompleted()) {
 
+          <!-- Action Buttons -->
+          <div class="flex items-center justify-center gap-3 flex-nowrap">
+            <button
+              (click)="saveVideo()"
+              class="h-[52px] px-8 sm:px-12 bg-primary text-white rounded-2xl font-semibold
+                     flex items-center justify-center whitespace-nowrap
+                     shadow-lg shadow-primary/20 transition-all duration-200
+                     hover:bg-secondary active:scale-[0.98] cursor-pointer"
+            >
+              Save Video to Device
+            </button>
 
-  <!-- ===================== -->
-  <!-- COMPLETED ACTIONS -->
-  <!-- ===================== -->
-  @if (isCompleted()) {
+            <button
+              (click)="goHome()"
+              aria-label="Download more"
+              class="h-13 w-13 flex items-center justify-center rounded-2xl
+                     border border-neutral/40 bg-white text-primary
+                     transition-all duration-200 hover:bg-neutral/10
+                     active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary/40
+                     group cursor-pointer"
+            >
+              <mat-icon class="text-[20px] transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] group-hover:scale-110">
+                add
+              </mat-icon>
+            </button>
+          </div>
 
-    <div class="flex items-center justify-center gap-3 flex-nowrap">
+          <!-- Cloud Status Pill — only shown when status is set -->
+          @if (cloudStatus() === 'uploading' || cloudStatus() === 'success' || cloudStatus() === 'error') {
+            <div
+              class="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium
+                     w-fit mx-auto mt-6 sm:mt-3 border border-neutral/20
+                     shadow-sm transition-all duration-300"
+              [ngClass]="{
+                'bg-primary/10 text-primary':     cloudStatus() === 'uploading',
+                'bg-secondary/10 text-secondary': cloudStatus() === 'success',
+                'bg-red-500/10 text-red-500':     cloudStatus() === 'error'
+              }"
+            >
+              <!-- Status Icon -->
+              <div class="w-4 h-4 flex items-center justify-center shrink-0">
+                @if (cloudStatus() === 'uploading') {
+                  <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                }
+                @if (cloudStatus() === 'success') {
+                  <span class="text-secondary leading-none">✓</span>
+                }
+                @if (cloudStatus() === 'error') {
+                  <span class="text-red-500 leading-none">✕</span>
+                }
+              </div>
 
-      <!-- SAVE BUTTON -->
-      <button
-        (click)="saveVideo()"
-        class="h-[52px] px-8 sm:px-12 
-               bg-primary text-white 
-               rounded-2xl font-semibold
-               flex items-center justify-center
-               whitespace-nowrap
-               shadow-lg shadow-primary/20
-               transition-all duration-200 ease-in-out
-               hover:bg-secondary active:scale-[0.98] cursor-pointer"
-      >
-        Save Video to Device
-      </button>
+              <!-- Status Label -->
+              <span class="tracking-wide">
+                @if (cloudStatus() === 'uploading') { Cloud uploading }
+                @if (cloudStatus() === 'success')  { Uploaded }
+                @if (cloudStatus() === 'error')    { Upload failed }
+              </span>
 
-      <!-- HOME BUTTON -->
-      <button
-        (click)="goHome()"
-        aria-label="Download more"
-        class="h-13 w-13
-               flex items-center justify-center
-               rounded-2xl
-               border border-neutral/40
-               bg-white dark:bg-white/5
-               text-primary
-               transition-all duration-200
-               hover:bg-neutral/10
-               active:scale-95
-               focus:outline-none focus:ring-2 focus:ring-primary/40
-               group cursor-pointer"
-      >
-        <mat-icon
-          class="text-[20px]
-                 transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]
-                 group-hover:scale-110"
-        >
-          add
-        </mat-icon>
-      </button>
-
-    </div>
-
-
-    <!-- ===================== -->
-    <!-- CLOUD STATUS PILL (CLEAN + GLOBAL COLORS) -->
-    <!-- ===================== -->
-    @if (cloudStatus() !== null) {
-
-      <div
-        class="flex items-center gap-2 px-3 py-1.5 rounded-full text-[11px] font-medium
-               w-fit mx-auto mt-6 sm:mt-3
-               transition-all duration-300 ease-in-out shadow-sm
-               border border-neutral/20"
-
-        [ngClass]="{
-          'bg-primary/10 text-primary': cloudStatus() === 'uploading',
-          'bg-secondary/10 text-secondary': cloudStatus() === 'success',
-          'bg-red-500/10 text-red-500': cloudStatus() === 'error'
-        }"
-      >
-
-        <!-- ICON (FIXED ALIGNMENT) -->
-        <div class="w-4 h-4 flex items-center justify-center shrink-0">
-
-          @if (cloudStatus() === 'uploading') {
-            <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+              <!-- Copy Link (success only) -->
+              @if (cloudStatus() === 'success') {
+                <button
+                  (click)="copyDriveLink()"
+                  class="ml-2 text-[10px] px-2 py-0.5 rounded-md bg-primary/10 text-primary
+                         hover:bg-primary/20 transition whitespace-nowrap"
+                >
+                  {{ copyState() === 'copied' ? 'Link Copied' : 'Copy Link' }}
+                </button>
+              }
+            </div>
           }
 
-          @if (cloudStatus() === 'success') {
-            <div class="text-secondary leading-none">✓</div>
-          }
+        }
 
-          @if (cloudStatus() === 'error') {
-            <div class="text-red-500 leading-none">✕</div>
-          }
-
-        </div>
-
-        <!-- TEXT -->
-        <span class="tracking-wide">
-          @if (cloudStatus() === 'uploading') {
-            Cloud uploading
-          }
-          @if (cloudStatus() === 'success') {
-            Uploaded
-          }
-          @if (cloudStatus() === 'error') {
-            Upload failed
-          }
-        </span>
-
-        <!-- COPY BUTTON (NO SHIFT ISSUE) -->
-       @if (cloudStatus() === 'success') {
-  <button
-    (click)="copyDriveLink()"
-    class="ml-2 text-[10px] px-2 py-0.5 rounded-md
-           bg-primary/10 text-primary
-           hover:bg-primary/20
-           transition whitespace-nowrap"
-  >
-    @if (copyState() === 'copied') {
-      Link Copied
-    } @else {
-      Copy Link
-    }
-  </button>
-}
+        <!-- Global Error -->
+        @if (hasError()) {
+          <div class="max-w-xs sm:max-w-md mx-auto mt-2 px-3 py-2 text-[11px] sm:text-xs font-medium
+                      text-red-500 bg-red-500/5 border border-red-500/20 rounded-xl
+                      flex items-center gap-2 animate-pulse">
+            <span>⚠</span>
+            {{ errorMessage() }}
+          </div>
+        }
 
       </div>
-    }
-
-
-
-
-    
-  }
-
-
-  <!-- ===================== -->
-  <!-- GLOBAL ERROR -->
-  <!-- ===================== -->
-  @if (hasError()) {
-    <div
-      class="max-w-xs sm:max-w-md mx-auto mt-2
-             px-3 py-2
-             text-[11px] sm:text-xs
-             font-medium
-             text-red-500
-             bg-red-500/5
-             border border-red-500/20
-             rounded-xl
-             flex items-center gap-2
-             animate-pulse"
-    >
-      <span class="text-red-500">⚠</span>
-      {{ errorMessage() }}
     </div>
-  }
+  </main>
 
 </div>
