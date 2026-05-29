@@ -13,5 +13,5 @@ export const environment = {
 
   
   //nest js api url 
-  apiUrl : 'http://localhost:3000',
+  apiUrl : 'http://localhost:3000', 
 };

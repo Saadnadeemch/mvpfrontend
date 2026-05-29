@@ -1,145 +1,145 @@
-<div class="h-screen w-screen flex flex-col overflow-hidden">
+  <div class="h-screen w-screen flex flex-col overflow-hidden">
 
-  <app-navbar />
+    <app-navbar />
 
-  <!-- Body -->
-  <main class="flex-1 flex flex-col items-center justify-center px-4 overflow-hidden">
+    <!-- Body -->
+    <main class="flex-1 flex flex-col items-center justify-center px-4 overflow-hidden">
 
-<!-- Heading -->
-<div class="w-full max-w-xl text-center select-none mb-6">
-  <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-primary">
-    Never Lose That 
-   
-      Video
+  <!-- Heading -->
+  <div class="w-full max-w-xl text-center select-none mb-6">
+    <h1 class="text-3xl md:text-4xl font-bold tracking-tight text-primary">
+      Never Lose That 
     
-    Again.
-  </h1>
-</div>
+        Video
+      
+      Again.
+    </h1>
+  </div>
 
-    <!-- Search Box -->
-    <div class="w-full max-w-2xl bg-white border border-neutral/30 rounded-2xl shadow-sm p-2 mb-10">
-      <div class="flex flex-col">
+      <!-- Search Box -->
+      <div class="w-full max-w-2xl bg-white border border-neutral/30 rounded-2xl shadow-sm p-2 mb-10">
+        <div class="flex flex-col">
 
-        <!-- URL Input -->
-        <div class="px-3 pt-2">
-          <input
-            type="text"
-            [(ngModel)]="url"
-            (keydown.enter)="handleDownload()"
-            [placeholder]="placeholderText()"
-            class="w-full py-3 bg-transparent outline-none text-base placeholder:text-neutral-400"
-          />
-        </div>
-
-        <!-- Controls Row -->
-        <div class="flex items-center justify-between px-3 pb-2 pt-1 flex-wrap gap-3">
-
-          <!-- Left: Audio Only Toggle -->
-          <div class="flex items-center gap-2 cursor-pointer" (click)="toggleAudio()">
-            <span
-              class="text-xs font-semibold transition-colors select-none"
-              [ngClass]="isAudioOnly() ? 'text-primary' : 'text-neutral-400'"
-            >
-              Audio Only
-            </span>
-            <button
-              class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
-              [ngClass]="isAudioOnly() ? 'bg-primary' : 'bg-neutral-300'"
-              type="button"
-            >
-              <span
-                class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
-                [ngClass]="isAudioOnly() ? 'translate-x-4' : 'translate-x-1'"
-              ></span>
-            </button>
+          <!-- URL Input -->
+          <div class="px-3 pt-2">
+            <input
+              type="text"
+              [(ngModel)]="url"
+              (keydown.enter)="handleDownload()"
+              [placeholder]="placeholderText()"
+              class="w-full py-3 bg-transparent outline-none text-base placeholder:text-neutral-400"
+            />
           </div>
 
-          <!-- Right: Quality + Paste Button -->
-          <div class="flex items-center gap-2 flex-wrap justify-end">
+          <!-- Controls Row -->
+          <div class="flex items-center justify-between px-3 pb-2 pt-1 flex-wrap gap-3">
 
-            <!-- Quality Dropdown -->
-          <div class="relative">
-  <button
-    (click)="toggleDropdown($event)"
-    [disabled]="isAudioOnly()"
-    type="button"
-    class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold border rounded-lg transition
-           border-primary text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    <span>{{ quality() }}</span>
-    <mat-icon class="text-sm">expand_more</mat-icon>
-  </button>
-
-  @if (isDropdownOpen()) {
-    <div class="absolute right-0 bottom-full mb-2 w-40
-                bg-white border border-neutral/20
-                rounded-xl shadow-lg z-50 py-1">
-      @for (q of qualities(); track q.label) {
-        <div class="relative group">
-          <button
-            (click)="selectQuality(q)"
-            [disabled]="q.isPaid"
-            type="button"
-            class="w-full text-left px-3 py-2 text-xs flex justify-between items-center transition text-dark
-                   disabled:opacity-50 disabled:cursor-not-allowed"
-            [ngClass]="{
-              'bg-primary/10 text-primary font-semibold': quality() === q.label,
-              'hover:bg-neutral/20': quality() !== q.label && !q.isPaid
-            }"
-          >
-            <span>{{ q.label }}</span>
-            @if (q.isPaid) {
-              <mat-icon class="text-sm text-neutral">lock</mat-icon>
-            }
-          </button>
-
-          <!-- Tooltip shown on hover for locked qualities -->
-          @if (q.isPaid) {
-            <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2
-                        bg-dark text-white text-[10px] font-medium
-                        px-2 py-1 rounded-lg whitespace-nowrap
-                        opacity-0 group-hover:opacity-100
-                        pointer-events-none transition-opacity duration-200 z-50">
-              ✦ Upgrade to Pro
-              <!-- Tooltip arrow -->
-              <span class="absolute -right-1 top-1/2 -translate-y-1/2
-                           border-4 border-transparent border-l-dark"></span>
+            <!-- Left: Audio Only Toggle -->
+            <div class="flex items-center gap-2 cursor-pointer" (click)="toggleAudio()">
+              <span
+                class="text-xs font-semibold transition-colors select-none"
+                [ngClass]="isAudioOnly() ? 'text-primary' : 'text-neutral-400'"
+              >
+                Audio Only
+              </span>
+              <button
+                class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors"
+                [ngClass]="isAudioOnly() ? 'bg-primary' : 'bg-neutral-300'"
+                type="button"
+              >
+                <span
+                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                  [ngClass]="isAudioOnly() ? 'translate-x-4' : 'translate-x-1'"
+                ></span>
+              </button>
             </div>
-          }
-        </div>
-      }
-    </div>
-  }
-</div>
 
-            <!-- Paste & Download Button -->
+            <!-- Right: Quality + Paste Button -->
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+
+              <!-- Quality Dropdown -->
+            <div class="relative">
+    <button
+      (click)="toggleDropdown($event)"
+      [disabled]="isAudioOnly()"
+      type="button"
+      class="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold border rounded-lg transition
+            border-primary text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      <span>{{ quality() }}</span>
+      <mat-icon class="text-sm">expand_more</mat-icon>
+    </button>
+
+    @if (isDropdownOpen()) {
+      <div class="absolute right-0 bottom-full mb-2 w-40
+                  bg-white border border-neutral/20
+                  rounded-xl shadow-lg z-50 py-1">
+        @for (q of qualities(); track q.label) {
+          <div class="relative group">
             <button
-              (click)="handlePaste()"
-              [disabled]="isDownloading()"
+              (click)="selectQuality(q)"
+              [disabled]="q.isPaid"
               type="button"
-              class="w-10 h-10 flex items-center justify-center rounded-full transition shadow-sm
-                     bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              class="w-full text-left px-3 py-2 text-xs flex justify-between items-center transition text-dark
+                    disabled:opacity-50 disabled:cursor-not-allowed"
+              [ngClass]="{
+                'bg-primary/10 text-primary font-semibold': quality() === q.label,
+                'hover:bg-neutral/20': quality() !== q.label && !q.isPaid
+              }"
             >
-              @if (isDownloading()) {
-                <mat-icon class="animate-spin text-base">sync</mat-icon>
-              } @else {
-                <mat-icon class="text-base">content_paste_go</mat-icon>
+              <span>{{ q.label }}</span>
+              @if (q.isPaid) {
+                <mat-icon class="text-sm text-neutral">lock</mat-icon>
               }
             </button>
 
+            <!-- Tooltip shown on hover for locked qualities -->
+            @if (q.isPaid) {
+              <div class="absolute right-full top-1/2 -translate-y-1/2 mr-2
+                          bg-dark text-white text-[10px] font-medium
+                          px-2 py-1 rounded-lg whitespace-nowrap
+                          opacity-0 group-hover:opacity-100
+                          pointer-events-none transition-opacity duration-200 z-50">
+                ✦ Upgrade to Pro
+                <!-- Tooltip arrow -->
+                <span class="absolute -right-1 top-1/2 -translate-y-1/2
+                            border-4 border-transparent border-l-dark"></span>
+              </div>
+            }
           </div>
-        </div>
-
+        }
       </div>
-    </div>
+    }
+  </div>
 
-    <!-- Footer Note -->
-    <p class="text-center text-xs text-neutral-400 -mt-8">
-      Only download content you have permission to use.
-    </p>
+              <!-- Paste & Download Button -->
+              <button
+                (click)="handlePaste()"
+                [disabled]="isDownloading()"
+                type="button"
+                class="w-10 h-10 flex items-center justify-center rounded-full transition shadow-sm
+                      bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                @if (isDownloading()) {
+                  <mat-icon class="animate-spin text-base">sync</mat-icon>
+                } @else {
+                  <mat-icon class="text-base">content_paste_go</mat-icon>
+                }
+              </button>
 
-  </main>
+            </div>
+          </div>
 
-  <app-footer />
+        </div>
+      </div>
 
-</div>
+      <!-- Footer Note -->
+      <p class="text-center text-xs text-neutral-400 -mt-8">
+        Only download content you have permission to use.
+      </p>
+
+    </main>
+
+    <app-footer />
+
+  </div>
