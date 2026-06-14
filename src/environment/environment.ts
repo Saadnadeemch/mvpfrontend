@@ -7,8 +7,8 @@ export const environment = {
 
 
   // current URL Frotnend 
-  FrontendURL: 'http://localhost:4200',
-  // FrontendURL : 'https://buckty.cloud',
+  // FrontendURL: 'http://localhost:4200',
+  FrontendURL : 'https://buckty.cloud',
 
 
   
