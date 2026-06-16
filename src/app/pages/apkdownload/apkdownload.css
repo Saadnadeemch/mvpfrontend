@@ -1,0 +1,73 @@
+/* =============================================
+   HOST
+   ============================================= */
+:host {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--color-white);
+  color: var(--color-dark);
+  font-family: var(--font-sans);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* =============================================
+   BADGE DOT PULSE (Tailwind animate-pulse is fine
+   but we override timing here to match brand)
+   ============================================= */
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.6); }
+}
+[style*="animate-pulse"],
+.animate-pulse {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
+/* =============================================
+   ACCENT UNDERLINE on headline
+   ============================================= */
+h1 .relative span {
+  display: block;
+}
+
+/* =============================================
+   RESPONSIVE
+   ============================================= */
+@media (max-width: 680px) {
+  /* Stack hero vertically, screenshot below */
+  main > div.flex.items-center {
+    flex-direction: column-reverse;
+    gap: 2rem;
+    align-items: center;
+    text-align: center;
+  }
+
+  main > div.flex.items-center > div:first-child {
+    align-items: center;
+  }
+
+  /* Shrink screenshot on mobile */
+  main > div.flex.items-center > div:last-child > div {
+    width: 160px !important;
+  }
+
+  footer {
+    flex-direction: column;
+    gap: 6px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 420px) {
+  main {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse { animation: none !important; }
+  * { transition-duration: 0.01ms !important; }
+}

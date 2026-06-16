@@ -10,6 +10,7 @@ import { Termservice } from './pages/termservice/termservice';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Notfound } from './pages/notfound/notfound';
 import { Youtube } from './pages/paltform/youtube/youtube';
+import { Apkdownload } from './pages/apkdownload/apkdownload';
 
 export const routes: Routes = [
   {
@@ -62,6 +63,11 @@ export const routes: Routes = [
     path: 'terms-of-service',
     title: 'Terms of Service — Buckty',
     component: Termservice,
+  },
+  {
+    path:'apk-download',
+    title: 'Download the Apk',
+    component:Apkdownload
   },
   {
     path: '**',

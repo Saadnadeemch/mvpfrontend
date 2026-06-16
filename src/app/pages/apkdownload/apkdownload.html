@@ -1,0 +1,148 @@
+<app-navbar></app-navbar>
+
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-10 sm:py-16 max-w-2xl mx-auto w-full text-center">
+
+  <!-- Breadcrumb -->
+  <nav class="flex items-center justify-center gap-2 text-xs mb-8 sm:mb-12 w-full"
+       aria-label="Breadcrumb"
+       style="color: color-mix(in srgb, var(--color-dark) 45%, transparent);">
+    <a href="/" 
+       class="font-medium hover:text-[var(--color-primary)] transition-colors duration-200"
+       style="color: var(--color-primary);">
+      Home
+    </a>
+    <span class="opacity-50">›</span>
+    <span class="font-medium">Download App</span>
+  </nav>
+
+  <!-- App Icon -->
+  <div class="w-[72px] h-[72px] sm:w-[88px] sm:h-[88px] rounded-[18px] sm:rounded-[22px] mb-5 sm:mb-7 flex items-center justify-center"
+       style="background: var(--color-primary); 
+              box-shadow: 0 12px 32px -8px color-mix(in srgb, var(--color-primary) 45%, transparent);">
+    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" 
+         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="sm:w-[44px] sm:h-[44px]">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </div>
+
+  <!-- Headline -->
+  <h1 class="font-bold leading-[1.1] tracking-tight mb-3 sm:mb-4"
+      style="font-family: var(--font-display); 
+             font-size: clamp(1.7rem, 7vw, 3.2rem); 
+             color: var(--color-dark);">
+    Buckty,<br>
+    now in your 
+    <span class="relative inline-block" style="color: var(--color-primary);">
+      pocket.
+      <span class="absolute bottom-[-3px] left-0 right-0 h-[3px] rounded-sm opacity-30"
+            style="background: var(--color-primary);"></span>
+    </span>
+  </h1>
+
+  <!-- Description -->
+  <p class="text-[14px] sm:text-[15px] leading-relaxed mb-6 sm:mb-8 max-w-md mx-auto px-2"
+     style="color: color-mix(in srgb, var(--color-dark) 60%, transparent);">
+    Share any video link from Instagram, TikTok, YouTube, Facebook and 180+ more — 
+    Buckty downloads it instantly and backs it up to your cloud. 
+    
+  </p>
+<!-- Meta Chips -->
+<div class="flex items-center justify-center gap-1 sm:gap-3 flex-wrap mb-6 sm:mb-9">
+  <div class="flex items-center gap-1 text-[11px] sm:text-[12px] font-medium px-[8px] sm:px-3 py-[4px] sm:py-[6px] rounded-full"
+       style="color: color-mix(in srgb, var(--color-dark) 65%, transparent); 
+              background: color-mix(in srgb, var(--color-dark) 5%, transparent);">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-60" aria-hidden="true">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+    </svg>
+    {{ appVersion }}
+  </div>
+
+  <div class="flex items-center gap-1 text-[11px] sm:text-[12px] font-medium px-[8px] sm:px-3 py-[4px] sm:py-[6px] rounded-full"
+       style="color: color-mix(in srgb, var(--color-dark) 65%, transparent); 
+              background: color-mix(in srgb, var(--color-dark) 5%, transparent);">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+         stroke-width="2" stroke-linecap="round" aria-hidden="true">
+      <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+      <line x1="12" y1="18" x2="12.01" y2="18"/>
+    </svg>
+    {{ minAndroid }}
+  </div>
+
+  <div class="flex items-center gap-1 text-[11px] sm:text-[12px] font-medium px-[8px] sm:px-3 py-[4px] sm:py-[6px] rounded-full"
+       style="color: color-mix(in srgb, var(--color-dark) 65%, transparent); 
+              background: color-mix(in srgb, var(--color-dark) 5%, transparent);">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+    {{ appSize }}
+  </div>
+</div>
+
+  <!-- Download Section -->
+  <div class="flex flex-col items-center gap-2">
+    <a [href]="apkUrl"
+       (click)="onDownloadClick($event)"
+       class="inline-flex items-center justify-center gap-[10px] w-full sm:w-auto px-8 py-[14px] sm:py-[15px] rounded-full text-white text-[15px] font-semibold 
+              no-underline transition-all duration-200 cursor-pointer hover:-translate-y-0.5 active:scale-[0.985]"
+       [class.opacity-80]="downloadStarted()"
+       style="background-color: var(--color-primary); 
+              box-shadow: 0 8px 24px -6px color-mix(in srgb, var(--color-primary) 50%, transparent);">
+      
+      @if (downloadStarted()) {
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+             stroke-width="2.5" stroke-linecap="round" aria-hidden="true">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Starting download…
+      } @else {
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+        Download APK
+      }
+    </a>
+
+    <p class="flex items-center gap-[5px] text-[11px] sm:text-[11.5px] text-center px-2"
+       style="color: color-mix(in srgb, var(--color-dark) 38%, transparent);">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+           stroke-width="2" stroke-linecap="round" class="opacity-55 shrink-0" aria-hidden="true">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      Enable "Install from unknown sources" in Android settings
+    </p>
+  </div>
+
+</main>
+
+<!-- Footer -->
+<footer class="flex flex-col sm:flex-row items-center justify-between gap-2 px-4 sm:px-6 py-[14px] text-[11px] sm:text-[11.5px] border-t transition-colors duration-400"
+        style="border-color: color-mix(in srgb, var(--color-neutral) 40%, transparent); 
+               color: color-mix(in srgb, var(--color-dark) 38%, transparent);">
+  <span>© 2026 Buckty</span>
+  
+  <div class="flex items-center gap-2">
+    <a href="/privacy-and-policy"
+       class="hover:text-[var(--color-primary)] transition-colors duration-200"
+       style="color: color-mix(in srgb, var(--color-dark) 38%, transparent);">
+      Privacy Policy
+    </a>
+    <span class="opacity-40">·</span>
+    <a href="/terms-of-service"
+       class="hover:text-[var(--color-primary)] transition-colors duration-200"
+       style="color: color-mix(in srgb, var(--color-dark) 38%, transparent);">
+      Terms of Service
+    </a>
+  </div>
+</footer>
