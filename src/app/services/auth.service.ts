@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { environment } from '../../environment/environment';
 import { AuthApi } from './auth.api';
 import { SelectPlanPayload, DriveStorage } from './Models/auth.model';
-import { getIsPaid, getPlanType, getMembershipType, getIsTrialActive } from './session-token.utils';
+import { getIsPaid, getPlanType, getMembershipType, getIsTrialActive  , getIsLifetime } from './session-token.utils';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -219,6 +219,9 @@ async getFreshToken(): Promise<string | null> {
     const profile = await this.getProfile();
     return profile?.plan_type != null;
   }
+isLifetime() { 
+  return this.isBrowser ? getIsLifetime(this.currentSession()) : false; 
+}
 
   // ================= TOKEN =================
 
