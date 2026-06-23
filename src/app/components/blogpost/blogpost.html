@@ -1,0 +1,110 @@
+  <!-- 404 State -->
+    @if (notFound()) {
+      <div class="min-h-screen bg-[var(--color-white)] flex flex-col items-center justify-center text-center px-4">
+        <span class="material-icons text-5xl text-[var(--color-neutral)] mb-4">search_off</span>
+        <h1 class="text-2xl font-bold text-[var(--color-dark)] font-[var(--font-display)] mb-2">Article not found</h1>
+        <p class="text-[var(--color-neutral)] mb-8">This article may have moved or the URL is incorrect.</p>
+        <a routerLink="/blog"
+           class="px-6 py-2.5 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+          Back to Blog
+        </a>
+      </div>
+    }
+ 
+    <!-- Article -->
+    @if (post()) {
+      <div class="min-h-screen bg-[var(--color-white)]">
+ 
+        <!-- Top nav breadcrumb -->
+        <div class="max-w-3xl mx-auto px-4 pt-10 pb-0">
+          <a routerLink="/blog"
+             class="inline-flex items-center gap-1.5 text-sm text-[var(--color-primary)] hover:opacity-80 transition-opacity font-medium">
+            <span class="material-icons text-base leading-none">arrow_back</span>
+            All articles
+          </a>
+        </div>
+ 
+        <!-- Article Header -->
+        <header class="max-w-3xl mx-auto px-4 pt-10 pb-10 border-b border-[var(--color-neutral)]/30">
+ 
+          <!-- Category + Reading time -->
+          <div class="flex items-center gap-3 mb-5">
+            <span class="text-xs font-bold text-[var(--color-primary)] uppercase tracking-widest">
+              {{ post()!.category }}
+            </span>
+            <span class="w-1 h-1 rounded-full bg-[var(--color-neutral)]"></span>
+            <span class="text-xs text-[var(--color-neutral)]">{{ post()!.readingTime }}</span>
+            <span class="w-1 h-1 rounded-full bg-[var(--color-neutral)]"></span>
+            <span class="text-xs text-[var(--color-neutral)]">{{ formatDate(post()!.publishedAt) }}</span>
+          </div>
+ 
+          <!-- Title -->
+          <h1 class="text-3xl md:text-4xl font-bold text-[var(--color-dark)] font-[var(--font-display)] leading-tight mb-5">
+            {{ post()!.title }}
+          </h1>
+ 
+          <!-- Description -->
+          <p class="text-lg text-[var(--color-neutral)] leading-relaxed mb-6">
+            {{ post()!.description }}
+          </p>
+ 
+          <!-- Tags -->
+          <div class="flex flex-wrap gap-2">
+            @for (tag of post()!.tags; track tag) {
+              <span class="text-xs px-3 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] font-medium">
+                {{ tag }}
+              </span>
+            }
+          </div>
+        </header>
+ 
+        <!-- Article Body -->
+        <article class="max-w-3xl mx-auto px-4 py-12">
+          <div
+            class="blog-content"
+[innerHTML]="safeContent()"
+          ></div>
+        </article>
+ 
+        <!-- Bottom CTA -->
+        <div class="max-w-3xl mx-auto px-4 pb-16">
+          <div class="rounded-2xl bg-[var(--color-primary)]/8 border border-[var(--color-primary)]/20 p-8 text-center">
+            <h3 class="text-xl font-bold text-[var(--color-dark)] font-[var(--font-display)] mb-2">
+              Ready to download?
+            </h3>
+            <p class="text-sm text-[var(--color-neutral)] mb-6">
+              Paste any video URL and get your file in seconds — no extensions, no ads.
+            </p>
+            <a href="/" class="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+              Try Buckty free
+              <span class="material-icons text-base">arrow_forward</span>
+            </a>
+          </div>
+        </div>
+ 
+        <!-- Related Posts -->
+        @if (related().length > 0) {
+          <div class="border-t border-[var(--color-neutral)]/30 bg-[var(--color-white)]">
+            <div class="max-w-3xl mx-auto px-4 py-12">
+              <h2 class="text-lg font-bold text-[var(--color-dark)] font-[var(--font-display)] mb-8">
+                More from the blog
+              </h2>
+              <div class="grid sm:grid-cols-2 gap-6">
+                @for (rel of related(); track rel.slug) {
+                  <a [routerLink]="['/blog', rel.slug]"
+                     class="group block p-5 rounded-xl border border-[var(--color-neutral)]/40 hover:border-[var(--color-primary)]/50 hover:shadow-sm transition-all duration-200">
+                    <span class="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-wider">{{ rel.category }}</span>
+                    <h3 class="mt-2 text-sm font-bold text-[var(--color-dark)] font-[var(--font-display)] leading-snug group-hover:text-[var(--color-primary)] transition-colors">
+                      {{ rel.title }}
+                    </h3>
+                    <p class="mt-2 text-xs text-[var(--color-neutral)] line-clamp-2">{{ rel.description }}</p>
+                    <p class="mt-3 text-xs text-[var(--color-neutral)]">{{ rel.readingTime }}</p>
+                  </a>
+                }
+              </div>
+            </div>
+          </div>
+        }
+ 
+      </div>
+    }

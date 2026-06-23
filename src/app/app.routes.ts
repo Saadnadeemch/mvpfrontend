@@ -11,6 +11,8 @@ import { Dashboard } from './pages/dashboard/dashboard';
 import { Notfound } from './pages/notfound/notfound';
 import { Youtube } from './pages/paltform/youtube/youtube';
 import { Apkdownload } from './pages/apkdownload/apkdownload';
+import { Blog } from './pages/blog/blog';
+import { Blogpost } from './components/blogpost/blogpost';
 
 export const routes: Routes = [
   {
@@ -69,10 +71,26 @@ export const routes: Routes = [
     title: 'Download the Apk',
     component:Apkdownload
   },
+   {
+  path: 'blog',
+  component: Blog,
+  data: {
+    seo: {
+      title: 'Buckty Blog – Video Downloading Guides, Comparisons & Tips (2026)',
+      description: 'Read the latest Buckty blog articles covering video downloading guides, tool comparisons, security tips, and the best online downloaders for 2026.',
+      keywords: 'buckty blog, video downloader blog, online video downloader guides, download videos 2026, buckty articles, video downloading tips'
+    }
+  }
+},
+{
+  path: 'blog/:slug',
+  component: Blogpost,
+},
   {
     path: '**',
     title: 'Page Not Found — Buckty',
     component: Notfound,
     data: { robots: 'noindex, nofollow' }
-  }
+  }, 
+ 
 ];
