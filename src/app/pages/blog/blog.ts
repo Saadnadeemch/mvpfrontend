@@ -2,10 +2,12 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { BLOG_POSTS, BlogPost, getPaginatedBlogs, formatDate } from '../../data/blog'
+import { NavbarComponent } from "../../components/navbar/navbar";
+import { Footer } from "../../components/footer/footer";
  
 @Component({
   selector: 'app-blog',
-  imports: [CommonModule , RouterModule],
+  imports: [CommonModule, RouterModule, NavbarComponent, Footer],
   templateUrl: './blog.html',
   styleUrl: './blog.css',
 })

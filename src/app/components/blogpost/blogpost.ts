@@ -3,10 +3,12 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Title, Meta, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { getBlogBySlug, BlogPost, BLOG_POSTS, formatDate } from '../../data/blog';
+import { NavbarComponent } from "../navbar/navbar";
+import { Footer } from "../footer/footer";
 
 @Component({
   selector: 'app-blogpost',
-  imports: [RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule, NavbarComponent, Footer],
   templateUrl: './blogpost.html',
   styleUrl: './blogpost.css',
 })
