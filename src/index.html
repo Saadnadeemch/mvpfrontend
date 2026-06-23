@@ -5,9 +5,10 @@
 
   <title>Buckty - Never Lose That Video Again In Your Edits</title>
   <meta name="description" content="Found a clip while scrolling but lost it before you could use it in your edit? Buckty saves videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, so it's always there when you're ready to edit.">
-  <meta name="keywords" content="save video for editing, never lose a video, video downloader for editors, save instagram reels, save tiktok video, content creator tools, save video from social media">
+  <meta name="keywords" content="save video for editing, never lose a video, video downloader for editors, save instagram reels, save tiktok video, content creator tools, save video from social media, buckty, buckty downloader, buckty video downloader">
   <meta name="robots" content="index, follow">
   <meta name="author" content="Buckty">
+  <meta name="theme-color" content="#0d9488">
 
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,13 +16,17 @@
   <!-- Canonical -->
   <link rel="canonical" href="https://www.buckty.cloud/">
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="buckty.png">
+  <link rel="apple-touch-icon" href="buckty.png">
+
   <!-- Open Graph -->
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Buckty">
   <meta property="og:title" content="Buckty - Never Lose That Video Again">
   <meta property="og:description" content="That clip you found mid-scroll and lost in saves or doomscroll? Buckty grabs videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, ready whenever you sit down to edit.">
   <meta property="og:url" content="https://www.buckty.cloud/">
-  <meta property="og:image" content="https://www.buckty.cloud/og.jpeg">
+  <meta property="og:image" content="https://www.buckty.cloud/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   <meta property="og:image:alt" content="Buckty - Never Lose That Video Again">
@@ -30,11 +35,8 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:site" content="@kakaCoder">
   <meta name="twitter:title" content="Buckty - Never Lose That Video Again">
-  <meta name="twitter:description" content="That clip you found mid-scroll and forgot to where you saved ? Buckty grabs videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, ready for your next edit.">
-  <meta name="twitter:image" content="https://www.buckty.cloud/og.jpeg">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="buckty.png">
+  <meta name="twitter:description" content="That clip you found mid-scroll and forgot to where you saved? Buckty grabs videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, ready for your next edit.">
+  <meta name="twitter:image" content="https://www.buckty.cloud/og.jpg">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -42,23 +44,104 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Schema.org structured data -->
+  <!-- Schema 1: WebSite with SearchAction (critical for brand ranking + sitelinks) -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "WebSite",
     "name": "Buckty",
+    "alternateName": ["Buckty Downloader", "Buckty Video Downloader", "buckty.cloud"],
     "url": "https://www.buckty.cloud",
-    "description": "Never lose a video again. Buckty saves videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, so editors and creators always have their clips ready for the next edit.",
-    "applicationCategory": "MultimediaApplication",
-    "operatingSystem": "Android, Web",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
+    "description": "Buckty is a video downloader tool for content creators and video editors. Download videos from YouTube, Instagram, TikTok and 1800+ platforms in HD and 4K quality.",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": {
+        "@type": "EntryPoint",
+        "urlTemplate": "https://www.buckty.cloud/?q={search_term_string}"
+      },
+      "query-input": "required name=search_term_string"
     }
   }
   </script>
+
+  <!-- Schema 2: SoftwareApplication (main product schema) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Buckty",
+    "alternateName": ["Buckty Downloader", "Buckty Video Downloader"],
+    "url": "https://www.buckty.cloud",
+    "description": "Buckty is a video downloader and organizer built for content creators and video editors. Download videos from YouTube, Instagram, TikTok and 1800+ platforms in HD or 4K. Logged-in users can save directly to Google Drive, use the Android app to share-to-download from any app, and access their full video library in one place.",
+    "applicationCategory": "MultimediaApplication",
+    "applicationSubCategory": "Video Downloader",
+    "operatingSystem": "Android, Web",
+    "browserRequirements": "Requires a modern browser with JavaScript enabled",
+    "softwareVersion": "1.0",
+    "releaseNotes": "Supports 1800+ platforms including YouTube, Instagram, TikTok, Facebook, Twitter/X, Vimeo and more.",
+    "featureList": [
+      "Download videos from 1800+ platforms",
+      "HD and 4K quality downloads",
+      "YouTube video downloader",
+      "Instagram Reels downloader",
+      "TikTok video downloader",
+      "Save videos to Google Drive",
+      "Android APK with share-to-download",
+      "Download without leaving any app",
+      "Audio-only download mode",
+      "Organize downloaded videos in one library"
+    ],
+    "screenshot": "https://www.buckty.cloud/og.jpg",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free Plan",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Download videos for free in standard quality"
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro Plan",
+        "priceCurrency": "USD",
+        "description": "HD and 4K downloads, Google Drive sync, priority support"
+      }
+    ],
+    "creator": {
+      "@type": "Organization",
+      "name": "Buckty",
+      "url": "https://www.buckty.cloud"
+    },
+    "brand": {
+      "@type": "Brand",
+      "name": "Buckty"
+    },
+    "keywords": "video downloader, youtube downloader, instagram downloader, tiktok downloader, buckty, buckty downloader, save videos for editing, video downloader for editors"
+  }
+  </script>
+
+  <!-- Schema 3: Organization (helps brand entity recognition by Google and LLMs) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Buckty",
+    "alternateName": "Buckty Downloader",
+    "url": "https://www.buckty.cloud",
+    "logo": "https://www.buckty.cloud/buckty.png",
+    "description": "Buckty builds tools for video editors and content creators to download, save and organize video clips from any platform.",
+    "foundingDate": "2026",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "contactType": "customer support",
+      "url": "https://www.buckty.cloud"
+    },
+    "sameAs": [
+      "https://twitter.com/kakaCoder"
+    ]
+  }
+  </script>
+
 </head>
 <body>
   <app-root></app-root>
