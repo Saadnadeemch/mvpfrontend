@@ -1,5 +1,5 @@
 import { Component, OnInit, signal, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Title, Meta, DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { getBlogBySlug, BlogPost, BLOG_POSTS, formatDate } from '../../data/blog';
@@ -13,20 +13,30 @@ import { Footer } from "../footer/footer";
   styleUrl: './blogpost.css',
 })
 export class Blogpost implements OnInit {
-  private route = inject(ActivatedRoute);
-  private router = inject(Router);
-  private title = inject(Title);
-  private meta = inject(Meta);
+  private route     = inject(ActivatedRoute);
+  private router    = inject(Router);
+  private title     = inject(Title);
+  private meta      = inject(Meta);
   private sanitizer = inject(DomSanitizer);
+  private document  = inject(DOCUMENT);
 
-  post = signal<BlogPost | null>(null);
+  post        = signal<BlogPost | null>(null);
   safeContent = signal<SafeHtml | null>(null);
-  notFound = signal(false);
-  related = signal<BlogPost[]>([]);
+  notFound    = signal(false);
+  related     = signal<BlogPost[]>([]);
+  openFaq     = signal<number | null>(null);
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
       const slug = params.get('slug');
+
+      // Reset state on every navigation — also purge any lingering schema scripts
+      this.openFaq.set(null);
+      this.post.set(null);
+      this.notFound.set(false);
+      this.document.getElementById('article-schema')?.remove();
+      this.document.getElementById('faq-schema')?.remove();
+
       if (!slug) { this.notFound.set(true); return; }
 
       const found = getBlogBySlug(slug);
@@ -38,24 +48,100 @@ export class Blogpost implements OnInit {
 
       this.post.set(found);
       this.safeContent.set(this.sanitizer.bypassSecurityTrustHtml(found.content));
-      this.notFound.set(false);
 
-      // SEO
+      const pageUrl = `https://www.buckty.cloud/blog/${slug}`;
+
+      // ── Core meta ──────────────────────────────────────────────
       this.title.setTitle(found.seo.title);
       this.meta.updateTag({ name: 'description', content: found.seo.description });
-      this.meta.updateTag({ name: 'keywords', content: found.seo.keywords });
-      this.meta.updateTag({ property: 'og:title', content: found.seo.title });
+      this.meta.updateTag({ name: 'keywords',    content: found.seo.keywords });
+      this.meta.updateTag({ name: 'robots',      content: 'index, follow' });
+
+      // ── Open Graph ─────────────────────────────────────────────
+      this.meta.updateTag({ property: 'og:type',        content: 'article' });
+      this.meta.updateTag({ property: 'og:url',         content: pageUrl });
+      this.meta.updateTag({ property: 'og:title',       content: found.seo.title });
       this.meta.updateTag({ property: 'og:description', content: found.seo.description });
+      this.meta.updateTag({ property: 'og:site_name',   content: 'Buckty' });
       if (found.seo.ogImage) {
-        this.meta.updateTag({ property: 'og:image', content: found.seo.ogImage });
+        this.meta.updateTag({ property: 'og:image',        content: found.seo.ogImage });
+        this.meta.updateTag({ property: 'og:image:width',  content: '1200' });
+        this.meta.updateTag({ property: 'og:image:height', content: '630' });
       }
 
-      // Related: same category, exclude current, max 2
+      // ── Twitter Card ───────────────────────────────────────────
+      this.meta.updateTag({ name: 'twitter:card',        content: 'summary_large_image' });
+      this.meta.updateTag({ name: 'twitter:title',       content: found.seo.title });
+      this.meta.updateTag({ name: 'twitter:description', content: found.seo.description });
+      if (found.seo.ogImage) {
+        this.meta.updateTag({ name: 'twitter:image', content: found.seo.ogImage });
+      }
+
+      // ── Canonical <link> ───────────────────────────────────────
+      let canonical = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+      if (!canonical) {
+        canonical = this.document.createElement('link');
+        canonical.setAttribute('rel', 'canonical');
+        this.document.head.appendChild(canonical);
+      }
+      canonical.setAttribute('href', pageUrl);
+
+      // ── Article schema (JSON-LD) — no FAQ nested here ──────────
+      const articleSchema = {
+        '@context':     'https://schema.org',
+        '@type':        'Article',
+        'headline':     found.seo.title,
+        'description':  found.seo.description,
+        'url':          pageUrl,
+        'datePublished': found.publishedAt,
+        'dateModified': found.seo.dateModified ?? found.publishedAt,
+        'image':        found.seo.ogImage ?? '',
+        'author': {
+          '@type': 'Organization',
+          'name':  'Buckty',
+          'url':   'https://www.buckty.cloud',
+        },
+        'publisher': {
+          '@type': 'Organization',
+          'name':  'Buckty',
+          'url':   'https://www.buckty.cloud',
+          'logo': {
+            '@type': 'ImageObject',
+            'url':   'https://www.buckty.cloud/buckty.png',
+          },
+        },
+      };
+
+      const articleScript = this.document.createElement('script');
+      articleScript.id   = 'article-schema';
+      articleScript.type = 'application/ld+json';
+      articleScript.text = JSON.stringify(articleSchema);
+      this.document.head.appendChild(articleScript);
+
+      // ── FAQPage schema (JSON-LD) — separate script tag ─────────
+      if (found.seo.faq?.length) {
+        const faqSchema = {
+          '@context': 'https://schema.org',
+          '@type':    'FAQPage',
+          'mainEntity': found.seo.faq.map(item => ({
+            '@type':          'Question',
+            'name':           item.q,
+            'acceptedAnswer': { '@type': 'Answer', 'text': item.a },
+          })),
+        };
+
+        const faqScript = this.document.createElement('script');
+        faqScript.id   = 'faq-schema';
+        faqScript.type = 'application/ld+json';
+        faqScript.text = JSON.stringify(faqSchema);
+        this.document.head.appendChild(faqScript);
+      }
+
+      // ── Related posts ──────────────────────────────────────────
       const rel = BLOG_POSTS
         .filter(p => p.slug !== slug && p.category === found.category)
         .slice(0, 2);
 
-      // Fill with recent posts if not enough same-category
       if (rel.length < 2) {
         const extra = BLOG_POSTS
           .filter(p => p.slug !== slug && !rel.find(r => r.slug === p.slug))
@@ -65,6 +151,10 @@ export class Blogpost implements OnInit {
       }
       this.related.set(rel);
     });
+  }
+
+  toggleFaq(index: number) {
+    this.openFaq.set(this.openFaq() === index ? null : index);
   }
 
   formatDate = formatDate;

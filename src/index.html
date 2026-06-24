@@ -13,7 +13,7 @@
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Canonical -->
+  <!-- Canonical — overridden per-page by blogpost.ts / other components -->
   <link rel="canonical" href="https://www.buckty.cloud/">
 
   <!-- Favicon -->
@@ -29,7 +29,8 @@
   <meta property="og:image" content="https://www.buckty.cloud/og.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Buckty - Never Lose That Video Again">
+  <!-- FIXED: was "Buckty - Never Lose That Video Again" — og:image:alt must describe the image, not the brand -->
+  <meta property="og:image:alt" content="Buckty video downloader — save videos from Instagram, TikTok and YouTube">
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
@@ -37,6 +38,8 @@
   <meta name="twitter:title" content="Buckty - Never Lose That Video Again">
   <meta name="twitter:description" content="That clip you found mid-scroll and forgot to where you saved? Buckty grabs videos from Instagram, TikTok, YouTube and 1800+ platforms in one tap, ready for your next edit.">
   <meta name="twitter:image" content="https://www.buckty.cloud/og.jpg">
+  <!-- ADDED: twitter:image:alt mirrors og:image:alt for Twitter's crawler -->
+  <meta name="twitter:image:alt" content="Buckty video downloader — save videos from Instagram, TikTok and YouTube">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -44,7 +47,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-  <!-- Schema 1: WebSite with SearchAction (critical for brand ranking + sitelinks) -->
+  <!-- Schema 1: WebSite with SearchAction -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -64,7 +67,7 @@
   }
   </script>
 
-  <!-- Schema 2: SoftwareApplication (main product schema) -->
+  <!-- Schema 2: SoftwareApplication -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -120,7 +123,7 @@
   }
   </script>
 
-  <!-- Schema 3: Organization (helps brand entity recognition by Google and LLMs) -->
+  <!-- Schema 3: Organization -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -128,7 +131,10 @@
     "name": "Buckty",
     "alternateName": "Buckty Downloader",
     "url": "https://www.buckty.cloud",
-    "logo": "https://www.buckty.cloud/buckty.png",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.buckty.cloud/buckty.png"
+    },
     "description": "Buckty builds tools for video editors and content creators to download, save and organize video clips from any platform.",
     "foundingDate": "2026",
     "contactPoint": {

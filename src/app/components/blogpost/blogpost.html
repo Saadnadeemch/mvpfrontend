@@ -107,6 +107,40 @@
             </div>
           </div>
         }
+
+        <!-- FAQ Section -->
+@if (post()!.seo.faq && post()!.seo.faq!.length > 0) {
+  <section class="max-w-3xl mx-auto px-4 pb-10" aria-label="Frequently asked questions">
+    <h2 class="text-lg font-bold text-[var(--color-dark)] font-[var(--font-display)] mb-6">
+      Frequently asked questions
+    </h2>
+    <div class="faq-list">
+      @for (item of post()!.seo.faq!; track item.q; let i = $index) {
+        <div class="faq-item" [class.faq-open]="openFaq() === i">
+          <button
+            class="faq-btn"
+            [attr.aria-expanded]="openFaq() === i"
+            [attr.aria-controls]="'faq-' + i"
+            (click)="toggleFaq(i)"
+          >
+            <span>{{ item.q }}</span>
+            <span class="faq-chevron" aria-hidden="true">
+              <span class="material-icons">expand_more</span>
+            </span>
+          </button>
+          <div
+            class="faq-body"
+            [id]="'faq-' + i"
+            role="region"
+            [class.faq-body-open]="openFaq() === i"
+          >
+            <div class="faq-inner">{{ item.a }}</div>
+          </div>
+        </div>
+      }
+    </div>
+  </section>
+}
  
       </div>
     }
