@@ -23,22 +23,27 @@ export class Blogpost implements OnInit, OnDestroy {
 
   private routeSub!: Subscription;
 
-  post        = signal<BlogPost | null>(null);
-  safeContent = signal<SafeHtml | null>(null);
-  notFound    = signal(false);
-  related     = signal<BlogPost[]>([]);
-  openFaq     = signal<number | null>(null);
+  post             = signal<BlogPost | null>(null);
+  safeContent      = signal<SafeHtml | null>(null);
+  notFound         = signal(false);
+  related          = signal<BlogPost[]>([]);
+  openFaq          = signal<number | null>(null);
+
+  // Signals for JSON-LD schemas — rendered via [innerHTML] in the template so
+  // Angular SSR serialises them into the prerendered HTML for crawlers.
+  articleSchemaJson = signal<SafeHtml | null>(null);
+  faqSchemaJson     = signal<SafeHtml | null>(null);
 
   ngOnInit() {
     this.routeSub = this.route.paramMap.subscribe(params => {
       const slug = params.get('slug');
 
-      // Reset state on every navigation — also purge any lingering schema scripts
+      // Reset all state on every navigation
       this.openFaq.set(null);
       this.post.set(null);
       this.notFound.set(false);
-      this.document.getElementById('article-schema')?.remove();
-      this.document.getElementById('faq-schema')?.remove();
+      this.articleSchemaJson.set(null);
+      this.faqSchemaJson.set(null);
 
       if (!slug) { this.notFound.set(true); return; }
 
@@ -70,12 +75,10 @@ export class Blogpost implements OnInit, OnDestroy {
         this.meta.updateTag({ property: 'og:image',        content: found.seo.ogImage });
         this.meta.updateTag({ property: 'og:image:width',  content: '1200' });
         this.meta.updateTag({ property: 'og:image:height', content: '630' });
-        // FIX 1: update og:image:alt per post (was never being set — inherited homepage value)
-        this.meta.updateTag({ property: 'og:image:alt', content: found.seo.title });
+        this.meta.updateTag({ property: 'og:image:alt',    content: found.seo.title });
       }
 
-      // ── article:* tags — required when og:type = article ───────
-      // FIX 2: these were never injected; crawlers expect them for Article type
+      // ── article:* tags (placeholders exist in index.html so updateTag works) ─
       this.meta.updateTag({ property: 'article:published_time', content: found.publishedAt });
       this.meta.updateTag({ property: 'article:modified_time',  content: found.seo.dateModified ?? found.publishedAt });
       this.meta.updateTag({ property: 'article:author',         content: 'Buckty' });
@@ -86,7 +89,6 @@ export class Blogpost implements OnInit, OnDestroy {
       this.meta.updateTag({ name: 'twitter:description', content: found.seo.description });
       if (found.seo.ogImage) {
         this.meta.updateTag({ name: 'twitter:image',     content: found.seo.ogImage });
-        // FIX 3: update twitter:image:alt per post (was never being set — inherited homepage value)
         this.meta.updateTag({ name: 'twitter:image:alt', content: found.seo.title });
       }
 
@@ -100,6 +102,9 @@ export class Blogpost implements OnInit, OnDestroy {
       canonical.setAttribute('href', pageUrl);
 
       // ── Article schema (JSON-LD) ────────────────────────────────
+      // Rendered via [innerHTML] signal in the template — this is the only approach
+      // that survives Angular SSR serialisation. document.createElement + appendChild
+      // gets stripped by Angular's SSR security serialiser before the HTML is written.
       const articleSchema = {
         '@context':      'https://schema.org',
         '@type':         'Article',
@@ -125,13 +130,13 @@ export class Blogpost implements OnInit, OnDestroy {
         },
       };
 
-      const articleScript = this.document.createElement('script');
-      articleScript.id   = 'article-schema';
-      articleScript.type = 'application/ld+json';
-      articleScript.text = JSON.stringify(articleSchema);
-      this.document.head.appendChild(articleScript);
+      this.articleSchemaJson.set(
+        this.sanitizer.bypassSecurityTrustHtml(
+          `<script type="application/ld+json">${JSON.stringify(articleSchema)}<\/script>`
+        )
+      );
 
-      // ── FAQPage schema (JSON-LD) — separate script tag ─────────
+      // ── FAQPage schema (JSON-LD) ────────────────────────────────
       if (found.seo.faq?.length) {
         const faqSchema = {
           '@context':   'https://schema.org',
@@ -143,11 +148,11 @@ export class Blogpost implements OnInit, OnDestroy {
           })),
         };
 
-        const faqScript = this.document.createElement('script');
-        faqScript.id   = 'faq-schema';
-        faqScript.type = 'application/ld+json';
-        faqScript.text = JSON.stringify(faqSchema);
-        this.document.head.appendChild(faqScript);
+        this.faqSchemaJson.set(
+          this.sanitizer.bypassSecurityTrustHtml(
+            `<script type="application/ld+json">${JSON.stringify(faqSchema)}<\/script>`
+          )
+        );
       }
 
       // ── Related posts ──────────────────────────────────────────
@@ -167,20 +172,20 @@ export class Blogpost implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // FIX 4: when navigating away from any blog post, clean up everything this
-    // component injected so the next page (e.g. homepage) doesn't inherit article state
+    // Unsubscribe to prevent memory leaks
     this.routeSub?.unsubscribe();
 
-    this.document.getElementById('article-schema')?.remove();
-    this.document.getElementById('faq-schema')?.remove();
+    // Clear schema signals so they don't leak into other routes
+    this.articleSchemaJson.set(null);
+    this.faqSchemaJson.set(null);
 
     // Restore og:type to website (homepage default)
     this.meta.updateTag({ property: 'og:type', content: 'website' });
 
-    // Remove article:* tags — these have no meaning on non-article pages
-    this.meta.removeTag("property='article:published_time'");
-    this.meta.removeTag("property='article:modified_time'");
-    this.meta.removeTag("property='article:author'");
+    // Clear article:* tags — meaningless on non-article pages
+    this.meta.updateTag({ property: 'article:published_time', content: '' });
+    this.meta.updateTag({ property: 'article:modified_time',  content: '' });
+    this.meta.updateTag({ property: 'article:author',         content: '' });
 
     // Restore canonical to homepage
     const canonical = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
