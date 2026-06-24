@@ -21,13 +21,13 @@
    DARK THEME — same variable names, new values
    Applied when <html> has class="dark"
    ============================================= */
-:root.dark {
-  --color-primary:   #4e9195;
-  --color-secondary: #3a6b8a;
-  --color-dark:      #e8e8e8;
-  --color-neutral:   #6b6b6b;
-  --color-white:     #1c1c1c;
-}
+  :root.dark {
+    --color-primary:   #4e9195;
+    --color-secondary: #3a6b8a;
+    --color-dark:      #e8e8e8;`
+    --color-neutral:   #6b6b6b;
+    --color-white:     #1c1c1c;
+  }
 
 /* =============================================
    BASE BODY
