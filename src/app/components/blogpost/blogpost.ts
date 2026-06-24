@@ -1,7 +1,8 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, inject } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Title, Meta, DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Subscription } from 'rxjs';
 import { getBlogBySlug, BlogPost, BLOG_POSTS, formatDate } from '../../data/blog';
 import { NavbarComponent } from "../navbar/navbar";
 import { Footer } from "../footer/footer";
@@ -12,13 +13,15 @@ import { Footer } from "../footer/footer";
   templateUrl: './blogpost.html',
   styleUrl: './blogpost.css',
 })
-export class Blogpost implements OnInit {
+export class Blogpost implements OnInit, OnDestroy {
   private route     = inject(ActivatedRoute);
   private router    = inject(Router);
   private title     = inject(Title);
   private meta      = inject(Meta);
   private sanitizer = inject(DomSanitizer);
   private document  = inject(DOCUMENT);
+
+  private routeSub!: Subscription;
 
   post        = signal<BlogPost | null>(null);
   safeContent = signal<SafeHtml | null>(null);
@@ -27,7 +30,7 @@ export class Blogpost implements OnInit {
   openFaq     = signal<number | null>(null);
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.routeSub = this.route.paramMap.subscribe(params => {
       const slug = params.get('slug');
 
       // Reset state on every navigation — also purge any lingering schema scripts
@@ -67,14 +70,24 @@ export class Blogpost implements OnInit {
         this.meta.updateTag({ property: 'og:image',        content: found.seo.ogImage });
         this.meta.updateTag({ property: 'og:image:width',  content: '1200' });
         this.meta.updateTag({ property: 'og:image:height', content: '630' });
+        // FIX 1: update og:image:alt per post (was never being set — inherited homepage value)
+        this.meta.updateTag({ property: 'og:image:alt', content: found.seo.title });
       }
+
+      // ── article:* tags — required when og:type = article ───────
+      // FIX 2: these were never injected; crawlers expect them for Article type
+      this.meta.updateTag({ property: 'article:published_time', content: found.publishedAt });
+      this.meta.updateTag({ property: 'article:modified_time',  content: found.seo.dateModified ?? found.publishedAt });
+      this.meta.updateTag({ property: 'article:author',         content: 'Buckty' });
 
       // ── Twitter Card ───────────────────────────────────────────
       this.meta.updateTag({ name: 'twitter:card',        content: 'summary_large_image' });
       this.meta.updateTag({ name: 'twitter:title',       content: found.seo.title });
       this.meta.updateTag({ name: 'twitter:description', content: found.seo.description });
       if (found.seo.ogImage) {
-        this.meta.updateTag({ name: 'twitter:image', content: found.seo.ogImage });
+        this.meta.updateTag({ name: 'twitter:image',     content: found.seo.ogImage });
+        // FIX 3: update twitter:image:alt per post (was never being set — inherited homepage value)
+        this.meta.updateTag({ name: 'twitter:image:alt', content: found.seo.title });
       }
 
       // ── Canonical <link> ───────────────────────────────────────
@@ -86,16 +99,16 @@ export class Blogpost implements OnInit {
       }
       canonical.setAttribute('href', pageUrl);
 
-      // ── Article schema (JSON-LD) — no FAQ nested here ──────────
+      // ── Article schema (JSON-LD) ────────────────────────────────
       const articleSchema = {
-        '@context':     'https://schema.org',
-        '@type':        'Article',
-        'headline':     found.seo.title,
-        'description':  found.seo.description,
-        'url':          pageUrl,
+        '@context':      'https://schema.org',
+        '@type':         'Article',
+        'headline':      found.seo.title,
+        'description':   found.seo.description,
+        'url':           pageUrl,
         'datePublished': found.publishedAt,
-        'dateModified': found.seo.dateModified ?? found.publishedAt,
-        'image':        found.seo.ogImage ?? '',
+        'dateModified':  found.seo.dateModified ?? found.publishedAt,
+        'image':         found.seo.ogImage ?? '',
         'author': {
           '@type': 'Organization',
           'name':  'Buckty',
@@ -121,8 +134,8 @@ export class Blogpost implements OnInit {
       // ── FAQPage schema (JSON-LD) — separate script tag ─────────
       if (found.seo.faq?.length) {
         const faqSchema = {
-          '@context': 'https://schema.org',
-          '@type':    'FAQPage',
+          '@context':   'https://schema.org',
+          '@type':      'FAQPage',
           'mainEntity': found.seo.faq.map(item => ({
             '@type':          'Question',
             'name':           item.q,
@@ -151,6 +164,27 @@ export class Blogpost implements OnInit {
       }
       this.related.set(rel);
     });
+  }
+
+  ngOnDestroy() {
+    // FIX 4: when navigating away from any blog post, clean up everything this
+    // component injected so the next page (e.g. homepage) doesn't inherit article state
+    this.routeSub?.unsubscribe();
+
+    this.document.getElementById('article-schema')?.remove();
+    this.document.getElementById('faq-schema')?.remove();
+
+    // Restore og:type to website (homepage default)
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+
+    // Remove article:* tags — these have no meaning on non-article pages
+    this.meta.removeTag("property='article:published_time'");
+    this.meta.removeTag("property='article:modified_time'");
+    this.meta.removeTag("property='article:author'");
+
+    // Restore canonical to homepage
+    const canonical = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (canonical) canonical.setAttribute('href', 'https://www.buckty.cloud/');
   }
 
   toggleFaq(index: number) {
