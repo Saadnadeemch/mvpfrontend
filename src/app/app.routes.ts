@@ -55,16 +55,13 @@ export const routes: Routes = [
     path: 'apk-download',
     title: 'Download the Apk',
     loadComponent: () => import('./pages/apkdownload/apkdownload').then(m => m.Apkdownload),
-  },
-  {
+  },{
     path: 'blog',
     loadComponent: () => import('./pages/blog/blog').then(m => m.Blog),
+    title: 'Buckty Blog – Video Downloading Guides, Comparisons & Tips (2026)',
     data: {
-      seo: {
-        title: 'Buckty Blog – Video Downloading Guides, Comparisons & Tips (2026)',
-        description: 'Read the latest Buckty blog articles covering video downloading guides, tool comparisons, security tips, and the best online downloaders for 2026.',
-        keywords: 'buckty blog, video downloader blog, online video downloader guides, download videos 2026, buckty articles, video downloading tips'
-      }
+      description: 'Read the latest Buckty blog articles covering video downloading guides, tool comparisons, security tips, and the best online downloaders for 2026.',
+      keywords: 'buckty blog, video downloader blog, online video downloader guides, download videos 2026, buckty articles, video downloading tips'
     }
   },
   {

@@ -2,16 +2,6 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar';
 
-interface Feature {
-  title: string;
-  subtitle: string;
-  icon: string; // SVG path string
-}
-
-interface Step {
-  num: number;
-  text: string;
-}
 
 @Component({
   selector: 'app-apkdownload',
@@ -23,9 +13,6 @@ export class Apkdownload {
   isDark = signal(false);
   downloadStarted = signal(false);
  
-  appVersion = 'v1.0';
-  appSize = '23 MB';
-  minAndroid = 'Android 7+';
   apkUrl = '/buckty.apk'; 
  
   toggleDark() {

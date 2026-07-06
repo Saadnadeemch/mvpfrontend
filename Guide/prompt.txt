@@ -1,0 +1,97 @@
+You are writing a blog article for Buckty (buckty.cloud), a multi-platform video downloader. Output a complete BlogPost TypeScript object only. No explanation, no markdown code fences, no preamble, no text before or after the object.
+ARTICLE TITLE:
+
+[Paste the exact title here]
+COVER IMAGE URL:
+
+[Paste the full R2 URL here]
+TOOLS / WEBSITES TO COVER:
+
+[List each tool on its own line with any facts you already have:
+
+Tool name
+Platforms it supports
+Quality cap if known
+Ads yes or no if known
+Screenshot URL from R2 if you have one
+Always include Buckty as one of the tools]
+
+
+BUCKTY PRODUCT FACTS — USE THESE EXACTLY, DO NOT DEVIATE:
+
+Free without login: 720p maximum on all platforms
+Logged-in free account: up to 4K where the source supports it
+Paid tier: Google Drive integration, higher priority processing, 8K where available
+Paid tier trial: one month free, no credit card required — mention this every time the paid tier comes up
+No ads on the download flow
+No watermarks on any download
+No file size limit
+No browser extension required
+Platforms supported: YouTube, Instagram, TikTok, Twitter/X, Facebook, Snapchat, Pinterest, LinkedIn, Threads, Vimeo, and 1,800+ more
+Buckty does not log the URLs users download
+Buckty never asks for social media login credentials
+
+
+SLUG RULES:
+
+Hyphens only — zero underscores, zero spaces, zero special characters
+Keyword-first — most important word at the start
+Under 60 characters
+No year in the slug — put the year in the title instead
+No filler words — remove "a", "the", "and", "of", "for" unless part of the actual keyword
+
+SEO FIELD RULES:
+
+seo.title: under 60 characters, primary keyword first, ends with "| Buckty"
+seo.description: 140 to 160 characters, specific, contains primary keyword, sentence case
+seo.keywords: 6 to 10 comma-separated phrases, include long-tail variants
+seo.ogImage: set to the cover image URL provided above
+publishedAt: today's date in YYYY-MM-DD format
+readingTime: calculated at 200 words per minute, format "X min read"
+category: one of — Guides, Comparisons, Legal, Security, Features
+tags: 2 to 5 tags covering platforms, article type, year if relevant
+
+CONTENT RULES:
+
+Cover image goes first in content, before the first paragraph, loading="eager", descriptive alt text
+All other images use loading="lazy" and have descriptive alt text
+Every image inline style: width:100%;border-radius:10px;margin:1.5rem 0;
+Minimum 2 internal links to other Buckty blog articles using descriptive anchor text
+Minimum 1 external link to an authoritative source — platform docs, official policy, or journalism. Never link to competitors.
+Active voice throughout — rewrite every passive construction before outputting
+Paragraphs are 2 to 4 sentences, one point each
+No sentence that announces what the article will cover
+No conclusion that restates everything already said — end with a strong final paragraph
+
+BANNED WORDS — REMOVE EVERY INSTANCE:
+
+delve, straightforward, leverage, utilize, comprehensive, in-depth, "in today's digital world", "it is worth noting", "without further ado", "essentially" starting a sentence, game-changer, revolutionary, cutting-edge, nuanced, multifaceted
+TONE:
+
+Light and conversational. Knowledgeable but not stiff. Write like a person explaining something to a smart friend who is not technical. Use contractions. Short paragraphs. Get to the point.
+FORMATTING:
+
+Em dash with spaces on each side ( — ) for clause separation — never double hyphens
+No underscores anywhere in article text — zero instances, no exceptions
+Bold specific words or short phrases only — never entire sentences
+Oxford comma always
+Numbers under 10 spelled out, 10 and above as numerals, years always numerals
+
+
+ARTICLE TYPE — apply the matching structure:
+If this is a How-to Guide:
+
+Cover image → opening paragraph (name the problem, say what this provides — no questions, no definitions) → why this is harder than it looks → prerequisites if any → numbered steps one action each → common problems and fixes → strong closing paragraph
+If this is a Comparison Article:
+
+Cover image → opening paragraph → testing methodology section (specific: platforms tested, connection, what was measured) → one H3 section per tool with screenshot, platform support, quality cap, ads and privacy, verdict — equal depth for every tool → HTML comparison table with columns: platforms, free quality cap, ads, watermark, file size limit → "which one should you use" section with a clear answer for each user type, no hedging → privacy and safety note → final verdict paragraph
+If this is an Explainer / Educational Article:
+
+Cover image → short answer in the first paragraph — give the answer before the explanation → why the short answer is incomplete → section-by-section breakdown, each major aspect as its own H2 → practical takeaway for the reader → closing paragraph
+
+COMPARISON TABLE FORMAT (for comparison articles):
+
+Use this exact inline style pattern for the table header row background: background:rgba(78,145,149,0.12) and header border-bottom: 2px solid rgba(78,145,149,0.3). Cell padding: 12px 14px. Alternate row backgrounds: white and rgba(0,0,0,0.02).
+HR DIVIDERS between tool sections in comparison articles:
+
+<hr style="margin:2.5rem 0;border:none;border-top:1px solid rgba(0,0,0,0.08);">
